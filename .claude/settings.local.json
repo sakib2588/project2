@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.luxurypresence.com)",
+      "Bash(rtk ls:*)"
+    ]
+  }
+}

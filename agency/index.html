@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nexora Digital — Websites, SEO & Marketing for New Businesses</title>
+<meta name="description" content="We build professional websites, set up business profiles, and run SEO & social media marketing for new businesses across the USA."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ─────────────────────────────────────────────────────────────
+   NEXORA DIGITAL  –  Gold · Black · White  (LP palette)
+   #eeb75d gold · #141516 ink · #F1EFEB off-white · #ffffff white
+───────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Gold · Black · White  (LP palette) ── */
+  --primary:    #eeb75d;   /* gold  */
+  --primary-dk: #d4993c;   /* dark gold */
+  --primary-lt: rgba(238,183,93,.1); /* gold tint */
+  --gold:       #eeb75d;
+  --gold-dk:    #d4993c;
+  --bg:         #F1EFEB;   /* LP off-white */
+  --ink:        #141516;   /* LP ink dark  */
+  --charcoal:   #262626;
+  --ash:        #3d3a3a;
+  --flint:      #8F8F8F;
+  --dove:       #dedede;
+  --white:      #ffffff;
+  --card-bg:    #ffffff;
+
+  /* spacing (LP scale) */
+  --sp-1: 0.44rem;
+  --sp-2: 0.67rem;
+  --sp-3: 1rem;
+  --sp-4: 1.5rem;
+  --sp-5: 2.25rem;
+  --sp-6: 3.38rem;
+  --sp-7: 5.06rem;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --nav-h: 74px;
+  --content-w: 800px;
+  --wide-w: 1400px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #ffffff;
+  color: var(--charcoal);
+  line-height: 1.6;
+  padding-top: var(--nav-h);
+}
+
+h1,h2,h3,h4,h5 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--ink);
+}
+h1 { font-size: clamp(2.6rem, 5.5vw, 4.8rem); letter-spacing: -.02em; }
+h2 { font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -.015em; margin-bottom: var(--sp-3); }
+h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); margin-bottom: .5rem; }
+h4 { font-size: 1.15rem; }
+h1 em, h2 em { font-style: italic; color: var(--primary); }
+
+p { color: var(--ash); font-size: 1rem; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* ── Utilities ─────────────────────────────────────────── */
+.w { max-width: var(--wide-w); margin: 0 auto; padding: 0 var(--sp-5); }
+.w-content { max-width: var(--content-w); margin: 0 auto; padding: 0 var(--sp-5); }
+.center { text-align: center; }
+
+.eyebrow {
+  display: inline-block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: var(--sp-2);
+}
+.eyebrow.gold { color: var(--gold-dk); }
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .85rem 1.9rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .88rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: none;
+  transition: background .2s, color .2s, transform .2s, box-shadow .2s;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+
+.btn-primary {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(20,21,22,.3);
+}
+.btn-primary:hover {
+  background: var(--charcoal);
+  box-shadow: 0 8px 28px rgba(20,21,22,.4);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid rgba(20,21,22,.22);
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold-dk); }
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--ink);
+  box-shadow: 0 4px 18px rgba(238,183,93,.35);
+}
+.btn-gold:hover {
+  background: var(--gold-dk);
+  color: #fff;
+  box-shadow: 0 8px 28px rgba(238,183,93,.45);
+}
+
+.btn-white {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
+}
+.btn-white:hover { background: var(--bg); }
+
+.btn-lg { padding: 1.05rem 2.4rem; font-size: .95rem; }
+
+/* ── Nav ────────────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: #141516;
+  border-bottom: 1px solid rgba(238,183,93,.25);
+  z-index: 100;
+  box-shadow: 0 1px 12px rgba(0,0,0,.4);
+}
+.nav-inner {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: 0 var(--sp-5);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -.02em;
+  flex-shrink: 0;
+  display: flex;
+  align-items: baseline;
+  gap: .2rem;
+}
+.nav-logo span { color: var(--primary); font-style: italic; font-weight: 400; }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex: 1;
+  justify-content: center;
+  list-style: none;
+}
+.nav-links a {
+  font-size: .88rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.7);
+  transition: color .2s;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -3px;
+  width: 0; height: 1.5px;
+  background: var(--primary);
+  transition: width .25s;
+}
+.nav-links a:hover { color: var(--primary); }
+.nav-links a:hover::after { width: 100%; }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-shrink: 0;
+}
+.nav-phone {
+  font-size: .85rem;
+  color: rgba(255,255,255,.7);
+  font-weight: 500;
+  transition: color .2s;
+}
+.nav-phone:hover { color: var(--primary); }
+
+@media (max-width: 980px) {
+  .nav-links, .nav-phone { display: none; }
+}
+
+/* ── Hero ───────────────────────────────────────────────── */
+.hero {
+  background: #141516;
+  min-height: calc(100vh - var(--nav-h));
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+/* subtle gold radial glow top-left */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -120px; left: -120px;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(238,183,93,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-inner {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: var(--sp-7) var(--sp-5);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero-visual { display: none; }
+}
+
+.hero-content { max-width: 580px; }
+.hero h1 { color: #ffffff; margin-bottom: 1.5rem; }
+.hero h1 em { color: var(--gold); }
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  background: rgba(238,183,93,.12);
+  color: #eeb75d;
+  border: 1px solid rgba(238,183,93,.3);
+  border-radius: 99px;
+  padding: .4rem 1rem;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  margin-bottom: 1.5rem;
+}
+.hero-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #eeb75d;
+  animation: pulse-dot 2s ease infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:.5; transform:scale(1.5); }
+}
+
+.hero-sub {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,.6);
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  max-width: 48ch;
+}
+.hero-cta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+/* ghost button on dark bg */
+.hero-cta .btn-ghost {
+  color: #fff;
+  border-color: rgba(255,255,255,.25);
+}
+.hero-cta .btn-ghost:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.hero-proof {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+.hero-proof-item {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .82rem;
+  color: rgba(255,255,255,.55);
+  font-weight: 500;
+}
+.hero-proof-item .check {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(238,183,93,.15);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  font-size: .6rem;
+  color: #eeb75d;
+}
+
+/* Hero visual */
+.hero-visual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.hero-visual-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 30px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(238,183,93,.15);
+  overflow: hidden;
+  width: 100%;
+  max-width: 520px;
+}
+.hero-visual-header {
+  background: var(--ink);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+.hero-visual-dots { display: flex; gap: .4rem; }
+.hero-visual-dots span {
+  width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.35);
+}
+.hero-visual-dots span:first-child { background: #ff5f57; }
+.hero-visual-dots span:nth-child(2) { background: #febc2e; }
+.hero-visual-dots span:last-child { background: #28c840; }
+.hero-visual-url {
+  flex: 1;
+  background: rgba(255,255,255,.15);
+  border-radius: 4px;
+  padding: .35rem 1rem;
+  font-size: .75rem;
+  color: rgba(255,255,255,.8);
+  font-family: monospace;
+}
+.hero-visual-body { padding: 1.5rem; }
+.hero-site-preview {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.hero-site-nav-mock {
+  background: var(--ink);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 1rem;
+}
+.hero-site-nav-mock span {
+  height: 6px; border-radius: 3px; background: rgba(255,255,255,.25);
+}
+.hero-site-nav-mock span:first-child { width: 60px; background: rgba(255,255,255,.6); }
+.hero-site-nav-mock span:nth-child(2) { width: 35px; }
+.hero-site-nav-mock span:nth-child(3) { width: 45px; }
+.hero-site-nav-mock span:nth-child(4) { width: 35px; }
+.hero-site-nav-mock span:last-child { margin-left: auto; width: 70px; background: var(--primary); border-radius: 3px; height: 20px; }
+.hero-site-hero-mock {
+  height: 120px;
+  background: linear-gradient(135deg, #525ddc 0%, #262626 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+  gap: .5rem;
+}
+.hero-site-hero-mock span {
+  height: 8px; border-radius: 4px; background: rgba(255,255,255,.9);
+}
+.hero-site-hero-mock span:first-child { width: 70%; }
+.hero-site-hero-mock span:nth-child(2) { width: 55%; opacity: .7; }
+.hero-site-hero-mock span:last-child { width: 90px; background: var(--gold); margin-top: .25rem; }
+.hero-site-cards-mock {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: .5rem;
+  padding: 1rem;
+}
+.hero-site-card-mock {
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,.07);
+}
+.hero-site-card-mock-img {
+  height: 40px;
+}
+.hero-site-card-mock-img:nth-child(1) { background: rgba(82,93,220,.12); }
+.hero-site-card-mock:nth-child(2) .hero-site-card-mock-img { background: rgba(238,183,93,.15); }
+.hero-site-card-mock:nth-child(3) .hero-site-card-mock-img { background: var(--bg); }
+.hero-site-card-mock-lines { padding: .5rem; display: flex; flex-direction: column; gap: .25rem; }
+.hero-site-card-mock-lines span { height: 4px; border-radius: 2px; background: var(--dove); }
+.hero-site-card-mock-lines span:first-child { width: 80%; }
+.hero-site-card-mock-lines span:last-child { width: 55%; }
+
+/* Floating badges on hero */
+.hero-float {
+  position: absolute;
+  background: #fff;
+  border-radius: var(--radius-md);
+  padding: .75rem 1rem;
+  box-shadow: 0 10px 40px rgba(0,0,0,.12);
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--ink);
+  animation: float 3.5s ease-in-out infinite;
+}
+.hero-float:nth-child(2) { animation-delay: -1.5s; }
+.hero-float-1 { top: 5%; right: -5%; }
+.hero-float-2 { bottom: 10%; left: -8%; }
+.hero-float .ico {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.hero-float-1 .ico { background: rgba(82,93,220,.12); }
+.hero-float-2 .ico { background: rgba(238,183,93,.15); }
+.hero-float-sub { font-size: .7rem; font-weight: 400; color: var(--flint); }
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ── Logo Strip ─────────────────────────────────────────── */
+.logo-strip {
+  background: #141516;
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  padding: 1.75rem 0;
+  overflow: hidden;
+}
+.logo-strip-label {
+  text-align: center;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+  margin-bottom: 1.25rem;
+}
+.logo-track {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+  width: max-content;
+  animation: scroll-x 28s linear infinite;
+}
+.logo-track:hover { animation-play-state: paused; }
+.logo-item {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #bbb;
+  white-space: nowrap;
+  transition: color .25s;
+}
+.logo-item:hover { color: var(--primary); }
+@keyframes scroll-x {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Section base ────────────────────────────────────────── */
+.section { padding: var(--sp-7) 0; }
+.section-head { margin-bottom: var(--sp-6); }
+.section-head p {
+  font-size: 1.05rem;
+  color: var(--flint);
+  max-width: 52ch;
+  margin-top: .75rem;
+  line-height: 1.7;
+}
+.section-head.center p { margin: .75rem auto 0; }
+
+/* ── Services ───────────────────────────────────────────── */
+.services { background: #ffffff; }
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+@media (max-width: 900px) { .services-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .services-grid { grid-template-columns: 1fr; } }
+
+.service-card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 2.25rem;
+  border: 1px solid var(--dove);
+  transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+}
+.service-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .35s ease;
+}
+.service-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px rgba(238,183,93,.15);
+  border-color: transparent;
+}
+.service-card:hover::after { transform: scaleX(1); }
+
+.service-icon {
+  width: 52px; height: 52px;
+  border-radius: var(--radius-sm);
+  display: grid; place-items: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.25rem;
+  background: var(--primary-lt);
+}
+.service-card:nth-child(2) .service-icon { background: rgba(238,183,93,.12); }
+.service-card:nth-child(3) .service-icon { background: var(--bg); }
+.service-card:nth-child(4) .service-icon { background: rgba(20,21,22,.05); }
+.service-card:nth-child(5) .service-icon { background: rgba(238,183,93,.1); }
+.service-card:nth-child(6) .service-icon { background: rgba(20,21,22,.05); }
+
+.service-card h3 { color: var(--ink); margin-bottom: .5rem; font-size: 1.25rem; }
+.service-card p { font-size: .92rem; color: var(--flint); line-height: 1.65; margin-bottom: 1.25rem; }
+.service-link {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  transition: gap .2s;
+}
+.service-link:hover { gap: .65rem; }
+
+/* ── Why Us ──────────────────────────────────────────────── */
+.why { background: #141516; }
+.why .section-head h2,
+.why .section-head .eyebrow { color: #ffffff; }
+.why .section-head p { color: rgba(255,255,255,.55); }
+.why-feat h4 { color: #ffffff; }
+.why-feat p { color: rgba(255,255,255,.5); }
+/* why-feat hover handled below */
+.why-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+@media (max-width: 860px) { .why-inner { grid-template-columns: 1fr; } }
+
+.why-features { display: flex; flex-direction: column; gap: 1.5rem; }
+.why-feat {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition:
+    background .6s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color .6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform .6s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow .6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.why-feat:hover {
+  background: rgba(255,255,255,.05);
+  border-color: rgba(238,183,93,.3);
+  transform: translateX(8px);
+  box-shadow: -3px 0 0 0 #eeb75d;
+}
+.why-feat-icon {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  background: var(--primary-lt);
+  display: grid; place-items: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.why-feat h4 { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600; color: #ffffff; margin-bottom: .3rem; }
+.why-feat p { font-size: .88rem; color: rgba(255,255,255,.75); margin: 0; }
+
+/* Why visual panel */
+.why-visual {
+  background: var(--ink);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.why-visual::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 240px; height: 240px;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: .18;
+}
+.why-visual-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: .75rem;
+  position: relative;
+}
+.why-visual > p {
+  color: rgba(255,255,255,.6);
+  font-size: .9rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+.why-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  position: relative;
+}
+.why-stat {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+}
+.why-stat strong {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  color: var(--gold);
+  display: block;
+  line-height: 1;
+  margin-bottom: .35rem;
+}
+.why-stat span {
+  font-size: .75rem;
+  color: rgba(255,255,255,.55);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.why-visual-cta {
+  margin-top: 1.75rem;
+  position: relative;
+}
+
+/* ── How It Works ────────────────────────────────────────── */
+.how { background: #ffffff; }
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  position: relative;
+  margin-top: var(--sp-5);
+}
+@media (max-width: 860px) { .steps { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 500px) { .steps { grid-template-columns: 1fr; } }
+
+/* connector line */
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 26px; left: calc(12.5% + 1rem); right: calc(12.5% + 1rem);
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--gold));
+  opacity: .3;
+  z-index: 0;
+}
+@media (max-width: 860px) { .steps::before { display: none; } }
+
+.step {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.step-num {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: #525ddc;
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: grid; place-items: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 4px 16px rgba(82,93,220,.35);
+}
+.step:nth-child(2) .step-num { background: #4dbe8e; box-shadow: 0 4px 16px rgba(77,190,142,.35); }
+.step:nth-child(3) .step-num { background: #eeb75d; color: #141516; box-shadow: 0 4px 16px rgba(238,183,93,.4); }
+.step:nth-child(4) .step-num { background: #e85d7e; box-shadow: 0 4px 16px rgba(232,93,126,.35); }
+.step h4 { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: .5rem; }
+.step p { font-size: .88rem; color: var(--flint); line-height: 1.6; }
+
+/* ── Testimonials ────────────────────────────────────────── */
+.testimonials { background: #141516; }
+.testimonials .section-head h2,
+.testimonials .section-head .eyebrow { color: #ffffff; }
+.testimonials .section-head p { color: rgba(255,255,255,.55); }
+.test-card { background: #1e1f20; border-color: rgba(255,255,255,.08); }
+.test-quote { color: #ffffff; }
+.test-name { color: #ffffff; }
+.test-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+@media (max-width: 860px) { .test-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .test-grid { grid-template-columns: 1fr; } }
+
+.test-card {
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  border: 1px solid var(--dove);
+  transition: box-shadow .3s;
+}
+.test-card:hover { box-shadow: 0 12px 40px rgba(238,183,93,.12); }
+.test-stars { color: var(--gold); font-size: 1rem; letter-spacing: 2px; margin-bottom: 1rem; }
+.test-quote {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+.test-author { display: flex; align-items: center; gap: .75rem; }
+.test-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  overflow: hidden; flex-shrink: 0;
+  background: var(--primary-lt);
+  display: grid; place-items: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+  font-family: 'DM Sans', sans-serif;
+}
+.test-name { font-size: .9rem; font-weight: 600; color: var(--ink); }
+.test-biz { font-size: .78rem; color: var(--flint); }
+
+/* ── Pricing ─────────────────────────────────────────────── */
+.pricing { background: #ffffff; }
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 860px) { .pricing-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .pricing-grid { grid-template-columns: 1fr; } }
+
+.pricing-card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 2.5rem 2rem;
+  border: 1px solid var(--dove);
+  position: relative;
+  transition: transform .3s, box-shadow .3s;
+}
+.pricing-card:hover { transform: translateY(-4px); box-shadow: 0 16px 50px rgba(0,0,0,.08); }
+.pricing-card.popular {
+  border-color: var(--gold);
+  border-width: 2px;
+  transform: scale(1.03);
+  box-shadow: 0 20px 60px rgba(238,183,93,.2);
+}
+.pricing-card.popular:hover { transform: scale(1.03) translateY(-4px); }
+.pricing-badge {
+  position: absolute;
+  top: -14px; left: 50%; transform: translateX(-50%);
+  background: var(--primary);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: .35rem 1.2rem;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+.pricing-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--flint);
+  margin-bottom: .75rem;
+}
+.pricing-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: .4rem;
+}
+.pricing-price sup { font-size: 1.5rem; vertical-align: super; }
+.pricing-price sub { font-family: 'DM Sans', sans-serif; font-size: .85rem; color: var(--flint); vertical-align: baseline; font-weight: 400; }
+.pricing-desc {
+  font-size: .88rem;
+  color: var(--flint);
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid var(--dove);
+}
+.pricing-features { list-style: none; display: flex; flex-direction: column; gap: .75rem; margin-bottom: 2rem; }
+.pricing-features li {
+  display: flex; align-items: flex-start; gap: .6rem;
+  font-size: .88rem; color: var(--ash);
+}
+.pricing-features li::before {
+  content: '✓';
+  color: var(--primary);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: .1rem;
+}
+
+/* ── CTA Banner ──────────────────────────────────────────── */
+.cta-banner {
+  background: var(--ink);
+  padding: var(--sp-7) 0;
+  position: relative;
+  overflow: hidden;
+}
+.cta-banner::before {
+  content: '';
+  position: absolute;
+  top: -100px; left: -100px;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: .15;
+}
+.cta-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: -80px;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: .1;
+}
+.cta-banner-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.cta-banner h2 { color: #fff; margin-bottom: .75rem; }
+.cta-banner p { color: rgba(255,255,255,.6); font-size: 1.05rem; max-width: 50ch; margin: 0 auto 2.5rem; }
+.cta-banner-btns { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+
+/* ── Footer ──────────────────────────────────────────────── */
+footer {
+  background: var(--ink);
+  color: #fff;
+  padding: var(--sp-7) 0 var(--sp-5);
+}
+.foot-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr;
+  gap: 3rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+@media (max-width: 860px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
+
+.foot-brand .nav-logo { color: #fff; font-size: 1.5rem; margin-bottom: 1rem; }
+.foot-brand .nav-logo span { color: var(--gold); }
+.foot-brand p {
+  color: rgba(255,255,255,.5);
+  font-size: .88rem;
+  line-height: 1.7;
+  max-width: 30ch;
+  margin-bottom: 1.5rem;
+}
+.foot-social { display: flex; gap: .75rem; }
+.foot-social a {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.08);
+  display: grid; place-items: center;
+  font-size: .85rem;
+  color: rgba(255,255,255,.6);
+  transition: background .2s, color .2s;
+}
+.foot-social a:hover { background: var(--primary); color: #fff; }
+
+footer h6 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.35);
+  margin-bottom: 1.25rem;
+}
+footer ul { list-style: none; display: flex; flex-direction: column; gap: .65rem; }
+footer ul a {
+  font-size: .88rem;
+  color: rgba(255,255,255,.55);
+  transition: color .2s;
+}
+footer ul a:hover { color: #fff; }
+
+.foot-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 2rem;
+}
+.foot-bottom p { font-size: .8rem; color: rgba(255,255,255,.3); }
+.foot-legal { display: flex; gap: 1.5rem; }
+.foot-legal a { font-size: .8rem; color: rgba(255,255,255,.3); transition: color .2s; }
+.foot-legal a:hover { color: rgba(255,255,255,.7); }
+
+/* ── FAQ ─────────────────────────────────────────────────── */
+.faq { background: #141516; }
+.faq .section-head h2,
+.faq .section-head .eyebrow { color: #ffffff; }
+.faq-item { border-color: rgba(255,255,255,.1); }
+.faq-q { background: #1e1f20; color: #ffffff; }
+.faq-q:hover { background: #262626; }
+.faq-a { color: rgba(255,255,255,.55); }
+.faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: .75rem; }
+.faq-item {
+  border: 1px solid var(--dove);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.faq-q {
+  width: 100%; text-align: left;
+  padding: 1.25rem 1.5rem;
+  background: var(--white);
+  border: none; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem; font-weight: 600;
+  color: var(--ink);
+  transition: background .2s;
+}
+.faq-q:hover { background: var(--bg); }
+.faq-q svg {
+  flex-shrink: 0;
+  transition: transform .3s;
+  color: var(--primary);
+}
+.faq-item.open .faq-q svg { transform: rotate(180deg); }
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s ease, padding .35s ease;
+  padding: 0 1.5rem;
+  font-size: .92rem;
+  color: var(--flint);
+  line-height: 1.7;
+}
+.faq-item.open .faq-a { max-height: 300px; padding: 0 1.5rem 1.25rem; }
+
+/* ── Scroll reveal ───────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  filter: blur(4px);
+  transition:
+    opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.d1 { transition-delay: .12s; }
+.reveal.d2 { transition-delay: .24s; }
+.reveal.d3 { transition-delay: .36s; }
+.reveal.d4 { transition-delay: .48s; }
+.reveal.in { opacity: 1; transform: none; filter: blur(0); }
+
+/* ── Misc ────────────────────────────────────────────────── */
+.divider {
+  height: 1px; background: var(--dove);
+  max-width: var(--wide-w); margin: 0 auto;
+}
+
+/* ── Section gold border dividers ───────────────────────── */
+.fade-d2l {
+  height: 2px;
+  background: linear-gradient(to right, transparent 0%, #eeb75d 20%, #eeb75d 80%, transparent 100%);
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+.fade-l2d {
+  height: 2px;
+  background: linear-gradient(to right, transparent 0%, #eeb75d 20%, #eeb75d 80%, transparent 100%);
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Scroll-to-top button ────────────────────────────────── */
+#back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 200;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--gold);
+  border: 2px solid var(--gold);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(20,21,22,.3);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .3s ease, transform .3s ease, background .2s, color .2s;
+  pointer-events: none;
+}
+#back-to-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+#back-to-top:hover {
+  background: var(--gold);
+  color: var(--ink);
+}
+#back-to-top svg {
+  width: 18px; height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ──────────────────────────────────────────────────── -->
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">Nexora<span>Digital</span></a>
+
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#why">Why Us</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#testimonials">Results</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="tel:+13109551077" class="nav-phone">(310) 955-1077</a>
+      <a href="#contact" class="btn btn-gold">Get Started Free</a>
+    </div>
+  </div>
+</header>
+
+<!-- ─── HERO ─────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-inner">
+
+    <div class="hero-content">
+      <div class="hero-badge">🇺🇸 Serving New Businesses Across the USA</div>
+      <h1>The growth platform for <em>new businesses</em></h1>
+      <p class="hero-sub">We build your professional website, set up your business profiles, and run SEO &amp; social media marketing — everything you need to get found, get customers, and grow fast.</p>
+      <div class="hero-cta">
+        <a href="#contact" class="btn btn-gold btn-lg">Get a Free Consultation</a>
+        <a href="#services" class="btn btn-ghost btn-lg">See Our Services</a>
+      </div>
+      <div class="hero-proof">
+        <div class="hero-proof-item">
+          <span class="check">✓</span> No long-term contracts
+        </div>
+        <div class="hero-proof-item">
+          <span class="check">✓</span> Results in 30 days
+        </div>
+        <div class="hero-proof-item">
+          <span class="check">✓</span> USA-based team
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <!-- Website preview mockup -->
+      <div class="hero-visual-card">
+        <div class="hero-visual-header">
+          <div class="hero-visual-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="hero-visual-url">yourbusiness.com</div>
+        </div>
+        <div class="hero-visual-body">
+          <div class="hero-site-preview">
+            <div class="hero-site-nav-mock">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="hero-site-hero-mock">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="hero-site-cards-mock">
+              <div class="hero-site-card-mock">
+                <div class="hero-site-card-mock-img"></div>
+                <div class="hero-site-card-mock-lines"><span></span><span></span></div>
+              </div>
+              <div class="hero-site-card-mock">
+                <div class="hero-site-card-mock-img"></div>
+                <div class="hero-site-card-mock-lines"><span></span><span></span></div>
+              </div>
+              <div class="hero-site-card-mock">
+                <div class="hero-site-card-mock-img"></div>
+                <div class="hero-site-card-mock-lines"><span></span><span></span></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:.75rem;margin-top:.75rem">
+            <div style="flex:1;background:var(--primary-lt);border-radius:6px;padding:.75rem;font-size:.75rem;font-weight:600;color:var(--primary)">📈 +0% Traffic</div>
+            <div style="flex:1;background:rgba(238,183,93,.12);border-radius:6px;padding:.75rem;font-size:.75rem;font-weight:600;color:var(--gold-dk)">⭐ 0 Google Rating</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating badges -->
+      <div class="hero-float hero-float-1">
+        <div class="ico">🌐</div>
+        <div>
+          <div>Website Live</div>
+          <div class="hero-float-sub">Built in 7 days</div>
+        </div>
+      </div>
+      <div class="hero-float hero-float-2">
+        <div class="ico">🏆</div>
+        <div>
+          <div>Page 1 Google</div>
+          <div class="hero-float-sub">Local SEO result</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── LOGO STRIP ────────────────────────────────────────────── -->
+<div class="logo-strip">
+  <p class="logo-strip-label">Trusted by businesses across</p>
+  <div class="logo-track" id="logo-track">
+    <span class="logo-item">Restaurants</span>
+    <span class="logo-item">Law Firms</span>
+    <span class="logo-item">Retail Shops</span>
+    <span class="logo-item">E-Commerce</span>
+    <span class="logo-item">Contractors</span>
+    <span class="logo-item">Real Estate</span>
+    <span class="logo-item">Salons &amp; Spas</span>
+    <span class="logo-item">Consultants</span>
+    <span class="logo-item">Healthcare</span>
+    <span class="logo-item">Fitness</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="logo-item">Restaurants</span>
+    <span class="logo-item">Law Firms</span>
+    <span class="logo-item">Retail Shops</span>
+    <span class="logo-item">E-Commerce</span>
+    <span class="logo-item">Contractors</span>
+    <span class="logo-item">Real Estate</span>
+    <span class="logo-item">Salons &amp; Spas</span>
+    <span class="logo-item">Consultants</span>
+    <span class="logo-item">Healthcare</span>
+    <span class="logo-item">Fitness</span>
+  </div>
+</div>
+
+<div class="fade-d2l"></div>
+<!-- ─── SERVICES ─────────────────────────────────────────────── -->
+<section class="section services" id="services">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">What We Do</span>
+      <h2>Everything your business needs<br>to <em>dominate online</em></h2>
+      <p>From building your first website to ranking #1 on Google — we handle the digital side so you can focus on running your business.</p>
+    </div>
+    <div class="services-grid">
+
+      <div class="service-card reveal">
+        <div class="service-icon">🌐</div>
+        <h3>Professional Website Design</h3>
+        <p>A stunning, mobile-first website built in 7–14 days. Fully custom, SEO-ready, and built to convert visitors into paying customers.</p>
+        <a href="#contact" class="service-link">Get started →</a>
+      </div>
+
+      <div class="service-card reveal d1">
+        <div class="service-icon">📍</div>
+        <h3>Business Profile Setup</h3>
+        <p>We set up and fully optimize your Google Business Profile, Yelp, Facebook, and 40+ directories so local customers can find you instantly.</p>
+        <a href="#contact" class="service-link">Get started →</a>
+      </div>
+
+      <div class="service-card reveal d2">
+        <div class="service-icon">🔍</div>
+        <h3>Search Engine Optimization</h3>
+        <p>Rank on the first page of Google for the keywords your customers are searching. We do keyword research, on-page SEO, and link building.</p>
+        <a href="#contact" class="service-link">Get started →</a>
+      </div>
+
+      <div class="service-card reveal">
+        <div class="service-icon">📱</div>
+        <h3>Social Media Marketing</h3>
+        <p>We create and manage your Instagram, Facebook, and TikTok content — building a loyal following that turns into real revenue for your business.</p>
+        <a href="#contact" class="service-link">Get started →</a>
+      </div>
+
+      <div class="service-card reveal d1">
+        <div class="service-icon">🛒</div>
+        <h3>E-Commerce Solutions</h3>
+        <p>Launch your online store with product pages that sell. We integrate payment gateways, inventory tools, and run Google Shopping &amp; Meta Ads.</p>
+        <a href="#contact" class="service-link">Get started →</a>
+      </div>
+
+      <div class="service-card reveal d2">
+        <div class="service-icon">📊</div>
+        <h3>Paid Ads Management</h3>
+        <p>Google Ads and Meta Ads campaigns managed by certified specialists. We track every dollar and optimize weekly so your ad spend actually works.</p>
+        <a href="#contact" class="service-link">Get started →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="fade-l2d"></div>
+<!-- ─── WHY US ────────────────────────────────────────────────── -->
+<section class="section why" id="why">
+  <div class="w">
+    <div class="why-inner">
+
+      <div>
+        <div class="section-head reveal">
+          <span class="eyebrow">Why Nexora Digital</span>
+          <h2>We specialize in <em>new businesses</em> — so you get results from day one</h2>
+          <p>We've helped hundreds of brand-new businesses go from zero online presence to fully booked in 60 days. Here's what makes us different.</p>
+        </div>
+        <div class="why-features">
+          <div class="why-feat reveal">
+            <div class="why-feat-icon">⚡</div>
+            <div>
+              <h4>Fast turnaround — go live in 7 days</h4>
+              <p>We know you can't wait 3 months for a website. Our streamlined process gets you online fast without cutting corners.</p>
+            </div>
+          </div>
+          <div class="why-feat reveal d1">
+            <div class="why-feat-icon">💰</div>
+            <div>
+              <h4>Startup-friendly pricing</h4>
+              <p>Affordable packages designed for new business budgets — no hidden fees, no bloated agency markups.</p>
+            </div>
+          </div>
+          <div class="why-feat reveal d2">
+            <div class="why-feat-icon">📞</div>
+            <div>
+              <h4>A real team, not a freelancer</h4>
+              <p>You get a dedicated account manager plus a full team of designers, SEO experts, and marketers working on your business.</p>
+            </div>
+          </div>
+          <div class="why-feat reveal d3">
+            <div class="why-feat-icon">📈</div>
+            <div>
+              <h4>Transparent monthly reporting</h4>
+              <p>Every month we send you a clear report showing exactly what we did, your traffic, rankings, and ROI.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="why-visual reveal d2">
+        <div class="why-visual-title">Your results, by the numbers</div>
+        <p>Average metrics across our clients after 90 days of working with Nexora Digital.</p>
+        <div class="why-stats">
+          <div class="why-stat">
+            <strong>0%</strong>
+            <span>Increase in web traffic</span>
+          </div>
+          <div class="why-stat">
+            <strong>0★</strong>
+            <span>Average Google rating</span>
+          </div>
+          <div class="why-stat">
+            <strong>0%</strong>
+            <span>More inbound leads</span>
+          </div>
+          <div class="why-stat">
+            <strong>0</strong>
+            <span>Average site launch</span>
+          </div>
+        </div>
+        <div class="why-visual-cta">
+          <a href="#contact" class="btn btn-gold">Book a Free Strategy Call</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="fade-d2l"></div>
+<!-- ─── HOW IT WORKS ──────────────────────────────────────────── -->
+<section class="section how" id="how">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">The Process</span>
+      <h2>From zero to thriving online<br>in <em>4 simple steps</em></h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <h4>Free Strategy Call</h4>
+        <p>We learn about your business, goals, and target customers. No obligation — just real advice.</p>
+      </div>
+      <div class="step reveal d1">
+        <div class="step-num">2</div>
+        <h4>We Build Your Foundation</h4>
+        <p>Website designed, business profiles claimed, and analytics set up — all within the first week.</p>
+      </div>
+      <div class="step reveal d2">
+        <div class="step-num">3</div>
+        <h4>We Launch &amp; Promote</h4>
+        <p>SEO optimization, social media content, and paid ads go live to start driving real customers.</p>
+      </div>
+      <div class="step reveal d3">
+        <div class="step-num">4</div>
+        <h4>Grow &amp; Scale Together</h4>
+        <p>Monthly reports, continuous optimization, and a dedicated team expanding your results every month.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="fade-l2d"></div>
+<!-- ─── TESTIMONIALS ──────────────────────────────────────────── -->
+<section class="section testimonials" id="testimonials">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Client Results</span>
+      <h2>Real businesses. <em>Real growth.</em></h2>
+      <p>Here's what new business owners say after working with Nexora Digital.</p>
+    </div>
+    <div class="test-grid">
+
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">"Nexora built our restaurant's website in 6 days and set up our Google profile. We went from 0 reviews to 47 in 2 months. Our tables are fully booked most weekends now."</p>
+        <div class="test-author">
+          <div class="test-avatar">MR</div>
+          <div>
+            <div class="test-name">Marco Rivera</div>
+            <div class="test-biz">Founder, Casa Rivera Restaurant · Miami, FL</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="test-card reveal d1">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">"We launched an e-commerce store for our boutique and Nexora handled everything — site, SEO, Instagram. Month 3 we hit $24K in online sales. Absolutely incredible."</p>
+        <div class="test-author">
+          <div class="test-avatar">AJ</div>
+          <div>
+            <div class="test-name">Ashley Johnson</div>
+            <div class="test-biz">Owner, Bloom Boutique · Austin, TX</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="test-card reveal d2">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">"As a new contractor, I had zero online presence. Nexora got me to page 1 for 'roofing contractor near me' in 45 days. My phone hasn't stopped ringing since."</p>
+        <div class="test-author">
+          <div class="test-avatar">DK</div>
+          <div>
+            <div class="test-name">Derek Kim</div>
+            <div class="test-biz">Owner, DK Roofing Solutions · Chicago, IL</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">"I opened my salon 4 months ago. Nexora built my website, ran Facebook ads, and my appointment slots fill up every week. Best investment I made for my new business."</p>
+        <div class="test-author">
+          <div class="test-avatar">PN</div>
+          <div>
+            <div class="test-name">Priya Nair</div>
+            <div class="test-biz">Owner, Glow Salon Studio · Seattle, WA</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="test-card reveal d1">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">"Their team set up everything in the first week — website, Yelp, Google, Facebook. I just focused on my law practice while Nexora handled my digital presence. Worth every penny."</p>
+        <div class="test-author">
+          <div class="test-avatar">TW</div>
+          <div>
+            <div class="test-name">Thomas Wade, Esq.</div>
+            <div class="test-biz">Founder, Wade Law Group · New York, NY</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="test-card reveal d2">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">"We went from invisible to 3,200 Instagram followers and 400% more website traffic in 90 days. The Nexora team actually cares about results and communicates clearly every step."</p>
+        <div class="test-author">
+          <div class="test-avatar">SC</div>
+          <div>
+            <div class="test-name">Sarah Chen</div>
+            <div class="test-biz">Co-Founder, PureLeaf Wellness · Denver, CO</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="fade-d2l"></div>
+<!-- ─── PRICING ────────────────────────────────────────────────── -->
+<section class="section pricing" id="pricing">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Transparent Pricing</span>
+      <h2>Simple plans for <em>every stage</em> of growth</h2>
+      <p>No hidden fees. No long-term lock-in. Cancel any time. All plans include a free strategy call.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- Starter -->
+      <div class="pricing-card reveal">
+        <div class="pricing-name">Starter</div>
+        <div class="pricing-price"><sup>$</sup>0<sub>/mo</sub></div>
+        <p class="pricing-desc">Perfect for brand-new businesses that need a professional online presence fast.</p>
+        <ul class="pricing-features">
+          <li>5-page professional website</li>
+          <li>Google Business Profile setup</li>
+          <li>Basic on-page SEO</li>
+          <li>3 social media posts/week</li>
+          <li>Monthly analytics report</li>
+          <li>Email &amp; chat support</li>
+        </ul>
+        <a href="#contact" class="btn btn-ghost" style="width:100%;justify-content:center">Get Started</a>
+      </div>
+
+      <!-- Growth (Popular) -->
+      <div class="pricing-card popular reveal d1">
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-name">Growth</div>
+        <div class="pricing-price"><sup>$</sup>0<sub>/mo</sub></div>
+        <p class="pricing-desc">For businesses serious about ranking on Google and generating consistent leads.</p>
+        <ul class="pricing-features">
+          <li>10-page custom website</li>
+          <li>Full business profile optimization (40+ directories)</li>
+          <li>Full local &amp; national SEO</li>
+          <li>Daily social media + content creation</li>
+          <li>Google &amp; Meta Ads management</li>
+          <li>Bi-weekly strategy calls</li>
+          <li>Priority dedicated account manager</li>
+        </ul>
+        <a href="#contact" class="btn btn-primary" style="width:100%;justify-content:center">Get Started</a>
+      </div>
+
+      <!-- Scale -->
+      <div class="pricing-card reveal d2">
+        <div class="pricing-name">Scale</div>
+        <div class="pricing-price"><sup>$</sup>0<sub>/mo</sub></div>
+        <p class="pricing-desc">Full-service digital marketing for businesses ready to dominate their market.</p>
+        <ul class="pricing-features">
+          <li>Unlimited pages + e-commerce</li>
+          <li>Full business profile management</li>
+          <li>Aggressive SEO + link building</li>
+          <li>Full social media management</li>
+          <li>Google, Meta &amp; TikTok Ads</li>
+          <li>Email marketing automation</li>
+          <li>Weekly reporting + weekly calls</li>
+          <li>Dedicated team of 3 specialists</li>
+        </ul>
+        <a href="#contact" class="btn btn-ghost" style="width:100%;justify-content:center">Get Started</a>
+      </div>
+
+    </div>
+    <p class="center reveal" style="margin-top:2rem;font-size:.88rem;color:var(--flint)">
+      Need something custom? <a href="#contact" style="color:var(--primary);font-weight:600">Contact us for a custom quote →</a>
+    </p>
+  </div>
+</section>
+
+<div class="fade-l2d"></div>
+<!-- ─── FAQ ────────────────────────────────────────────────────── -->
+<section class="section faq">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2>Questions? We've got <em>answers.</em></h2>
+    </div>
+    <div class="faq-list">
+
+      <div class="faq-item reveal">
+        <button class="faq-q">
+          How quickly can you launch my website?
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a">For standard websites (5–10 pages), we typically go live in 7–14 business days from our kickoff call. We move fast because we know every day without a website is a day you're losing potential customers.</div>
+      </div>
+
+      <div class="faq-item reveal d1">
+        <button class="faq-q">
+          Do I need to sign a long-term contract?
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a">No long-term contracts required. All our plans are month-to-month. We earn your business every single month by delivering results. That said, SEO and social media take 3–6 months to show their full potential, so we recommend committing to at least 3 months to see meaningful growth.</div>
+      </div>
+
+      <div class="faq-item reveal d2">
+        <button class="faq-q">
+          What kinds of businesses do you work with?
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a">We specialize in new and early-stage businesses across all industries — restaurants, retail shops, law firms, contractors, salons, healthcare providers, e-commerce brands, consultants, real estate agents, and more. If you're a new business owner looking to build your digital presence, we're the right fit.</div>
+      </div>
+
+      <div class="faq-item reveal">
+        <button class="faq-q">
+          How does SEO actually work for a new business?
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a">We start with local SEO — optimizing your Google Business Profile and targeting "near me" searches in your city. This is where new businesses see the fastest results. We then layer in on-page website SEO, content creation, and link-building to build your long-term search authority on Google.</div>
+      </div>
+
+      <div class="faq-item reveal d1">
+        <button class="faq-q">
+          What's included in the free strategy call?
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a">In a 30-minute call with one of our digital strategists, we'll audit your current online presence, identify the biggest opportunities for your specific business type and location, and recommend exactly which services would drive the most customers to you. Zero sales pressure — just real, actionable advice.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA BANNER ────────────────────────────────────────────── -->
+<section class="cta-banner" id="contact">
+  <div class="w cta-banner-inner">
+    <span class="eyebrow gold reveal">Ready to Grow?</span>
+    <h2 class="reveal d1">Start getting customers<br>from the internet <em>this week</em></h2>
+    <p class="reveal d2">Book a free 30-minute strategy call and we'll show you exactly how to grow your business online — no obligation, no fluff.</p>
+    <div class="cta-banner-btns reveal d3">
+      <a href="tel:+13109551077" class="btn btn-white btn-lg">📞 Call (310) 955-1077</a>
+      <a href="mailto:hello@nexoradigital.com" class="btn btn-gold btn-lg">Book a Free Call →</a>
+    </div>
+    <p class="reveal d4" style="color:rgba(255,255,255,.4);font-size:.82rem;margin-top:1.5rem">
+      Response within 2 hours · No credit card required · No long-term commitment
+    </p>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────────────────── -->
+<footer>
+  <div class="w">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="nav-logo">Nexora<span>Digital</span></a>
+        <p>The growth platform for new businesses across the USA. Websites, SEO, social media, and paid ads — all in one place.</p>
+        <div class="foot-social">
+          <a href="#">f</a>
+          <a href="#">in</a>
+          <a href="#">ig</a>
+          <a href="#">x</a>
+        </div>
+      </div>
+      <div>
+        <h6>Services</h6>
+        <ul>
+          <li><a href="#services">Website Design</a></li>
+          <li><a href="#services">Business Profiles</a></li>
+          <li><a href="#services">SEO</a></li>
+          <li><a href="#services">Social Media</a></li>
+          <li><a href="#services">E-Commerce</a></li>
+          <li><a href="#services">Paid Ads</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Company</h6>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Our Process</a></li>
+          <li><a href="#">Case Studies</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Contact</h6>
+        <ul>
+          <li><a href="tel:+13109551077">(310) 955-1077</a></li>
+          <li><a href="mailto:hello@nexoradigital.com">hello@nexoradigital.com</a></li>
+          <li><a href="#">Free Strategy Call</a></li>
+          <li><a href="#">Support Center</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p>© 2026 Nexora Digital LLC. All rights reserved. USA.</p>
+      <div class="foot-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">DMCA</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── Scroll Reveal ─────────────────────────────────────────── */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ── FAQ accordion ─────────────────────────────────────────── */
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  });
+});
+
+/* ── Smooth scroll for anchor links ───────────────────────── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href').slice(1);
+    const el = id ? document.getElementById(id) : null;
+    if (el) {
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+/* ── Back to top ───────────────────────────────────────────── */
+const btt = document.getElementById('back-to-top');
+window.addEventListener('scroll', () => {
+  btt.classList.toggle('visible', window.scrollY > 400);
+}, { passive: true });
+btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+<!-- Scroll-to-top button -->
+<button id="back-to-top" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+</body>
+</html>
