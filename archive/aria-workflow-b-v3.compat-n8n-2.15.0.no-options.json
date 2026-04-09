@@ -1,0 +1,748 @@
+﻿{
+    "name":  "Aria â€” WORKFLOW B: Retell Call Webhook Handler (v3 Master)",
+    "nodes":  [
+                  {
+                      "id":  "wfb-001",
+                      "name":  "Retell Call Webhook",
+                      "type":  "n8n-nodes-base.webhook",
+                      "typeVersion":  2,
+                      "position":  [
+                                       200,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "httpMethod":  "POST",
+                                         "path":  "aria-retell-callback",
+                                         "responseMode":  "immediately",
+                                         "responseData":  "noData"
+                                     },
+                      "webhookId":  "aria-retell-v3"
+                  },
+                  {
+                      "id":  "wfb-002",
+                      "name":  "Validate \u0026 Classify Call Outcome",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       420,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const body = $input.first().json || {};\n\nconst call_id = body.call_id || \u0027\u0027;\nconst call_status = body.call_status || \u0027unknown\u0027;\nconst disconnection_reason = body.disconnection_reason || \u0027unknown\u0027;\nconst call_duration_sec = body.call_length_second || 0;\nconst call_analysis = body.call_analysis || {};\n\n// Retell echoes back whatever we put in retell_llm_dynamic_variables\nconst dynVars = body.retell_llm_dynamic_variables || {};\nconst lead_id = dynVars.lead_id || \u0027\u0027;\nconst attempt_number = parseInt(dynVars.attempt_number || \u00271\u0027, 10);\nconst customer_name = dynVars.customer_name || \u0027Unknown\u0027;\nconst property_value = dynVars.property_value || \u0027undisclosed\u0027;\n\n// Enforce contract\nif (!call_id) throw new Error(`WEBHOOK_MISSING_CALL_ID: body=${JSON.stringify(body).slice(0,200)}`);\nif (!lead_id) throw new Error(`WEBHOOK_MISSING_LEAD_ID: Retell did not echo back lead_id. check dynamic variables in Workflow A.`);\n\n// OUTCOME CLASSIFICATION\n// \u0027answered\u0027 = call ended AND the human actually picked up\n// \u0027voicemail\u0027 = call ended but hit voicemail\n// \u0027no_answer\u0027 = call ended, no one answered\n// \u0027error\u0027 = retell-side error (credits, carrier reject, internal failure)\n// \u0027unknown\u0027 = any unrecognised combination\nconst ANSWERED_REASONS = new Set([\u0027user_hangup\u0027, \u0027agent_hangup\u0027, \u0027call_transfer\u0027]);\nlet outcome;\nif (call_status === \u0027ended\u0027 \u0026\u0026 ANSWERED_REASONS.has(disconnection_reason)) {\n  outcome = \u0027answered\u0027;\n} else if (call_status === \u0027ended\u0027 \u0026\u0026 disconnection_reason === \u0027voicemail\u0027) {\n  outcome = \u0027voicemail\u0027;\n} else if (call_status === \u0027ended\u0027 \u0026\u0026 (disconnection_reason === \u0027no_answer\u0027 || disconnection_reason === \u0027dial_failed\u0027)) {\n  outcome = \u0027no_answer\u0027;\n} else if (call_status === \u0027error\u0027) {\n  outcome = \u0027error\u0027; // CRITICAL FIX #3: errors no longer route to voicemail retry loop\n} else {\n  outcome = \u0027unknown\u0027;\n}\n\nreturn [{ json: {\n  call_id,\n  call_status,\n  disconnection_reason,\n  call_duration_sec,\n  call_summary: call_analysis.call_summary || \u0027\u0027,\n  user_sentiment: call_analysis.user_sentiment || \u0027unknown\u0027,\n  lead_id,\n  attempt_number,\n  customer_name,\n  property_value,\n  outcome,\n  received_at: new Date().toISOString()\n}}];"
+                                     }
+                  },
+                  {
+                      "id":  "wfb-003",
+                      "name":  "Lookup Lead from CRM",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       640,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "operation":  "read",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                         "sheetName":  "Leads",
+                                         "filtersUI":  {
+                                                           "values":  [
+                                                                          {
+                                                                              "lookupColumn":  "lead_id",
+                                                                              "lookupValue":  "={{ $json.lead_id }}"
+                                                                          }
+                                                                      ]
+                                                       }
+                                     }
+                  },
+                  {
+                      "id":  "wfb-004",
+                      "name":  "Merge Call Data + Lead Record",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       860,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const callData = $(\u0027Validate \u0026 Classify Call Outcome\u0027).first().json;\nconst crmRow = $input.first().json || {};\n\n// Merge, preferring CRM data for lead fields (it\u0027s authoritative)\nreturn [{ json: {\n  ...callData,\n  full_name: crmRow.full_name || callData.customer_name,\n  email: crmRow.email || \u0027\u0027,\n  phone: crmRow.phone || \u0027\u0027,\n  lead_score: crmRow.lead_score || 0,\n  lead_tier: crmRow.lead_tier || \u0027C\u0027,\n  source: crmRow.source || \u0027unknown\u0027\n}}];"
+                                     }
+                  },
+                  {
+                      "id":  "wfb-005",
+                      "name":  "Route by Call Outcome",
+                      "type":  "n8n-nodes-base.switch",
+                      "typeVersion":  3,
+                      "position":  [
+                                       1080,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "mode":  "rules",
+                                         "rules":  {
+                                                       "rules":  [
+                                                                     {
+                                                                         "conditions":  {
+                                                                                            "conditions":  [
+                                                                                                               {
+                                                                                                                   "leftValue":  "={{ $json.outcome }}",
+                                                                                                                   "rightValue":  "answered",
+                                                                                                                   "operator":  {
+                                                                                                                                    "type":  "string",
+                                                                                                                                    "operation":  "equals"
+                                                                                                                                }
+                                                                                                               }
+                                                                                                           ],
+                                                                                            "combinator":  "and"
+                                                                                        },
+                                                                         "renameOutput":  true,
+                                                                         "outputKey":  "answered"
+                                                                     },
+                                                                     {
+                                                                         "conditions":  {
+                                                                                            "conditions":  [
+                                                                                                               {
+                                                                                                                   "leftValue":  "={{ $json.outcome }}",
+                                                                                                                   "rightValue":  "voicemail",
+                                                                                                                   "operator":  {
+                                                                                                                                    "type":  "string",
+                                                                                                                                    "operation":  "equals"
+                                                                                                                                }
+                                                                                                               }
+                                                                                                           ],
+                                                                                            "combinator":  "and"
+                                                                                        },
+                                                                         "renameOutput":  true,
+                                                                         "outputKey":  "voicemail"
+                                                                     },
+                                                                     {
+                                                                         "conditions":  {
+                                                                                            "conditions":  [
+                                                                                                               {
+                                                                                                                   "leftValue":  "={{ $json.outcome }}",
+                                                                                                                   "rightValue":  "no_answer",
+                                                                                                                   "operator":  {
+                                                                                                                                    "type":  "string",
+                                                                                                                                    "operation":  "equals"
+                                                                                                                                }
+                                                                                                               }
+                                                                                                           ],
+                                                                                            "combinator":  "and"
+                                                                                        },
+                                                                         "renameOutput":  true,
+                                                                         "outputKey":  "no_answer"
+                                                                     },
+                                                                     {
+                                                                         "conditions":  {
+                                                                                            "conditions":  [
+                                                                                                               {
+                                                                                                                   "leftValue":  "={{ $json.outcome }}",
+                                                                                                                   "rightValue":  "error",
+                                                                                                                   "operator":  {
+                                                                                                                                    "type":  "string",
+                                                                                                                                    "operation":  "equals"
+                                                                                                                                }
+                                                                                                               }
+                                                                                                           ],
+                                                                                            "combinator":  "and"
+                                                                                        },
+                                                                         "renameOutput":  true,
+                                                                         "outputKey":  "error"
+                                                                     }
+                                                                 ]
+                                                   }
+                                     }
+                  },
+                  {
+                      "id":  "wfb-006",
+                      "name":  "CRM Update â€” Call Answered",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       1320,
+                                       60
+                                   ],
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                         "sheetName":  "Leads",
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $json.lead_id }}",
+                                                                       "status":  "=call_answered_attempt_{{ $json.attempt_number }}",
+                                                                       "call_id":  "={{ $json.call_id }}",
+                                                                       "call_duration_sec":  "={{ $json.call_duration_sec }}",
+                                                                       "call_summary":  "={{ $json.call_summary }}",
+                                                                       "user_sentiment":  "={{ $json.user_sentiment }}",
+                                                                       "last_updated":  "={{ new Date().toISOString() }}"
+                                                                   }
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "wfb-007",
+                      "name":  "Slack â€” HOT LEAD Answered",
+                      "type":  "n8n-nodes-base.slack",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       1540,
+                                       60
+                                   ],
+                      "parameters":  {
+                                         "authentication":  "oAuth2",
+                                         "channel":  "#leads-live",
+                                         "text":  "=:fire: *HOT LEAD â€” Call Answered (Attempt {{ $json.attempt_number }})*\n\n:bust_in_silhouette: *Name:* {{ $json.full_name }}\n:star: *Tier:* {{ $json.lead_tier }} | Score: {{ $json.lead_score }}/100\n:telephone_receiver: *Phone:* {{ $json.phone }}\n:moneybag: *Property:* ${{ $json.property_value }}\n:stopwatch: *Duration:* {{ $json.call_duration_sec }}s\n:bar_chart: *Sentiment:* {{ $json.user_sentiment }}\n:speech_balloon: *Summary:* {{ $json.call_summary || \u0027No summary available\u0027 }}\n:id: *Lead ID:* {{ $json.lead_id }}\n\n@here â€” Follow up NOW while they are warm."
+                                     }
+                  },
+                  {
+                      "id":  "wfb-008",
+                      "name":  "Prepare Retry Config (Voicemail)",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1320,
+                                       220
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const d = $input.first().json;\nconst next_attempt = d.attempt_number + 1;\n// Attempt 1â†’2: wait 2 hours. Attempt 2â†’3: wait 24 hours.\nconst wait_hours = d.attempt_number === 1 ? 2 : 24;\nconst script_hook = next_attempt === 2 ? \u0027second_contact\u0027 : \u0027final_contact\u0027;\nconst attempts_exhausted = d.attempt_number \u003e= 3;\nreturn [{ json: { ...d, next_attempt, wait_hours, script_hook, attempts_exhausted } }];"
+                                     }
+                  },
+                  {
+                      "id":  "wfb-008b",
+                      "name":  "Prepare Retry Config (No Answer)",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1320,
+                                       340
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const d = $input.first().json;\nconst next_attempt = d.attempt_number + 1;\nconst wait_hours = d.attempt_number === 1 ? 2 : 24;\nconst script_hook = next_attempt === 2 ? \u0027second_contact\u0027 : \u0027final_contact\u0027;\nconst attempts_exhausted = d.attempt_number \u003e= 3;\nreturn [{ json: { ...d, next_attempt, wait_hours, script_hook, attempts_exhausted } }];"
+                                     }
+                  },
+                  {
+                      "id":  "wfb-009",
+                      "name":  "Merge No-Contact Paths",
+                      "type":  "n8n-nodes-base.merge",
+                      "typeVersion":  3,
+                      "position":  [
+                                       1540,
+                                       280
+                                   ],
+                      "parameters":  {
+                                         "mode":  "passThrough",
+                                         "output":  "input1"
+                                     }
+                  },
+                  {
+                      "id":  "wfb-010",
+                      "name":  "Are Attempts Exhausted?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1760,
+                                       280
+                                   ],
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "cond-exhausted",
+                                                                                   "leftValue":  "={{ $json.attempts_exhausted }}",
+                                                                                   "rightValue":  true,
+                                                                                   "operator":  {
+                                                                                                    "type":  "boolean",
+                                                                                                    "operation":  "true"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        }
+                                     }
+                  },
+                  {
+                      "id":  "wfb-011",
+                      "name":  "Wait Before Next Attempt",
+                      "type":  "n8n-nodes-base.wait",
+                      "typeVersion":  1,
+                      "position":  [
+                                       1980,
+                                       160
+                                   ],
+                      "parameters":  {
+                                         "amount":  "={{ $json.wait_hours }}",
+                                         "unit":  "hours"
+                                     },
+                      "webhookId":  "wfb-retry-wait"
+                  },
+                  {
+                      "id":  "wfb-012",
+                      "name":  "Trigger Retell â€” Next Attempt",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       2200,
+                                       160
+                                   ],
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "https://api.retellai.com/v2/create-phone-call",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "=Bearer {{ $env.RETELL_API_KEY }}"
+                                                                                     },
+                                                                                     {
+                                                                                         "name":  "Content-Type",
+                                                                                         "value":  "application/json"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "sendBody":  true,
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={\n  \"from_number\": \"{{ $env.RETELL_FROM_NUMBER }}\",\n  \"to_number\": \"{{ $json.phone }}\",\n  \"agent_id\": \"{{ $env.RETELL_AGENT_ID }}\",\n  \"retell_llm_dynamic_variables\": {\n    \"customer_name\": \"{{ $json.full_name }}\",\n    \"property_value\": \"{{ $json.property_value }}\",\n    \"lead_tier\": \"{{ $json.lead_tier }}\",\n    \"script_hook\": \"{{ $json.script_hook }}\",\n    \"lead_id\": \"{{ $json.lead_id }}\",\n    \"attempt_number\": \"{{ $json.next_attempt }}\"\n  }\n}",
+                                         "retryOnFail":  true,
+                                         "maxTries":  3,
+                                         "waitBetweenTries":  5000
+                                     }
+                  },
+                  {
+                      "id":  "wfb-013",
+                      "name":  "CRM Update â€” Next Attempt Scheduled",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       2420,
+                                       160
+                                   ],
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                         "sheetName":  "Leads",
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $json.lead_id }}",
+                                                                       "status":  "=call_initiated_attempt_{{ $json.next_attempt }}",
+                                                                       "last_updated":  "={{ new Date().toISOString() }}"
+                                                                   }
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "wfb-014",
+                      "name":  "Generate Exhausted Fallback Email",
+                      "type":  "@n8n/n8n-nodes-langchain.chainLlm",
+                      "typeVersion":  1.4,
+                      "position":  [
+                                       1980,
+                                       400
+                                   ],
+                      "parameters":  {
+                                         "promptType":  "define",
+                                         "text":  "=You are an elite real estate broker assistant writing a last-chance outreach email to a lead we could not reach by phone after 3 attempts.\n\nLead details:\n- Name: {{ $json.full_name }}\n- Property Interest: ${{ $json.property_value }}\n- Tier: {{ $json.lead_tier }}\n\nWrite a warm, personalised HTML email body. Do NOT mention phone calls or failed attempts. Express genuine interest. Keep under 110 words. Offer to connect on their schedule.\n\nOUTPUT CONTRACT:\n1. First character MUST be \u003c (an HTML tag, no preamble)\n2. No ```html fences, no markdown, no subject line\n3. Close with a proper HTML block tag\n\nBegin HTML now:"
+                                     }
+                  },
+                  {
+                      "id":  "wfb-015",
+                      "name":  "Sanitize Fallback Email LLM Output",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       2200,
+                                       400
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const raw = ($input.first().json.text || \u0027\u0027).trim();\nconst lead = $(\u0027Merge Call Data + Lead Record\u0027).first().json;\n\nlet html = raw.replace(/```[a-z]*\\s*/gi, \u0027\u0027).replace(/```/g, \u0027\u0027).trim();\nconst firstTag = html.indexOf(\u0027\u003c\u0027);\nif (firstTag \u003e 0) html = html.slice(firstTag);\n\nconst hasHtml = /\u003c[a-z][^\u003e]*\u003e/i.test(html);\nconst firstName = lead.full_name.split(\u0027 \u0027)[0];\n\nif (!hasHtml || html.length \u003c 50) {\n  html = `\u003cp\u003eDear ${firstName},\u003c/p\u003e\u003cp\u003eWe\u0027ve been trying to connect with you regarding your property interest at the $${lead.property_value} level. We\u0027d love to help â€” please book a time that works for you.\u003c/p\u003e`;\n}\n\nreturn [{ json: { ...lead, sanitized_fallback_html: html, first_name: firstName } }];"
+                                     }
+                  },
+                  {
+                      "id":  "wfb-016",
+                      "name":  "Send Fallback Email (3 Strikes)",
+                      "type":  "n8n-nodes-base.gmail",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       2420,
+                                       400
+                                   ],
+                      "parameters":  {
+                                         "sendTo":  "={{ $json.email }}",
+                                         "subject":  "=We\u0027d love to connect, {{ $json.first_name }}",
+                                         "emailType":  "html",
+                                         "message":  "={{ $json.sanitized_fallback_html }}\u003cbr\u003e\u003cbr\u003e\u003ca href=\"{{ $env.CALENDAR_LINK }}\" style=\"display:inline-block;background:#1a1a2e;color:#fff;padding:13px 28px;border-radius:5px;text-decoration:none;font-family:Arial,sans-serif;\"\u003eBook at Your Convenience â†’\u003c/a\u003e"
+                                     }
+                  },
+                  {
+                      "id":  "wfb-017",
+                      "name":  "CRM Update â€” All Attempts Exhausted",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       2640,
+                                       400
+                                   ],
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                         "sheetName":  "Leads",
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $json.lead_id }}",
+                                                                       "status":  "exhausted_all_attempts_fallback_email_sent",
+                                                                       "last_updated":  "={{ new Date().toISOString() }}"
+                                                                   }
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "wfb-018",
+                      "name":  "Slack â€” Lead Exhausted",
+                      "type":  "n8n-nodes-base.slack",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       2860,
+                                       400
+                                   ],
+                      "parameters":  {
+                                         "authentication":  "oAuth2",
+                                         "channel":  "#leads-live",
+                                         "text":  "=:zzz: *Lead Exhausted â€” 3 No-Answers + Fallback Email Sent*\n\n:bust_in_silhouette: *Name:* {{ $json.full_name }}\n:star: *Tier:* {{ $json.lead_tier }}\n:moneybag: *Property:* ${{ $json.property_value }}\n:id: *Lead ID:* {{ $json.lead_id }}\n\nFallback email sent. Consider manual outreach if Tier A."
+                                     }
+                  },
+                  {
+                      "id":  "wfb-019",
+                      "name":  "Slack â€” CRITICAL: Retell Error",
+                      "type":  "n8n-nodes-base.slack",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       1320,
+                                       520
+                                   ],
+                      "parameters":  {
+                                         "authentication":  "oAuth2",
+                                         "channel":  "#ops-alerts",
+                                         "text":  "=:rotating_light: *CRITICAL â€” Retell Call Error (NOT a voicemail)*\n\nRetell returned `call_status=error` for a call â€” this is a SYSTEM failure, not a lead behaviour.\n\n:id: *Call ID:* {{ $json.call_id }}\n:bust_in_silhouette: *Lead:* {{ $json.full_name }} ({{ $json.lead_id }})\n:warning: *Disconnection Reason:* {{ $json.disconnection_reason }}\n:repeat: *Attempt:* {{ $json.attempt_number }}\n\nPossible causes: Retell credits exhausted, carrier block, invalid E.164 number, Retell API outage.\n\n*Immediate action required. This lead has NOT been retried.*"
+                                     }
+                  },
+                  {
+                      "id":  "wfb-020",
+                      "name":  "CRM Update â€” Call Error",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       1540,
+                                       520
+                                   ],
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                         "sheetName":  "Leads",
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $json.lead_id }}",
+                                                                       "status":  "=retell_error_attempt_{{ $json.attempt_number }}_manual_review_required",
+                                                                       "last_updated":  "={{ new Date().toISOString() }}"
+                                                                   }
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "wfb-021",
+                      "name":  "Slack â€” Unknown Call State (Ops)",
+                      "type":  "n8n-nodes-base.slack",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       1320,
+                                       680
+                                   ],
+                      "parameters":  {
+                                         "authentication":  "oAuth2",
+                                         "channel":  "#ops-alerts",
+                                         "text":  "=:question: *Unknown Retell Call State â€” Needs Manual Review*\n\n:id: *Call ID:* {{ $json.call_id }}\n:bust_in_silhouette: *Lead:* {{ $json.lead_id }}\n:warning: *call_status:* {{ $json.call_status }}\n:warning: *disconnection_reason:* {{ $json.disconnection_reason }}\n:repeat: *Attempt:* {{ $json.attempt_number }}\n\nThis state is not in our routing logic. Lead has been paused pending manual review."
+                                     }
+                  },
+                  {
+                      "id":  "wfb-022",
+                      "name":  "CRM Update â€” Unknown State",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       1540,
+                                       680
+                                   ],
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                         "sheetName":  "Leads",
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $json.lead_id }}",
+                                                                       "status":  "=unknown_state_manual_review",
+                                                                       "last_updated":  "={{ new Date().toISOString() }}"
+                                                                   }
+                                                     }
+                                     }
+                  }
+              ],
+    "connections":  {
+                        "Retell Call Webhook":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Validate \u0026 Classify Call Outcome",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Validate \u0026 Classify Call Outcome":  {
+                                                                      "main":  [
+                                                                                   [
+                                                                                       {
+                                                                                           "node":  "Lookup Lead from CRM",
+                                                                                           "type":  "main",
+                                                                                           "index":  0
+                                                                                       }
+                                                                                   ]
+                                                                               ]
+                                                                  },
+                        "Lookup Lead from CRM":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Merge Call Data + Lead Record",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Merge Call Data + Lead Record":  {
+                                                              "main":  [
+                                                                           [
+                                                                               {
+                                                                                   "node":  "Route by Call Outcome",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               }
+                                                                           ]
+                                                                       ]
+                                                          },
+                        "Route by Call Outcome":  {
+                                                      "main":  [
+                                                                   [
+                                                                       {
+                                                                           "node":  "CRM Update â€” Call Answered",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ],
+                                                                   [
+                                                                       {
+                                                                           "node":  "Prepare Retry Config (Voicemail)",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ],
+                                                                   [
+                                                                       {
+                                                                           "node":  "Prepare Retry Config (No Answer)",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ],
+                                                                   [
+                                                                       {
+                                                                           "node":  "Slack â€” CRITICAL: Retell Error",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ],
+                                                                   [
+                                                                       {
+                                                                           "node":  "Slack â€” Unknown Call State (Ops)",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ]
+                                                               ]
+                                                  },
+                        "CRM Update â€” Call Answered":  {
+                                                             "main":  [
+                                                                          [
+                                                                              {
+                                                                                  "node":  "Slack â€” HOT LEAD Answered",
+                                                                                  "type":  "main",
+                                                                                  "index":  0
+                                                                              }
+                                                                          ]
+                                                                      ]
+                                                         },
+                        "Prepare Retry Config (Voicemail)":  {
+                                                                 "main":  [
+                                                                              [
+                                                                                  {
+                                                                                      "node":  "Merge No-Contact Paths",
+                                                                                      "type":  "main",
+                                                                                      "index":  0
+                                                                                  }
+                                                                              ]
+                                                                          ]
+                                                             },
+                        "Prepare Retry Config (No Answer)":  {
+                                                                 "main":  [
+                                                                              [
+                                                                                  {
+                                                                                      "node":  "Merge No-Contact Paths",
+                                                                                      "type":  "main",
+                                                                                      "index":  1
+                                                                                  }
+                                                                              ]
+                                                                          ]
+                                                             },
+                        "Merge No-Contact Paths":  {
+                                                       "main":  [
+                                                                    [
+                                                                        {
+                                                                            "node":  "Are Attempts Exhausted?",
+                                                                            "type":  "main",
+                                                                            "index":  0
+                                                                        }
+                                                                    ]
+                                                                ]
+                                                   },
+                        "Are Attempts Exhausted?":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Generate Exhausted Fallback Email",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ],
+                                                                     [
+                                                                         {
+                                                                             "node":  "Wait Before Next Attempt",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    },
+                        "Wait Before Next Attempt":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Trigger Retell â€” Next Attempt",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                        "Trigger Retell â€” Next Attempt":  {
+                                                                "main":  [
+                                                                             [
+                                                                                 {
+                                                                                     "node":  "CRM Update â€” Next Attempt Scheduled",
+                                                                                     "type":  "main",
+                                                                                     "index":  0
+                                                                                 }
+                                                                             ]
+                                                                         ]
+                                                            },
+                        "Generate Exhausted Fallback Email":  {
+                                                                  "main":  [
+                                                                               [
+                                                                                   {
+                                                                                       "node":  "Sanitize Fallback Email LLM Output",
+                                                                                       "type":  "main",
+                                                                                       "index":  0
+                                                                                   }
+                                                                               ]
+                                                                           ]
+                                                              },
+                        "Sanitize Fallback Email LLM Output":  {
+                                                                   "main":  [
+                                                                                [
+                                                                                    {
+                                                                                        "node":  "Send Fallback Email (3 Strikes)",
+                                                                                        "type":  "main",
+                                                                                        "index":  0
+                                                                                    }
+                                                                                ]
+                                                                            ]
+                                                               },
+                        "Send Fallback Email (3 Strikes)":  {
+                                                                "main":  [
+                                                                             [
+                                                                                 {
+                                                                                     "node":  "CRM Update â€” All Attempts Exhausted",
+                                                                                     "type":  "main",
+                                                                                     "index":  0
+                                                                                 }
+                                                                             ]
+                                                                         ]
+                                                            },
+                        "CRM Update â€” All Attempts Exhausted":  {
+                                                                      "main":  [
+                                                                                   [
+                                                                                       {
+                                                                                           "node":  "Slack â€” Lead Exhausted",
+                                                                                           "type":  "main",
+                                                                                           "index":  0
+                                                                                       }
+                                                                                   ]
+                                                                               ]
+                                                                  },
+                        "Slack â€” CRITICAL: Retell Error":  {
+                                                                 "main":  [
+                                                                              [
+                                                                                  {
+                                                                                      "node":  "CRM Update â€” Call Error",
+                                                                                      "type":  "main",
+                                                                                      "index":  0
+                                                                                  }
+                                                                              ]
+                                                                          ]
+                                                             },
+                        "Slack â€” Unknown Call State (Ops)":  {
+                                                                   "main":  [
+                                                                                [
+                                                                                    {
+                                                                                        "node":  "CRM Update â€” Unknown State",
+                                                                                        "type":  "main",
+                                                                                        "index":  0
+                                                                                    }
+                                                                                ]
+                                                                            ]
+                                                               }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "saveManualExecutions":  true,
+                     "callerPolicy":  "workflowsFromSameOwner"
+                 },
+    "versionId":  "aria-wfb-v3-master",
+    "id":  "aria-workflow-b-v3",
+    "tags":  [
+                 {
+                     "id":  "tag-001",
+                     "name":  "production"
+                 },
+                 {
+                     "id":  "tag-004",
+                     "name":  "retell-webhook-handler"
+                 },
+                 {
+                     "id":  "tag-003",
+                     "name":  "aria-v3"
+                 }
+             ]
+}

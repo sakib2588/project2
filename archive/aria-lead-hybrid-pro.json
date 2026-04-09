@@ -1,0 +1,814 @@
+{
+  "name": "Aria Lead Automation - Hybrid Pro (Fixed)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-submission-hybrid",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "node-001",
+      "name": "On Form Submission",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 400],
+      "webhookId": "aria-lead-webhook-hybrid"
+    },
+    {
+      "_comment": "V1 IMPROVEMENT: Strips dashes, parens, dots — not just spaces. Adds random suffix to lead_id for uniqueness. Safe fallbacks on every field so bad input never crashes the workflow.",
+      "parameters": {
+        "jsCode": "const body = $input.first().json || {};\n\nconst lead = {\n  full_name: (body.full_name || body.name || 'Valued Client').trim(),\n  email: (body.email || '').toLowerCase().trim(),\n  phone: (body.phone || body.phone_number || '').replace(/[\\s\\-().+]/g, '').trim(),\n  property_value: body.property_value || body.budget || 'Market Value',\n  source: body.source || body.utm_source || 'direct_inquiry',\n  submitted_at: new Date().toISOString(),\n  lead_id: `lead_${Date.now()}_${Math.floor(Math.random() * 9999).toString().padStart(4, '0')}`\n};\n\nconst phone_looks_valid = /^[1-9]\\d{7,14}$/.test(lead.phone);\nconst email_looks_valid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(lead.email);\n\nreturn [{ json: { ...lead, phone_looks_valid, email_looks_valid } }];"
+      },
+      "id": "node-002",
+      "name": "Normalize Lead Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 400]
+    },
+    {
+      "parameters": {
+        "amount": 60,
+        "unit": "seconds"
+      },
+      "id": "node-003",
+      "name": "Wait 60 Sec",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [620, 400],
+      "webhookId": "wait-60s-hybrid"
+    },
+    {
+      "_comment": "V1 IMPROVEMENT: retryOnFail + maxTries prevents transient API failures from killing the workflow.",
+      "parameters": {
+        "method": "GET",
+        "url": "=https://phonevalidation.abstractapi.com/v1/?api_key={{ $env.ABSTRACT_API_KEY }}&phone={{ encodeURIComponent($json.phone) }}",
+        "options": { "timeout": 10000 },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 2000
+      },
+      "id": "node-004",
+      "name": "Verify Phone Number",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [820, 400]
+    },
+    {
+      "_comment": "V2 IMPROVEMENT: Captures carrier, country, and formatted number for downstream use.",
+      "parameters": {
+        "jsCode": "const lead = $('Normalize Lead Data').first().json;\nconst v = $input.first().json || {};\n\nreturn [{\n  json: {\n    ...lead,\n    phone_verified: v.valid === true,\n    phone_is_mobile: (v.type || '').toLowerCase().includes('mobile'),\n    phone_carrier: v.carrier?.name || 'Unknown',\n    phone_country: v.country?.code || 'Unknown',\n    phone_format: v.format?.international || ('+' + lead.phone)\n  }\n}];"
+      },
+      "id": "node-005",
+      "name": "Merge Verification Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1020, 400]
+    },
+    {
+      "_comment": "V2 IMPROVEMENT: Stores carrier and country, giving you real CRM data to filter on.",
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "={{ $env.GOOGLE_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Leads", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_id":        "={{ $json.lead_id }}",
+            "full_name":      "={{ $json.full_name }}",
+            "email":          "={{ $json.email }}",
+            "phone":          "={{ $json.phone_format }}",
+            "property_value": "={{ $json.property_value }}",
+            "source":         "={{ $json.source }}",
+            "phone_verified": "={{ $json.phone_verified }}",
+            "phone_carrier":  "={{ $json.phone_carrier }}",
+            "phone_country":  "={{ $json.phone_country }}",
+            "status":         "new",
+            "submitted_at":   "={{ $json.submitted_at }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "node-006",
+      "name": "Add Lead to CRM",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1220, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "cond-phone-valid",
+              "leftValue": "={{ $json.phone_verified }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-007",
+      "name": "If Number Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1420, 400]
+    },
+
+    {
+      "_comment": "V1+V2: retryOnFail added. V2 dynamic variables include lead_id so Retell can pass it back in webhooks.",
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.retellai.com/v2/create-phone-call",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RETELL_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from_number\": \"{{ $env.RETELL_FROM_NUMBER }}\",\n  \"to_number\": \"{{ $('Merge Verification Result').first().json.phone_format }}\",\n  \"agent_id\": \"{{ $env.RETELL_AGENT_ID }}\",\n  \"retell_llm_dynamic_variables\": {\n    \"customer_name\": \"{{ $('Merge Verification Result').first().json.full_name }}\",\n    \"property_value\": \"{{ $('Merge Verification Result').first().json.property_value }}\",\n    \"script_hook\": \"first_contact\",\n    \"lead_id\": \"{{ $('Merge Verification Result').first().json.lead_id }}\"\n  }\n}",
+        "options": { "timeout": 30000 },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      "id": "node-008",
+      "name": "Aria - Call Attempt 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1660, 180]
+    },
+    {
+      "_comment": "CRITICAL BUG FIX (both V1 and V2 are broken here): Retell's create-phone-call returns call_status='registered', not 'ended'. The 'If Lead Answered' check in both original workflows ALWAYS routes to false/no-answer. Fix: store the call_id and wait for the call to complete before polling.",
+      "parameters": {
+        "jsCode": "const callData = $input.first().json;\nconst lead = $('Merge Verification Result').first().json;\n\nreturn [{\n  json: {\n    ...lead,\n    call_id_attempt_1: callData.call_id || '',\n    call_attempt: 1\n  }\n}];"
+      },
+      "id": "node-008b",
+      "name": "Store Call ID (Attempt 1)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1880, 180]
+    },
+    {
+      "_comment": "HYBRID FIX: Give Retell enough time to dial, connect, and complete the call before polling. 5 minutes is a safe upper bound for most residential calls.",
+      "parameters": {
+        "amount": 5,
+        "unit": "minutes"
+      },
+      "id": "node-009",
+      "name": "Wait 5 Min (Call 1)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [2080, 180],
+      "webhookId": "wait-5m-call1"
+    },
+    {
+      "_comment": "HYBRID FIX: Poll the actual call status instead of trusting the initial API response. call_status will be 'ended', 'error', or 'registered' (still ringing). disconnection_reason 'user_hangup' or 'agent_hangup' = answered.",
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.retellai.com/v2/get-call/{{ $json.call_id_attempt_1 }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RETELL_API_KEY }}" }
+          ]
+        },
+        "options": { "timeout": 10000 },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 3000
+      },
+      "id": "node-010",
+      "name": "Poll Call Status (Attempt 1)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2280, 180]
+    },
+    {
+      "_comment": "HYBRID FIX: disconnection_reason being 'user_hangup' or 'agent_hangup' means someone actually answered. 'voicemail' or 'no_answer' means not reached.",
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "cond-answered-1",
+              "leftValue": "={{ $json.call_status }}",
+              "rightValue": "ended",
+              "operator": { "type": "string", "operation": "equals" }
+            },
+            {
+              "id": "cond-not-voicemail-1",
+              "leftValue": "={{ $json.disconnection_reason }}",
+              "rightValue": "voicemail",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-011",
+      "name": "If Lead Answered 1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2480, 180]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $env.GOOGLE_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Leads", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_id":        "={{ $('Merge Verification Result').first().json.lead_id }}",
+            "status":         "call_answered_attempt_1",
+            "call_id":        "={{ $('Store Call ID (Attempt 1)').first().json.call_id_attempt_1 }}",
+            "call_duration":  "={{ $json.call_length_second }}",
+            "last_updated":   "={{ new Date().toISOString() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "node-012",
+      "name": "CRM Update - Answered 1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [2700, 60]
+    },
+    {
+      "_comment": "V2 IMPROVEMENT: Live Slack feed lets your team follow up in real time.",
+      "parameters": {
+        "authentication": "oAuth2",
+        "channel": "#leads-live",
+        "text": "=:white_check_mark: *Lead Answered — Attempt 1*\n\n:bust_in_silhouette: *Name:* {{ $('Merge Verification Result').first().json.full_name }}\n:telephone_receiver: *Phone:* {{ $('Merge Verification Result').first().json.phone_format }}\n:moneybag: *Property Value:* ${{ $('Merge Verification Result').first().json.property_value }}\n:id: *Lead ID:* {{ $('Merge Verification Result').first().json.lead_id }}\n:stopwatch: *Duration:* {{ $json.call_length_second }}s\n:clock1: *Time:* {{ new Date().toLocaleString() }}",
+        "otherOptions": {}
+      },
+      "id": "node-013",
+      "name": "Slack - Answered 1",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [2920, 60]
+    },
+
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "hours"
+      },
+      "id": "node-014",
+      "name": "Wait 2 Hours",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [2700, 300],
+      "webhookId": "wait-2h-hybrid"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.retellai.com/v2/create-phone-call",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RETELL_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from_number\": \"{{ $env.RETELL_FROM_NUMBER }}\",\n  \"to_number\": \"{{ $('Merge Verification Result').first().json.phone_format }}\",\n  \"agent_id\": \"{{ $env.RETELL_AGENT_ID }}\",\n  \"retell_llm_dynamic_variables\": {\n    \"customer_name\": \"{{ $('Merge Verification Result').first().json.full_name }}\",\n    \"property_value\": \"{{ $('Merge Verification Result').first().json.property_value }}\",\n    \"script_hook\": \"second_contact\",\n    \"lead_id\": \"{{ $('Merge Verification Result').first().json.lead_id }}\"\n  }\n}",
+        "options": { "timeout": 30000 },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      "id": "node-015",
+      "name": "Aria - Call Attempt 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2920, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const callData = $input.first().json;\nconst lead = $('Merge Verification Result').first().json;\nreturn [{ json: { ...lead, call_id_attempt_2: callData.call_id || '', call_attempt: 2 } }];"
+      },
+      "id": "node-015b",
+      "name": "Store Call ID (Attempt 2)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3120, 300]
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "minutes"
+      },
+      "id": "node-016",
+      "name": "Wait 5 Min (Call 2)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [3320, 300],
+      "webhookId": "wait-5m-call2"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.retellai.com/v2/get-call/{{ $json.call_id_attempt_2 }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RETELL_API_KEY }}" }
+          ]
+        },
+        "options": { "timeout": 10000 },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 3000
+      },
+      "id": "node-017",
+      "name": "Poll Call Status (Attempt 2)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3520, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "cond-answered-2",
+              "leftValue": "={{ $json.call_status }}",
+              "rightValue": "ended",
+              "operator": { "type": "string", "operation": "equals" }
+            },
+            {
+              "id": "cond-not-voicemail-2",
+              "leftValue": "={{ $json.disconnection_reason }}",
+              "rightValue": "voicemail",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-018",
+      "name": "If Lead Answered 2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [3720, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $env.GOOGLE_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Leads", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_id":       "={{ $('Merge Verification Result').first().json.lead_id }}",
+            "status":        "call_answered_attempt_2",
+            "call_id":       "={{ $('Store Call ID (Attempt 2)').first().json.call_id_attempt_2 }}",
+            "call_duration": "={{ $json.call_length_second }}",
+            "last_updated":  "={{ new Date().toISOString() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "node-019",
+      "name": "CRM Update - Answered 2",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [3940, 180]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "channel": "#leads-live",
+        "text": "=:white_check_mark: *Lead Answered — Attempt 2*\n\n:bust_in_silhouette: *Name:* {{ $('Merge Verification Result').first().json.full_name }}\n:telephone_receiver: *Phone:* {{ $('Merge Verification Result').first().json.phone_format }}\n:moneybag: *Property Value:* ${{ $('Merge Verification Result').first().json.property_value }}\n:id: *Lead ID:* {{ $('Merge Verification Result').first().json.lead_id }}\n:stopwatch: *Duration:* {{ $json.call_length_second }}s",
+        "otherOptions": {}
+      },
+      "id": "node-020",
+      "name": "Slack - Answered 2",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [4160, 180]
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "days"
+      },
+      "id": "node-021",
+      "name": "Wait 1 Day",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [3940, 420],
+      "webhookId": "wait-1d-hybrid"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.retellai.com/v2/create-phone-call",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RETELL_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from_number\": \"{{ $env.RETELL_FROM_NUMBER }}\",\n  \"to_number\": \"{{ $('Merge Verification Result').first().json.phone_format }}\",\n  \"agent_id\": \"{{ $env.RETELL_AGENT_ID }}\",\n  \"retell_llm_dynamic_variables\": {\n    \"customer_name\": \"{{ $('Merge Verification Result').first().json.full_name }}\",\n    \"property_value\": \"{{ $('Merge Verification Result').first().json.property_value }}\",\n    \"script_hook\": \"final_attempt\",\n    \"lead_id\": \"{{ $('Merge Verification Result').first().json.lead_id }}\"\n  }\n}",
+        "options": { "timeout": 30000 },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      "id": "node-022",
+      "name": "Aria - Call Attempt 3",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4160, 420]
+    },
+    {
+      "parameters": {
+        "jsCode": "const callData = $input.first().json;\nconst lead = $('Merge Verification Result').first().json;\nreturn [{ json: { ...lead, call_id_attempt_3: callData.call_id || '', call_attempt: 3 } }];"
+      },
+      "id": "node-022b",
+      "name": "Store Call ID (Attempt 3)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4360, 420]
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "minutes"
+      },
+      "id": "node-023",
+      "name": "Wait 5 Min (Call 3)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [4560, 420],
+      "webhookId": "wait-5m-call3"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.retellai.com/v2/get-call/{{ $json.call_id_attempt_3 }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": [
+          { "name": "Authorization", "value": "=Bearer {{ $env.RETELL_API_KEY }}" }
+        ],
+        "options": { "timeout": 10000 },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 3000
+      },
+      "id": "node-024",
+      "name": "Poll Call Status (Attempt 3)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4760, 420]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "cond-answered-3",
+              "leftValue": "={{ $json.call_status }}",
+              "rightValue": "ended",
+              "operator": { "type": "string", "operation": "equals" }
+            },
+            {
+              "id": "cond-not-voicemail-3",
+              "leftValue": "={{ $json.disconnection_reason }}",
+              "rightValue": "voicemail",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-025",
+      "name": "If Lead Answered 3",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [4960, 420]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $env.GOOGLE_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Leads", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_id":      "={{ $('Merge Verification Result').first().json.lead_id }}",
+            "status":       "call_answered_attempt_3",
+            "call_id":      "={{ $('Store Call ID (Attempt 3)').first().json.call_id_attempt_3 }}",
+            "last_updated": "={{ new Date().toISOString() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "node-026",
+      "name": "CRM Update - Answered 3",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [5180, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "channel": "#leads-live",
+        "text": "=:white_check_mark: *Lead Answered — Final Attempt (3)*\n\n:bust_in_silhouette: *Name:* {{ $('Merge Verification Result').first().json.full_name }}\n:telephone_receiver: *Phone:* {{ $('Merge Verification Result').first().json.phone_format }}\n:moneybag: *Property Value:* ${{ $('Merge Verification Result').first().json.property_value }}\n:id: *Lead ID:* {{ $('Merge Verification Result').first().json.lead_id }}",
+        "otherOptions": {}
+      },
+      "id": "node-027",
+      "name": "Slack - Answered 3",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [5400, 300]
+    },
+    {
+      "_comment": "V2: After 3 no-answers, mark the lead and send a fallback email so you still have a chance to convert.",
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $env.GOOGLE_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Leads", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_id":      "={{ $('Merge Verification Result').first().json.lead_id }}",
+            "status":       "no_answer_all_attempts_email_sent",
+            "last_updated": "={{ new Date().toISOString() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "node-028",
+      "name": "CRM Update - No Answer (All)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [5180, 540]
+    },
+    {
+      "_comment": "V2: Fallback email after 3 failed call attempts.",
+      "parameters": {
+        "sendTo": "={{ $('Merge Verification Result').first().json.email }}",
+        "subject": "=We tried to reach you, {{ $('Merge Verification Result').first().json.full_name.split(' ')[0] }}",
+        "emailType": "html",
+        "message": "=<html><body style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;\">\n<h2>Hi {{ $('Merge Verification Result').first().json.full_name.split(' ')[0] }},</h2>\n<p>We've been trying to reach you about your enquiry regarding a property valued at <strong>${{ $('Merge Verification Result').first().json.property_value }}</strong>.</p>\n<p>We'd love to connect at a time that works best for you. Please reply to this email or book directly:</p>\n<p><a href=\"{{ $env.CALENDAR_LINK }}\" style=\"background:#000;color:#fff;padding:12px 24px;text-decoration:none;border-radius:4px;display:inline-block;\">Book a Call</a></p>\n<p>Best regards,<br>The Aria Team</p>\n</body></html>",
+        "options": {}
+      },
+      "id": "node-029",
+      "name": "Fallback Email (No Answer)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [5400, 540]
+    },
+
+    {
+      "_comment": "V1+V2: Invalid phone path — validate email in parallel. retryOnFail added.",
+      "parameters": {
+        "method": "GET",
+        "url": "=https://emailvalidation.abstractapi.com/v1/?api_key={{ $env.ABSTRACT_API_KEY }}&email={{ encodeURIComponent($('Merge Verification Result').first().json.email) }}",
+        "options": { "timeout": 10000 },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 2000
+      },
+      "id": "node-030",
+      "name": "Validate Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1660, 620]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "cond-email-valid",
+              "leftValue": "={{ $json.is_valid_format?.value }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-031",
+      "name": "If Email Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1880, 620]
+    },
+    {
+      "parameters": {
+        "model": "gemini-1.5-pro",
+        "options": {}
+      },
+      "id": "node-032",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [2080, 520]
+    },
+    {
+      "_comment": "V1 IMPROVEMENT: Prompt is more specific — mentions property value tier and asks for calendar CTA. Produces higher-quality, more contextual emails than V2's generic prompt.",
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an elite real estate broker writing to a high-intent lead who submitted a form but could not be reached by phone.\n\nLead details:\n- Name: {{ $('Merge Verification Result').first().json.full_name }}\n- Email: {{ $('Merge Verification Result').first().json.email }}\n- Property Interest Value: ${{ $('Merge Verification Result').first().json.property_value }}\n- Source: {{ $('Merge Verification Result').first().json.source }}\n\nWrite a highly personalised, warm, and professional HTML email body. Acknowledge their interest in properties at this value tier. Suggest a brief strategy call to discuss current market dynamics. Include a clear call-to-action button.\n\nRules:\n1. Keep it under 120 words.\n2. Do NOT mention that their phone number was invalid or that we tried to call.\n3. Output ONLY the raw HTML body (no ```html fences, no subject line, no <html> or <body> tags).",
+        "options": {}
+      },
+      "id": "node-033",
+      "name": "Generate Personalised Email (AI)",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [2300, 520]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $env.GOOGLE_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Leads", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_id":      "={{ $('Merge Verification Result').first().json.lead_id }}",
+            "status":       "invalid_phone_ai_email_sent",
+            "last_updated": "={{ new Date().toISOString() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "node-034",
+      "name": "CRM Update - Email Sent",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [2520, 520]
+    },
+    {
+      "_comment": "V1 IMPROVEMENT: Subject line includes property value for higher open rate. Calendar CTA button is embedded.",
+      "parameters": {
+        "sendTo": "={{ $('Merge Verification Result').first().json.email }}",
+        "subject": "=Exclusive Strategy Call: Your ${{ $('Merge Verification Result').first().json.property_value }} Property Inquiry",
+        "emailType": "html",
+        "message": "={{ $('Generate Personalised Email (AI)').first().json.text }}<br><br><a href=\"{{ $env.CALENDAR_LINK }}\" style=\"background:#2c3e50;color:#fff;padding:12px 24px;text-decoration:none;border-radius:4px;display:inline-block;margin-top:15px;\">Schedule Your Market Review</a>",
+        "options": {}
+      },
+      "id": "node-035",
+      "name": "Send AI Email (Invalid Phone)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2740, 520]
+    },
+    {
+      "_comment": "V2: Both phone AND email invalid — mark lead dead, do not waste further resources.",
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $env.GOOGLE_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Leads", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_id":      "={{ $('Merge Verification Result').first().json.lead_id }}",
+            "status":       "invalid_lead_bad_phone_bad_email",
+            "last_updated": "={{ new Date().toISOString() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "node-036",
+      "name": "CRM Update - Bad Lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [2080, 720]
+    }
+  ],
+
+  "connections": {
+    "On Form Submission":            { "main": [[{ "node": "Normalize Lead Data",              "type": "main", "index": 0 }]] },
+    "Normalize Lead Data":           { "main": [[{ "node": "Wait 60 Sec",                       "type": "main", "index": 0 }]] },
+    "Wait 60 Sec":                   { "main": [[{ "node": "Verify Phone Number",               "type": "main", "index": 0 }]] },
+    "Verify Phone Number":           { "main": [[{ "node": "Merge Verification Result",         "type": "main", "index": 0 }]] },
+    "Merge Verification Result":     { "main": [[{ "node": "Add Lead to CRM",                  "type": "main", "index": 0 }]] },
+    "Add Lead to CRM":               { "main": [[{ "node": "If Number Valid",                   "type": "main", "index": 0 }]] },
+    "If Number Valid": {
+      "main": [
+        [{ "node": "Aria - Call Attempt 1", "type": "main", "index": 0 }],
+        [{ "node": "Validate Email",        "type": "main", "index": 0 }]
+      ]
+    },
+    "Aria - Call Attempt 1":         { "main": [[{ "node": "Store Call ID (Attempt 1)",        "type": "main", "index": 0 }]] },
+    "Store Call ID (Attempt 1)":     { "main": [[{ "node": "Wait 5 Min (Call 1)",              "type": "main", "index": 0 }]] },
+    "Wait 5 Min (Call 1)":           { "main": [[{ "node": "Poll Call Status (Attempt 1)",     "type": "main", "index": 0 }]] },
+    "Poll Call Status (Attempt 1)":  { "main": [[{ "node": "If Lead Answered 1",               "type": "main", "index": 0 }]] },
+    "If Lead Answered 1": {
+      "main": [
+        [{ "node": "CRM Update - Answered 1", "type": "main", "index": 0 }],
+        [{ "node": "Wait 2 Hours",            "type": "main", "index": 0 }]
+      ]
+    },
+    "CRM Update - Answered 1":       { "main": [[{ "node": "Slack - Answered 1",              "type": "main", "index": 0 }]] },
+    "Wait 2 Hours":                  { "main": [[{ "node": "Aria - Call Attempt 2",            "type": "main", "index": 0 }]] },
+    "Aria - Call Attempt 2":         { "main": [[{ "node": "Store Call ID (Attempt 2)",        "type": "main", "index": 0 }]] },
+    "Store Call ID (Attempt 2)":     { "main": [[{ "node": "Wait 5 Min (Call 2)",              "type": "main", "index": 0 }]] },
+    "Wait 5 Min (Call 2)":           { "main": [[{ "node": "Poll Call Status (Attempt 2)",     "type": "main", "index": 0 }]] },
+    "Poll Call Status (Attempt 2)":  { "main": [[{ "node": "If Lead Answered 2",               "type": "main", "index": 0 }]] },
+    "If Lead Answered 2": {
+      "main": [
+        [{ "node": "CRM Update - Answered 2", "type": "main", "index": 0 }],
+        [{ "node": "Wait 1 Day",              "type": "main", "index": 0 }]
+      ]
+    },
+    "CRM Update - Answered 2":       { "main": [[{ "node": "Slack - Answered 2",              "type": "main", "index": 0 }]] },
+    "Wait 1 Day":                    { "main": [[{ "node": "Aria - Call Attempt 3",            "type": "main", "index": 0 }]] },
+    "Aria - Call Attempt 3":         { "main": [[{ "node": "Store Call ID (Attempt 3)",        "type": "main", "index": 0 }]] },
+    "Store Call ID (Attempt 3)":     { "main": [[{ "node": "Wait 5 Min (Call 3)",              "type": "main", "index": 0 }]] },
+    "Wait 5 Min (Call 3)":           { "main": [[{ "node": "Poll Call Status (Attempt 3)",     "type": "main", "index": 0 }]] },
+    "Poll Call Status (Attempt 3)":  { "main": [[{ "node": "If Lead Answered 3",               "type": "main", "index": 0 }]] },
+    "If Lead Answered 3": {
+      "main": [
+        [{ "node": "CRM Update - Answered 3",      "type": "main", "index": 0 }],
+        [{ "node": "CRM Update - No Answer (All)", "type": "main", "index": 0 }]
+      ]
+    },
+    "CRM Update - Answered 3":       { "main": [[{ "node": "Slack - Answered 3",              "type": "main", "index": 0 }]] },
+    "CRM Update - No Answer (All)":  { "main": [[{ "node": "Fallback Email (No Answer)",       "type": "main", "index": 0 }]] },
+    "Validate Email":                { "main": [[{ "node": "If Email Valid",                   "type": "main", "index": 0 }]] },
+    "If Email Valid": {
+      "main": [
+        [{ "node": "Google Gemini Chat Model", "type": "main", "index": 0 }],
+        [{ "node": "CRM Update - Bad Lead",    "type": "main", "index": 0 }]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [[{ "node": "Generate Personalised Email (AI)", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Generate Personalised Email (AI)": { "main": [[{ "node": "CRM Update - Email Sent",      "type": "main", "index": 0 }]] },
+    "CRM Update - Email Sent":          { "main": [[{ "node": "Send AI Email (Invalid Phone)", "type": "main", "index": 0 }]] }
+  },
+
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "YOUR_ERROR_WORKFLOW_ID"
+  },
+
+  "_setup_checklist": {
+    "n8n_env_vars_to_set": [
+      "ABSTRACT_API_KEY   — your AbstractAPI key (used for both phone and email validation)",
+      "RETELL_API_KEY     — your Retell AI API key",
+      "RETELL_AGENT_ID    — your Retell agent ID",
+      "RETELL_FROM_NUMBER — your verified Retell outbound number, e.g. +19295817404",
+      "GOOGLE_SHEET_ID    — your Google Sheets document ID",
+      "CALENDAR_LINK      — your Calendly or Cal.com booking URL"
+    ],
+    "google_sheets_columns_required": [
+      "lead_id", "full_name", "email", "phone", "property_value",
+      "source", "phone_verified", "phone_carrier", "phone_country",
+      "status", "call_id", "call_duration", "submitted_at", "last_updated"
+    ],
+    "retell_polling_note": "The 'If Lead Answered' condition checks call_status='ended' AND disconnection_reason!='voicemail'. Valid disconnection_reason values that mean 'answered': user_hangup, agent_hangup, call_transfer. Voicemail and no_answer should both route to the next attempt.",
+    "alternative_to_polling": "For production, set up a Retell webhook (POST to a separate n8n webhook workflow) that fires on call_ended events. This is more reliable than polling but requires a second workflow to handle Retell's async callbacks and update the CRM."
+  },
+
+  "versionId": "aria-lead-hybrid-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "aria-automation-hybrid"
+  },
+  "id": "aria-lead-hybrid-001",
+  "tags": [
+    { "createdAt": "2026-04-08", "updatedAt": "2026-04-08", "id": "tag-001", "name": "production" },
+    { "createdAt": "2026-04-08", "updatedAt": "2026-04-08", "id": "tag-002", "name": "retell-ai" },
+    { "createdAt": "2026-04-08", "updatedAt": "2026-04-08", "id": "tag-003", "name": "lead-automation" },
+    { "createdAt": "2026-04-08", "updatedAt": "2026-04-08", "id": "tag-004", "name": "hybrid-pro" }
+  ]
+}

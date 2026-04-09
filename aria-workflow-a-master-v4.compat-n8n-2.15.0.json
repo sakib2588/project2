@@ -1,0 +1,911 @@
+﻿{
+    "name":  "Aria â€” WORKFLOW A: Lead Intake \u0026 Orchestrator (v3 Master)",
+    "nodes":  [
+                  {
+                      "id":  "wfa-001",
+                      "name":  "Lead Form Webhook",
+                      "type":  "n8n-nodes-base.webhook",
+                      "typeVersion":  2,
+                      "position":  [
+                                       200,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "httpMethod":  "POST",
+                                         "path":  "aria-lead-intake",
+                                         "responseMode":  "immediately",
+                                         "responseData":  "noData"
+                                     },
+                      "webhookId":  "aria-intake-v3"
+                  },
+                  {
+                      "id":  "wfa-002",
+                      "name":  "Schema Guard \u0026 Dedup",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       420,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const body = $input.first().json || {};\n\nconst full_name = (body.full_name || body.name || \u0027\u0027).trim();\nconst email = (body.email || \u0027\u0027).toLowerCase().trim();\nconst phone_raw = (body.phone || body.phone_number || \u0027\u0027).trim();\nconst property_value = body.property_value || body.budget || \u0027undisclosed\u0027;\nconst source = body.source || body.utm_source || \u0027direct\u0027;\n\n// Hard contract: must have a name and at least one contact method\nif (!full_name) throw new Error(\u0027SCHEMA_INVALID: full_name is required\u0027);\nif (!email \u0026\u0026 !phone_raw) throw new Error(\u0027SCHEMA_INVALID: phone or email required\u0027);\n\n// Deterministic lead_id for idempotency (email+timestamp bucketed to 5min to catch double-submits)\nconst bucket = Math.floor(Date.now() / 300000);\nconst dedup_key = `${email || phone_raw}_${bucket}`;\nconst lead_id = `lead_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;\n\nreturn [{ json: {\n  full_name,\n  email,\n  phone_raw,\n  property_value,\n  source,\n  lead_id,\n  dedup_key,\n  submitted_at: new Date().toISOString()\n}}];"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-003",
+                      "name":  "Normalize \u0026 Score Lead",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       640,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const d = $input.first().json;\n\n// E.164 FIX: strip spaces, dashes, parens, dots ONLY â€” NOT the +\nlet phone = d.phone_raw.replace(/[\\s\\-().]/g, \u0027\u0027).trim();\n\n// Auto-detect and fix common formats\nif (phone \u0026\u0026 !phone.startsWith(\u0027+\u0027)) {\n  if (phone.startsWith(\u00271\u0027) \u0026\u0026 phone.length === 11) {\n    phone = \u0027+\u0027 + phone; // US with country code, no +\n  } else if (phone.length === 10) {\n    phone = \u0027+1\u0027 + phone; // US 10-digit, no country code\n  } else {\n    phone = \u0027+\u0027 + phone; // Unknown international â€” prepend + and let Abstract validate\n  }\n}\n\n// Quick pre-flight format check before sending to Abstract API\nconst phone_format_ok = /^\\+[1-9]\\d{7,14}$/.test(phone);\nconst email_format_ok = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(d.email);\n\n// LEAD SCORING (0-100)\nlet score = 0;\nconst pv = parseFloat(String(d.property_value).replace(/[^0-9.]/g, \u0027\u0027)) || 0;\nif (pv \u003e= 5000000) score += 50;\nelse if (pv \u003e= 2000000) score += 35;\nelse if (pv \u003e= 1000000) score += 25;\nelse if (pv \u003e= 500000) score += 15;\nelse score += 5;\n\nconst premiumSources = [\u0027referral\u0027, \u0027google_ads\u0027, \u0027facebook_ads\u0027, \u0027linkedin\u0027];\nif (premiumSources.includes(d.source)) score += 20; else score += 5;\nif (phone \u0026\u0026 phone_format_ok) score += 15;\nif (d.email \u0026\u0026 email_format_ok) score += 10;\n\nconst lead_tier = score \u003e= 70 ? \u0027A\u0027 : score \u003e= 45 ? \u0027B\u0027 : \u0027C\u0027;\n\nreturn [{ json: {\n  ...d,\n  phone,\n  phone_format_ok,\n  email_format_ok,\n  lead_score: Math.min(score, 100),\n  lead_tier\n}}];"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-004",
+                      "name":  "Verify Phone (Abstract API)",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4,
+                      "position":  [
+                                       860,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "method":  "GET",
+                                         "url":  "=https://phonevalidation.abstractapi.com/v1/?api_key={{ $env.ABSTRACT_API_KEY }}\u0026phone={{ encodeURIComponent($json.phone) }}",
+                                         "retryOnFail":  true,
+                                         "maxTries":  3,
+                                         "waitBetweenTries":  2000
+                                     }
+                  },
+                  {
+                      "id":  "wfa-005",
+                      "name":  "Merge Phone Verification",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1080,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const lead = $(\u0027Normalize \u0026 Score Lead\u0027).first().json;\nconst v = $input.first().json || {};\n\n// Prefer Abstract\u0027s formatted number (already correct E.164) over our normalized version\nconst phone_e164 = (v.format \u0026\u0026 v.format.international) ? v.format.international : lead.phone;\n\nreturn [{ json: {\n  ...lead,\n  phone_e164,\n  phone_verified: v.valid === true,\n  phone_is_mobile: (v.type || \u0027\u0027).toLowerCase().includes(\u0027mobile\u0027),\n  phone_carrier: (v.carrier \u0026\u0026 v.carrier.name) ? v.carrier.name : \u0027Unknown\u0027,\n  phone_country_code: (v.country \u0026\u0026 v.country.code) ? v.country.code : \u0027Unknown\u0027\n}}];"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-006",
+                      "name":  "Check Business Hours",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1300,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const lead = $input.first().json;\nconst tz = $env.BUSINESS_TIMEZONE || \u0027America/New_York\u0027;\nconst now = new Date();\nconst localStr = now.toLocaleString(\u0027en-US\u0027, { timeZone: tz });\nconst local = new Date(localStr);\nconst hour = local.getHours();\nconst day = local.getDay(); // 0=Sun, 6=Sat\n\nconst isWeekday = day \u003e= 1 \u0026\u0026 day \u003c= 5;\nconst isSaturday = day === 6;\nconst isWeekdayHours = isWeekday \u0026\u0026 hour \u003e= 9 \u0026\u0026 hour \u003c 20;\nconst isSaturdayHours = isSaturday \u0026\u0026 hour \u003e= 10 \u0026\u0026 hour \u003c 16;\nconst can_call_now = isWeekdayHours || isSaturdayHours;\n\n// Calculate next business open time if outside hours\nlet resume_at = null;\nif (!can_call_now) {\n  const next = new Date(local);\n  let openHour = isSaturday ? 10 : 9;\n  next.setHours(openHour, 0, 0, 0);\n  if (hour \u003e= 20 || (isSaturday \u0026\u0026 hour \u003e= 16)) next.setDate(next.getDate() + 1);\n  // Skip Sunday\n  if (next.getDay() === 0) next.setDate(next.getDate() + 1);\n  if (next.getDay() === 6) openHour = 10; else openHour = 9;\n  next.setHours(openHour, 0, 0, 0);\n  resume_at = next.toISOString();\n}\n\nreturn [{ json: { ...lead, can_call_now, resume_at } }];"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-007",
+                      "name":  "Upsert Lead to CRM",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       1520,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "operation":  "append",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                         "sheetName":  "Leads",
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $json.lead_id }}",
+                                                                       "full_name":  "={{ $json.full_name }}",
+                                                                       "email":  "={{ $json.email }}",
+                                                                       "phone":  "={{ $json.phone_e164 }}",
+                                                                       "property_value":  "={{ $json.property_value }}",
+                                                                       "source":  "={{ $json.source }}",
+                                                                       "lead_score":  "={{ $json.lead_score }}",
+                                                                       "lead_tier":  "={{ $json.lead_tier }}",
+                                                                       "phone_verified":  "={{ $json.phone_verified }}",
+                                                                       "phone_type":  "={{ $json.phone_is_mobile ? \u0027mobile\u0027 : \u0027landline\u0027 }}",
+                                                                       "phone_carrier":  "={{ $json.phone_carrier }}",
+                                                                       "phone_country":  "={{ $json.phone_country_code }}",
+                                                                       "status":  "new",
+                                                                       "submitted_at":  "={{ $json.submitted_at }}",
+                                                                       "dedup_key":  "={{ $json.dedup_key }}"
+                                                                   }
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "wfa-008",
+                      "name":  "Route by Phone Validity",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1740,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "operator":  {
+                                                                                                    "operation":  "true",
+                                                                                                    "type":  "boolean"
+                                                                                                },
+                                                                                   "rightValue":  true,
+                                                                                   "id":  "cond-phone-verified",
+                                                                                                       "leftValue":  "={{ $(\u0027Check Business Hours\u0027).first().json.phone_verified }}"
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        }
+                                     }
+                  },
+                  {
+                      "id":  "wfa-009",
+                      "name":  "Can Call Right Now?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1980,
+                                       160
+                                   ],
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "operator":  {
+                                                                                                    "operation":  "true",
+                                                                                                    "type":  "boolean"
+                                                                                                },
+                                                                                   "rightValue":  true,
+                                                                                   "id":  "cond-call-now",
+                                                                                                       "leftValue":  "={{ $(\u0027Check Business Hours\u0027).first().json.can_call_now }}"
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        }
+                                     }
+                  },
+                  {
+                      "id":  "wfa-010",
+                      "name":  "Wait Until Business Hours",
+                      "type":  "n8n-nodes-base.wait",
+                      "typeVersion":  1,
+                      "position":  [
+                                       2200,
+                                       60
+                                   ],
+                      "parameters":  {
+                                         "resume":  "specificTime",
+                                         "dateTime":  "={{ $(\u0027Check Business Hours\u0027).first().json.resume_at }}"
+                                     },
+                      "webhookId":  "wfa-biz-hours-wait"
+                  },
+                  {
+                      "id":  "wfa-011",
+                      "name":  "Trigger Retell â€” Attempt 1",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4,
+                      "position":  [
+                                       2420,
+                                       160
+                                   ],
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "https://api.retellai.com/v2/create-phone-call",
+                                         "sendBody":  true,
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={\n  \"from_number\": \"{{ $env.RETELL_FROM_NUMBER }}\",\n  \"to_number\": \"{{ $(\\u0027Check Business Hours\\u0027).first().json.phone_e164 }}\",\n  \"agent_id\": \"{{ $env.RETELL_AGENT_ID }}\",\n  \"retell_llm_dynamic_variables\": {\n    \"customer_name\": \"{{ $(\\u0027Check Business Hours\\u0027).first().json.full_name }}\",\n    \"property_value\": \"{{ $(\\u0027Check Business Hours\\u0027).first().json.property_value }}\",\n    \"lead_tier\": \"{{ $(\\u0027Check Business Hours\\u0027).first().json.lead_tier }}\",\n    \"script_hook\": \"first_contact\",\n    \"lead_id\": \"{{ $(\\u0027Check Business Hours\\u0027).first().json.lead_id }}\",\n    \"attempt_number\": \"1\"\n  }\n}",
+                                         "retryOnFail":  true,
+                                         "maxTries":  3,
+                                         "waitBetweenTries":  5000,
+                                         "sendHeaders":  true,
+                                         "authentication":  "genericCredentialType",
+                                         "genericAuthType":  "httpHeaderAuth",
+                                         "headerParametersUi":  {
+                                                                    "parameter":  [
+                                                                                      {
+                                                                                          "value":  "=Bearer {{ $env.RETELL_API_KEY }}",
+                                                                                          "name":  "Authorization"
+                                                                                      },
+                                                                                      {
+                                                                                          "value":  "application/json",
+                                                                                          "name":  "Content-Type"
+                                                                                      }
+                                                                                  ]
+                                                                }
+                                     }
+                  },
+                  {
+                      "id":  "wfa-012",
+                      "name":  "Log Call Initiated \u0026 Update CRM",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       2640,
+                                       160
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const retellResponse = $input.first().json;\nconst lead = $(\u0027Check Business Hours\u0027).first().json;\n\nconst call_id = retellResponse.call_id || \u0027\u0027;\nif (!call_id) throw new Error(`RETELL_NO_CALL_ID: Retell did not return a call_id. Response: ${JSON.stringify(retellResponse)}`);\n\n// We do not wait here. Workflow B will be triggered by Retell webhook when call ends.\nreturn [{ json: {\n  lead_id: lead.lead_id,\n  call_id_attempt_1: call_id,\n  status: \u0027call_initiated_attempt_1\u0027,\n  lead_name: lead.full_name,\n  lead_tier: lead.lead_tier,\n  lead_score: lead.lead_score,\n  phone_e164: lead.phone_e164,\n  property_value: lead.property_value,\n  email: lead.email\n}}];"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-013",
+                      "name":  "CRM Update â€” Call Initiated",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       2860,
+                                       160
+                                   ],
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                         "sheetName":  "Leads",
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $json.lead_id }}",
+                                                                       "status":  "call_initiated_attempt_1",
+                                                                       "call_id":  "={{ $json.call_id_attempt_1 }}",
+                                                                       "last_updated":  "={{ new Date().toISOString() }}"
+                                                                   }
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "wfa-014",
+                      "name":  "Slack â€” New Lead Incoming",
+                      "type":  "n8n-nodes-base.slack",
+                      "typeVersion":  2,
+                      "position":  [
+                                       3080,
+                                       160
+                                   ],
+                      "parameters":  {
+                                         "authentication":  "oAuth2",
+                                         "channel":  "#leads-live",
+                                         "text":  "=:telephone_receiver: *NEW LEAD â€” Aria Calling Now*\n\n:bust_in_silhouette: *Name:* {{ $json.lead_name }}\n:star: *Tier:* {{ $json.lead_tier }} (Score: {{ $json.lead_score }}/100)\n:moneybag: *Property Value:* ${{ $json.property_value }}\n:id: *Lead ID:* {{ $json.lead_id }}\n:clock1: *Time:* {{ new Date().toLocaleString() }}\n\n_Aria is calling now. Results via Retell webhook._"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-015",
+                      "name":  "Validate Email (Abstract API)",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4,
+                      "position":  [
+                                       1980,
+                                       480
+                                   ],
+                      "parameters":  {
+                                         "method":  "GET",
+                                         "url":  "=https://emailvalidation.abstractapi.com/v1/?api_key={{ $env.ABSTRACT_API_KEY }}\u0026email={{ encodeURIComponent($(\u0027Check Business Hours\u0027).first().json.email) }}",
+                                         "retryOnFail":  true,
+                                         "maxTries":  3,
+                                         "waitBetweenTries":  2000
+                                     }
+                  },
+                  {
+                      "id":  "wfa-016",
+                      "name":  "Route by Email Validity",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2,
+                      "position":  [
+                                       2200,
+                                       480
+                                   ],
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "operator":  {
+                                                                                                    "operation":  "true",
+                                                                                                    "type":  "boolean"
+                                                                                                },
+                                                                                   "rightValue":  true,
+                                                                                   "id":  "cond-email-valid",
+                                                                                   "leftValue":  "={{ $json.is_valid_format \u0026\u0026 $json.is_valid_format.value }}"
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        }
+                                     }
+                  },
+                  {
+                      "id":  "wfa-017",
+                      "name":  "Generate AI Email (Gemini)",
+                      "type":  "@n8n/n8n-nodes-langchain.chainLlm",
+                      "typeVersion":  1,
+                      "position":  [
+                                       2420,
+                                       480
+                                   ],
+                      "parameters":  {
+                                         "promptType":  "define",
+                                         "text":  "=You are an elite real estate broker assistant crafting a personalised outreach email.\n\nLead details:\n- Name: {{ $(\u0027Check Business Hours\u0027).first().json.full_name }}\n- Property Interest: ${{ $(\u0027Check Business Hours\u0027).first().json.property_value }}\n- Source: {{ $(\u0027Check Business Hours\u0027).first().json.source }}\n- Tier: {{ $(\u0027Check Business Hours\u0027).first().json.lead_tier }}\n\nWrite a warm, professional, personalised HTML email body (NO \u003chtml\u003e, \u003chead\u003e, or \u003cbody\u003e wrapper tags).\nAcknowledge their interest. Offer a brief strategy call. Keep under 120 words.\n\nOUTPUT CONTRACT â€” MANDATORY:\n1. Start your response with \u003c (the first character MUST be an HTML tag)\n2. Do NOT include ```html fences, markdown, subject lines, or any preamble text before the HTML\n3. Do NOT mention their phone number or that we could not reach them\n4. End with \u003c/p\u003e or a closing block tag\n\nBegin HTML output now:"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-018",
+                      "name":  "Sanitize LLM Output",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       2640,
+                                       480
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const rawText = ($input.first().json.text || \u0027\u0027).trim();\nconst lead = $(\u0027Check Business Hours\u0027).first().json;\n\nlet html = rawText;\n\n// Strip markdown code fences regardless of language tag\nhtml = html.replace(/```[a-z]*\\s*/gi, \u0027\u0027).replace(/```/g, \u0027\u0027).trim();\n\n// Strip any conversational preamble before the first HTML tag\nconst firstTagIdx = html.indexOf(\u0027\u003c\u0027);\nif (firstTagIdx \u003e 0) {\n  html = html.slice(firstTagIdx);\n}\n\n// VALIDATION CHECKS\nconst hasHtmlTag = /\u003c[a-z][^\u003e]*\u003e/i.test(html);\nconst minLength = html.length \u003e= 50;\nconst maxLength = html.length \u003c= 6000;\nconst firstName = lead.full_name.split(\u0027 \u0027)[0];\n\nif (!hasHtmlTag || !minLength) {\n  // LLM output is garbage â€” use bulletproof static fallback\n  console.warn(`LLM_SANITIZE_FALLBACK: Output failed validation. Length=${html.length}, hasHtml=${hasHtmlTag}`);\n  html = `\u003cp\u003eDear ${firstName},\u003c/p\u003e\n\u003cp\u003eThank you for reaching out about your property interest at the \u003cstrong\u003e$${lead.property_value}\u003c/strong\u003e level. We work with a select group of clients and would love to understand your goals better.\u003c/p\u003e\n\u003cp\u003eI\u0027d suggest a brief 15-minute strategy call â€” please book at a time that suits you below.\u003c/p\u003e`;\n}\n\nif (!maxLength) {\n  html = html.slice(0, 5800) + \u0027\u003c/p\u003e\u0027;\n}\n\nreturn [{ json: { sanitized_html: html, first_name: firstName, email: lead.email, property_value: lead.property_value, lead_id: lead.lead_id } }];"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-019",
+                      "name":  "Send AI Email (Invalid Phone)",
+                      "type":  "n8n-nodes-base.gmail",
+                      "typeVersion":  2,
+                      "position":  [
+                                       2860,
+                                       480
+                                   ],
+                      "parameters":  {
+                                         "sendTo":  "={{ $json.email }}",
+                                         "subject":  "=Property Enquiry: ${{ $json.property_value }} â€” Let\u0027s Connect",
+                                         "emailType":  "html",
+                                         "message":  "={{ $json.sanitized_html }}\u003cbr\u003e\u003cbr\u003e\u003ca href=\"{{ $env.CALENDAR_LINK }}\" style=\"display:inline-block;background:#1a1a2e;color:#fff;padding:13px 28px;border-radius:5px;text-decoration:none;font-family:Arial,sans-serif;font-size:14px;letter-spacing:0.5px;\"\u003eBook a Strategy Call â†’\u003c/a\u003e"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-020",
+                      "name":  "CRM Update â€” Email Sent",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       3080,
+                                       480
+                                   ],
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                         "sheetName":  "Leads",
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $json.lead_id }}",
+                                                                       "status":  "invalid_phone_ai_email_sent",
+                                                                       "last_updated":  "={{ new Date().toISOString() }}"
+                                                                   }
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "wfa-021",
+                      "name":  "Slack â€” Email Sent (Invalid Phone)",
+                      "type":  "n8n-nodes-base.slack",
+                      "typeVersion":  2,
+                      "position":  [
+                                       3300,
+                                       480
+                                   ],
+                      "parameters":  {
+                                         "authentication":  "oAuth2",
+                                         "channel":  "#leads-live",
+                                         "text":  "=:email: *Lead â€” AI Email Sent (Invalid Phone)*\n\n:bust_in_silhouette: *Name:* {{ $(\u0027Check Business Hours\u0027).first().json.full_name }}\n:envelope: *Email:* {{ $json.email }}\n:moneybag: *Property:* ${{ $json.property_value }}\n:id: *Lead ID:* {{ $json.lead_id }}\n:warning: Phone validation failed â€” email outreach triggered."
+                                     }
+                  },
+                  {
+                      "id":  "wfa-022",
+                      "name":  "CRM Update â€” Dead Lead",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       2420,
+                                       680
+                                   ],
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                         "sheetName":  "Leads",
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $(\u0027Check Business Hours\u0027).first().json.lead_id }}",
+                                                                       "status":  "dead_lead_invalid_phone_and_email",
+                                                                       "last_updated":  "={{ new Date().toISOString() }}"
+                                                                   }
+                                                     }
+                                     }
+                  },
+                  {
+                      "id":  "wfa-023",
+                      "name":  "Slack â€” Dead Lead Alert (Ops)",
+                      "type":  "n8n-nodes-base.slack",
+                      "typeVersion":  2,
+                      "position":  [
+                                       2640,
+                                       680
+                                   ],
+                      "parameters":  {
+                                         "authentication":  "oAuth2",
+                                         "channel":  "#ops-alerts",
+                                         "text":  "=:skull: *Dead Lead â€” Both Phone \u0026 Email Invalid*\n\n:bust_in_silhouette: *Name:* {{ $(\u0027Check Business Hours\u0027).first().json.full_name }}\n:id: *Lead ID:* {{ $(\u0027Check Business Hours\u0027).first().json.lead_id }}\n:pushpin: *Source:* {{ $(\u0027Check Business Hours\u0027).first().json.source }}\n\nNo further action possible. Check lead source quality."
+                                     }
+                  },
+                  {
+                      "id":  "wfa-002b",
+                      "name":  "Lookup Lead by Dedup Key",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       520,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "operation":  "read",
+                                         "filtersUI":  {
+                                                           "values":  [
+                                                                          {
+                                                                              "lookupColumn":  "dedup_key",
+                                                                              "lookupValue":  "={{ $json.dedup_key }}"
+                                                                          }
+                                                                      ]
+                                                       },
+                                         "sheetName":  "Leads",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}"
+                                     },
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "id":  "wfa-002c",
+                      "name":  "Dedup Decision",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       720,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "const lead = $(\u0027Schema Guard \u0026 Dedup\u0027).first().json;\nconst existing = $input.first().json || {};\nconst is_duplicate = Boolean(existing.lead_id || existing.id);\nreturn [{ json: { ...lead, is_duplicate, existing_lead_id: existing.lead_id || \u0027\u0027 } }];"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-002d",
+                      "name":  "If Duplicate Lead?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2,
+                      "position":  [
+                                       920,
+                                       300
+                                   ],
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "operator":  {
+                                                                                                    "operation":  "true",
+                                                                                                    "type":  "boolean"
+                                                                                                },
+                                                                                   "rightValue":  true,
+                                                                                   "id":  "cond-duplicate",
+                                                                                   "leftValue":  "={{ $json.is_duplicate }}"
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        }
+                                     }
+                  },
+                  {
+                      "id":  "wfa-002e",
+                      "name":  "CRM Update - Duplicate Lead",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4,
+                      "position":  [
+                                       1120,
+                                       180
+                                   ],
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $json.existing_lead_id }}",
+                                                                       "status":  "duplicate_lead_ignored",
+                                                                       "last_updated":  "={{ new Date().toISOString() }}"
+                                                                   }
+                                                     },
+                                         "sheetName":  "Leads",
+                                         "documentId":  "={{ $env.GOOGLE_SHEET_ID }}"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-002f",
+                      "name":  "Slack - Duplicate Lead",
+                      "type":  "n8n-nodes-base.slack",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1320,
+                                       180
+                                   ],
+                      "parameters":  {
+                                         "channel":  "#ops-alerts",
+                                         "authentication":  "oAuth2",
+                                         "text":  "Duplicate lead ignored. Name: {{ $json.full_name }} Email: {{ $json.email }} Phone: {{ $json.phone_raw }} Dedup: {{ $json.dedup_key }}"
+                                     }
+                  },
+                  {
+                      "id":  "wfa-003a",
+                      "name":  "If Phone Format OK?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2,
+                      "position":  [
+                                       760,
+                                       460
+                                   ],
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "operator":  {
+                                                                                                    "operation":  "true",
+                                                                                                    "type":  "boolean"
+                                                                                                },
+                                                                                   "rightValue":  true,
+                                                                                   "id":  "cond-phone-format",
+                                                                                   "leftValue":  "={{ $json.phone_format_ok }}"
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        }
+                                     }
+                  },
+                  {
+                      "id":  "wfa-003b",
+                      "name":  "Phone Verification Placeholder",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       960,
+                                       560
+                                   ],
+                      "parameters":  {
+                                         "jsCode":  "return [{ json: {} }];"
+                                     }
+                  }
+              ],
+    "connections":  {
+                        "Lead Form Webhook":  {
+                                                  "main":  [
+                                                               [
+                                                                   {
+                                                                       "node":  "Schema Guard \u0026 Dedup",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ]
+                                                           ]
+                                              },
+                        "Verify Phone (Abstract API)":  {
+                                                            "main":  [
+                                                                         [
+                                                                             {
+                                                                                 "node":  "Merge Phone Verification",
+                                                                                 "type":  "main",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ]
+                                                                     ]
+                                                        },
+                        "Merge Phone Verification":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Check Business Hours",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                        "Check Business Hours":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Upsert Lead to CRM",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Upsert Lead to CRM":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Route by Phone Validity",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Route by Phone Validity":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Can Call Right Now?",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ],
+                                                                     [
+                                                                         {
+                                                                             "node":  "Validate Email (Abstract API)",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    },
+                        "Can Call Right Now?":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Trigger Retell â€” Attempt 1",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ],
+                                                                 [
+                                                                     {
+                                                                         "node":  "Wait Until Business Hours",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Wait Until Business Hours":  {
+                                                          "main":  [
+                                                                       [
+                                                                           {
+                                                                               "node":  "Trigger Retell â€” Attempt 1",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ]
+                                                                   ]
+                                                      },
+                        "Trigger Retell â€” Attempt 1":  {
+                                                             "main":  [
+                                                                          [
+                                                                              {
+                                                                                  "node":  "Log Call Initiated \u0026 Update CRM",
+                                                                                  "type":  "main",
+                                                                                  "index":  0
+                                                                              }
+                                                                          ]
+                                                                      ]
+                                                         },
+                        "Log Call Initiated \u0026 Update CRM":  {
+                                                                     "main":  [
+                                                                                  [
+                                                                                      {
+                                                                                          "node":  "CRM Update â€” Call Initiated",
+                                                                                          "type":  "main",
+                                                                                          "index":  0
+                                                                                      }
+                                                                                  ]
+                                                                              ]
+                                                                 },
+                        "CRM Update â€” Call Initiated":  {
+                                                              "main":  [
+                                                                           [
+                                                                               {
+                                                                                   "node":  "Slack â€” New Lead Incoming",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               }
+                                                                           ]
+                                                                       ]
+                                                          },
+                        "Validate Email (Abstract API)":  {
+                                                              "main":  [
+                                                                           [
+                                                                               {
+                                                                                   "node":  "Route by Email Validity",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               }
+                                                                           ]
+                                                                       ]
+                                                          },
+                        "Route by Email Validity":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Generate AI Email (Gemini)",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ],
+                                                                     [
+                                                                         {
+                                                                             "node":  "CRM Update â€” Dead Lead",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    },
+                        "Generate AI Email (Gemini)":  {
+                                                           "main":  [
+                                                                        [
+                                                                            {
+                                                                                "node":  "Sanitize LLM Output",
+                                                                                "type":  "main",
+                                                                                "index":  0
+                                                                            }
+                                                                        ]
+                                                                    ]
+                                                       },
+                        "Sanitize LLM Output":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Send AI Email (Invalid Phone)",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Send AI Email (Invalid Phone)":  {
+                                                              "main":  [
+                                                                           [
+                                                                               {
+                                                                                   "node":  "CRM Update â€” Email Sent",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               }
+                                                                           ]
+                                                                       ]
+                                                          },
+                        "CRM Update â€” Email Sent":  {
+                                                          "main":  [
+                                                                       [
+                                                                           {
+                                                                               "node":  "Slack â€” Email Sent (Invalid Phone)",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ]
+                                                                   ]
+                                                      },
+                        "CRM Update â€” Dead Lead":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Slack â€” Dead Lead Alert (Ops)",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                        "Schema Guard \u0026 Dedup":  {
+                                                          "main":  [
+                                                                       [
+                                                                           {
+                                                                               "node":  "Lookup Lead by Dedup Key",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ]
+                                                                   ]
+                                                      },
+                        "Lookup Lead by Dedup Key":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Dedup Decision",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                        "Dedup Decision":  {
+                                               "main":  [
+                                                            [
+                                                                {
+                                                                    "node":  "If Duplicate Lead?",
+                                                                    "type":  "main",
+                                                                    "index":  0
+                                                                }
+                                                            ]
+                                                        ]
+                                           },
+                        "If Duplicate Lead?":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "CRM Update - Duplicate Lead",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ],
+                                                                [
+                                                                    {
+                                                                        "node":  "Normalize \u0026 Score Lead",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "CRM Update - Duplicate Lead":  {
+                                                            "main":  [
+                                                                         [
+                                                                             {
+                                                                                 "node":  "Slack - Duplicate Lead",
+                                                                                 "type":  "main",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ]
+                                                                     ]
+                                                        },
+                        "Normalize \u0026 Score Lead":  {
+                                                            "main":  [
+                                                                         [
+                                                                             {
+                                                                                 "node":  "If Phone Format OK?",
+                                                                                 "type":  "main",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ]
+                                                                     ]
+                                                        },
+                        "If Phone Format OK?":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Verify Phone (Abstract API)",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ],
+                                                                 [
+                                                                     {
+                                                                         "node":  "Phone Verification Placeholder",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Phone Verification Placeholder":  {
+                                                               "main":  [
+                                                                            [
+                                                                                {
+                                                                                    "node":  "Merge Phone Verification",
+                                                                                    "type":  "main",
+                                                                                    "index":  0
+                                                                                }
+                                                                            ]
+                                                                        ]
+                                                           }
+                    },
+    "active":  false,
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "saveManualExecutions":  true,
+                     "callerPolicy":  "workflowsFromSameOwner"
+                 }
+}

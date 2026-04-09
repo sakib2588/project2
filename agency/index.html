@@ -53,8 +53,8 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 
 body {
   font-family: 'DM Sans', sans-serif;
-  background: #ffffff;
-  color: var(--charcoal);
+  background: #141516;
+  color: #ffffff;
   line-height: 1.6;
   padding-top: var(--nav-h);
 }
@@ -63,7 +63,7 @@ h1,h2,h3,h4,h5 {
   font-family: 'Playfair Display', serif;
   font-weight: 500;
   line-height: 1.1;
-  color: var(--ink);
+  color: #ffffff;
 }
 h1 { font-size: clamp(2.6rem, 5.5vw, 4.8rem); letter-spacing: -.02em; }
 h2 { font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -.015em; margin-bottom: var(--sp-3); }
@@ -71,7 +71,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); margin-bottom: .5rem; }
 h4 { font-size: 1.15rem; }
 h1 em, h2 em { font-style: italic; color: var(--primary); }
 
-p { color: var(--ash); font-size: 1rem; }
+p { color: rgba(255,255,255,.7); font-size: 1rem; }
 a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 
@@ -225,7 +225,9 @@ img { max-width: 100%; display: block; }
 
 /* ── Hero ───────────────────────────────────────────────── */
 .hero {
-  background: #141516;
+  background:
+    linear-gradient(rgba(20,21,22,.82), rgba(20,21,22,.88)),
+    url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
   min-height: calc(100vh - var(--nav-h));
   display: flex;
   align-items: center;
@@ -524,7 +526,10 @@ img { max-width: 100%; display: block; }
 .section-head.center p { margin: .75rem auto 0; }
 
 /* ── Services ───────────────────────────────────────────── */
-.services { background: #ffffff; }
+.services { background: #141516; }
+.services .section-head h2,
+.services .section-head .eyebrow { color: #ffffff; }
+.services .section-head p { color: rgba(255,255,255,.6); }
 .services-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -574,7 +579,8 @@ img { max-width: 100%; display: block; }
 .service-card:nth-child(5) .service-icon { background: rgba(238,183,93,.1); }
 .service-card:nth-child(6) .service-icon { background: rgba(20,21,22,.05); }
 
-.service-card h3 { color: var(--ink); margin-bottom: .5rem; font-size: 1.25rem; }
+.service-card { color: var(--charcoal); }
+.service-card h3 { color: var(--ink) !important; margin-bottom: .5rem; font-size: 1.25rem; }
 .service-card p { font-size: .92rem; color: var(--flint); line-height: 1.65; margin-bottom: 1.25rem; }
 .service-link {
   font-size: .82rem;
@@ -586,6 +592,144 @@ img { max-width: 100%; display: block; }
   transition: gap .2s;
 }
 .service-link:hover { gap: .65rem; }
+
+/* ── Service Detail Sections ─────────────────────────────── */
+.svc-detail {
+  background: #141516;
+  padding: 0;
+  scroll-margin-top: 100px;
+  overflow: hidden;
+  position: relative;
+}
+.svc-detail::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent 0%, #eeb75d 20%, #eeb75d 80%, transparent 100%);
+  z-index: 2;
+}
+#svc-ads::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent 0%, #eeb75d 20%, #eeb75d 80%, transparent 100%);
+  z-index: 2;
+}
+.svc-detail:nth-of-type(even) { background: #1a1b1c; }
+.svc-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  align-items: stretch;
+  min-height: 560px;
+}
+@media (max-width: 900px) {
+  .svc-inner { grid-template-columns: 1fr; min-height: 0; }
+}
+.svc-detail.reverse .svc-inner { direction: rtl; }
+.svc-detail.reverse .svc-inner > * { direction: ltr; }
+.svc-media {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 560px;
+}
+@media (max-width: 900px) { .svc-media { min-height: 360px; } }
+.svc-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.svc-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, transparent 40%, #141516 100%);
+  pointer-events: none;
+}
+.svc-detail:nth-of-type(even) .svc-media::after {
+  background: linear-gradient(to right, transparent 40%, #1a1b1c 100%);
+}
+.svc-detail.reverse .svc-media::after {
+  background: linear-gradient(to left, transparent 40%, #141516 100%);
+}
+.svc-detail.reverse:nth-of-type(even) .svc-media::after {
+  background: linear-gradient(to left, transparent 40%, #1a1b1c 100%);
+}
+.svc-content {
+  padding: var(--sp-7) var(--sp-5) var(--sp-7) 3rem;
+  align-self: center;
+  max-width: 640px;
+}
+.svc-detail.reverse .svc-content {
+  padding: var(--sp-7) 3rem var(--sp-7) var(--sp-5);
+  justify-self: end;
+}
+@media (max-width: 900px) {
+  .svc-content,
+  .svc-detail.reverse .svc-content { padding: var(--sp-6) var(--sp-5); }
+}
+.svc-content .eyebrow {
+  display: inline-block;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: .75rem;
+}
+.svc-content h2 {
+  color: #ffffff;
+  margin-bottom: 1.25rem;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+.svc-content h2 em { color: var(--primary); font-style: italic; }
+.svc-content > p {
+  color: rgba(255,255,255,.7);
+  margin-bottom: 1rem;
+  line-height: 1.75;
+}
+.svc-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem 1.25rem;
+}
+@media (max-width: 600px) { .svc-list { grid-template-columns: 1fr; } }
+.svc-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+  font-size: .9rem;
+  color: rgba(255,255,255,.8);
+}
+.svc-list li::before {
+  content: '✓';
+  color: var(--primary);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.svc-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  background: var(--primary);
+  color: #141516;
+  padding: .85rem 1.75rem;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: .95rem;
+  transition: transform .2s, box-shadow .2s;
+}
+.svc-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(238,183,93,.35);
+}
 
 /* ── Why Us ──────────────────────────────────────────────── */
 .why { background: #141516; }
@@ -698,7 +842,16 @@ img { max-width: 100%; display: block; }
 }
 
 /* ── How It Works ────────────────────────────────────────── */
-.how { background: #ffffff; }
+.how {
+  background:
+    linear-gradient(rgba(20,21,22,.97), rgba(20,21,22,.98)),
+    url('https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat fixed;
+}
+.how .section-head h2,
+.how .section-head .eyebrow { color: #ffffff; }
+.how .section-head h2 em { color: var(--gold); }
+.how .step h4 { color: #ffffff; }
+.how .step p { color: rgba(255,255,255,.7); }
 .steps {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -761,7 +914,7 @@ img { max-width: 100%; display: block; }
 @media (max-width: 560px) { .test-grid { grid-template-columns: 1fr; } }
 
 .test-card {
-  background: #ffffff;
+  background: #141516;
   border-radius: var(--radius-md);
   padding: 2rem;
   border: 1px solid var(--dove);
@@ -788,36 +941,54 @@ img { max-width: 100%; display: block; }
   color: var(--primary);
   font-family: 'DM Sans', sans-serif;
 }
+.test-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .test-name { font-size: .9rem; font-weight: 600; color: var(--ink); }
 .test-biz { font-size: .78rem; color: var(--flint); }
 
 /* ── Pricing ─────────────────────────────────────────────── */
-.pricing { background: #ffffff; }
+.pricing { background: #141516; position: relative; }
+.pricing .section-head h2,
+.pricing .section-head .eyebrow { color: #ffffff; }
+.pricing .section-head p { color: rgba(255,255,255,.6); }
+.pricing .center { color: rgba(255,255,255,.6); }
+.pricing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(238,183,93,.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+.pricing > * { position: relative; z-index: 1; }
 .pricing-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
-  align-items: start;
+  align-items: stretch;
 }
+.pricing-card { display: flex; flex-direction: column; }
+.pricing-features { flex: 1; }
 @media (max-width: 860px) { .pricing-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .pricing-grid { grid-template-columns: 1fr; } }
 
 .pricing-card {
   background: var(--white);
+  color: var(--charcoal);
   border-radius: var(--radius-md);
   padding: 2.5rem 2rem;
   border: 1px solid var(--dove);
   position: relative;
   transition: transform .3s, box-shadow .3s;
 }
+.pricing-card h1, .pricing-card h2, .pricing-card h3, .pricing-card h4 { color: var(--ink); }
+.pricing-card p { color: var(--flint); }
 .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 16px 50px rgba(0,0,0,.08); }
 .pricing-card.popular {
   border-color: var(--gold);
   border-width: 2px;
-  transform: scale(1.03);
   box-shadow: 0 20px 60px rgba(238,183,93,.2);
 }
-.pricing-card.popular:hover { transform: scale(1.03) translateY(-4px); }
+.pricing-card.popular:hover { transform: translateY(-4px); }
 .pricing-badge {
   position: absolute;
   top: -14px; left: 50%; transform: translateX(-50%);
@@ -1235,48 +1406,189 @@ footer ul a:hover { color: #fff; }
     </div>
     <div class="services-grid">
 
-      <div class="service-card reveal">
+      <a href="#svc-website" class="service-card reveal">
         <div class="service-icon">🌐</div>
         <h3>Professional Website Design</h3>
         <p>A stunning, mobile-first website built in 7–14 days. Fully custom, SEO-ready, and built to convert visitors into paying customers.</p>
-        <a href="#contact" class="service-link">Get started →</a>
-      </div>
+        <span class="service-link">Learn more →</span>
+      </a>
 
-      <div class="service-card reveal d1">
+      <a href="#svc-profile" class="service-card reveal d1">
         <div class="service-icon">📍</div>
         <h3>Business Profile Setup</h3>
         <p>We set up and fully optimize your Google Business Profile, Yelp, Facebook, and 40+ directories so local customers can find you instantly.</p>
-        <a href="#contact" class="service-link">Get started →</a>
-      </div>
+        <span class="service-link">Learn more →</span>
+      </a>
 
-      <div class="service-card reveal d2">
+      <a href="#svc-seo" class="service-card reveal d2">
         <div class="service-icon">🔍</div>
         <h3>Search Engine Optimization</h3>
         <p>Rank on the first page of Google for the keywords your customers are searching. We do keyword research, on-page SEO, and link building.</p>
-        <a href="#contact" class="service-link">Get started →</a>
-      </div>
+        <span class="service-link">Learn more →</span>
+      </a>
 
-      <div class="service-card reveal">
+      <a href="#svc-social" class="service-card reveal">
         <div class="service-icon">📱</div>
         <h3>Social Media Marketing</h3>
         <p>We create and manage your Instagram, Facebook, and TikTok content — building a loyal following that turns into real revenue for your business.</p>
-        <a href="#contact" class="service-link">Get started →</a>
-      </div>
+        <span class="service-link">Learn more →</span>
+      </a>
 
-      <div class="service-card reveal d1">
+      <a href="#svc-ecom" class="service-card reveal d1">
         <div class="service-icon">🛒</div>
         <h3>E-Commerce Solutions</h3>
         <p>Launch your online store with product pages that sell. We integrate payment gateways, inventory tools, and run Google Shopping &amp; Meta Ads.</p>
-        <a href="#contact" class="service-link">Get started →</a>
-      </div>
+        <span class="service-link">Learn more →</span>
+      </a>
 
-      <div class="service-card reveal d2">
+      <a href="#svc-ads" class="service-card reveal d2">
         <div class="service-icon">📊</div>
         <h3>Paid Ads Management</h3>
         <p>Google Ads and Meta Ads campaigns managed by certified specialists. We track every dollar and optimize weekly so your ad spend actually works.</p>
-        <a href="#contact" class="service-link">Get started →</a>
-      </div>
+        <span class="service-link">Learn more →</span>
+      </a>
 
+    </div>
+  </div>
+</section>
+
+<div class="fade-d2l"></div>
+<!-- ─── SERVICE DETAILS ──────────────────────────────────────── -->
+
+<section class="svc-detail" id="svc-website">
+  <div class="svc-inner">
+    <div class="svc-media reveal">
+      <img src="https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&w=900&q=80" alt="Professional website design on laptop" loading="lazy"/>
+    </div>
+    <div class="svc-content reveal">
+      <span class="eyebrow">🌐 Website Design</span>
+      <h2>Websites that <em>actually convert</em> visitors into customers</h2>
+      <p>Your website is the first impression most customers will ever get of your business — so we make sure it's unforgettable. Every site we build is handcrafted, mobile-first, and designed around one goal: turning browsers into buyers.</p>
+      <p>We don't use cookie-cutter templates. Every page, every button, and every headline is built around your brand, your audience, and the action you want visitors to take.</p>
+      <ul class="svc-list">
+        <li>Fully custom, mobile-first design</li>
+        <li>Lightning-fast page speeds</li>
+        <li>Built-in SEO foundations</li>
+        <li>Contact forms &amp; lead capture</li>
+        <li>Secure hosting &amp; SSL included</li>
+        <li>Live in 7–14 business days</li>
+      </ul>
+      <a href="#contact" class="svc-cta">Start your website →</a>
+    </div>
+  </div>
+</section>
+
+<section class="svc-detail reverse" id="svc-profile">
+  <div class="svc-inner">
+    <div class="svc-media reveal">
+      <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=900&q=80" alt="Local business profile on phone" loading="lazy"/>
+    </div>
+    <div class="svc-content reveal">
+      <span class="eyebrow">📍 Business Profiles</span>
+      <h2>Get found by <em>local customers</em> on every platform</h2>
+      <p>80% of customers search online before visiting a business — and if you're not showing up on Google Maps, Yelp, or Facebook, you're invisible. We fix that.</p>
+      <p>We claim, verify, and fully optimize your listings across 40+ business directories so your phone, address, hours, and photos are consistent everywhere. This builds trust with both customers and search engines.</p>
+      <ul class="svc-list">
+        <li>Google Business Profile setup</li>
+        <li>Yelp, Facebook, Apple Maps</li>
+        <li>40+ directory submissions</li>
+        <li>Review generation strategy</li>
+        <li>Photo &amp; content optimization</li>
+        <li>Monthly profile maintenance</li>
+      </ul>
+      <a href="#contact" class="svc-cta">Claim your profiles →</a>
+    </div>
+  </div>
+</section>
+
+<section class="svc-detail" id="svc-seo">
+  <div class="svc-inner">
+    <div class="svc-media reveal">
+      <img src="https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?auto=format&fit=crop&w=900&q=80" alt="SEO analytics dashboard" loading="lazy"/>
+    </div>
+    <div class="svc-content reveal">
+      <span class="eyebrow">🔍 Search Engine Optimization</span>
+      <h2>Rank on page 1 for the keywords <em>that matter</em></h2>
+      <p>SEO isn't magic — it's strategy. We research exactly what your ideal customers are typing into Google, then we build your pages to rank for those terms. No black-hat tricks, no fluff reports, just real organic traffic month after month.</p>
+      <p>Our process starts with a deep technical audit, then moves into keyword strategy, on-page optimization, content creation, and trusted link-building. Most clients see meaningful ranking movement within 60–90 days.</p>
+      <ul class="svc-list">
+        <li>In-depth keyword research</li>
+        <li>On-page SEO optimization</li>
+        <li>Technical audit &amp; fixes</li>
+        <li>Content strategy &amp; writing</li>
+        <li>Quality link building</li>
+        <li>Monthly ranking reports</li>
+      </ul>
+      <a href="#contact" class="svc-cta">Grow your rankings →</a>
+    </div>
+  </div>
+</section>
+
+<section class="svc-detail reverse" id="svc-social">
+  <div class="svc-inner">
+    <div class="svc-media reveal">
+      <img src="https://images.unsplash.com/photo-1611926653458-09294b3142bf?auto=format&fit=crop&w=900&q=80" alt="Social media content creation" loading="lazy"/>
+    </div>
+    <div class="svc-content reveal">
+      <span class="eyebrow">📱 Social Media Marketing</span>
+      <h2>Turn followers into <em>real paying customers</em></h2>
+      <p>Posting isn't enough. You need content that stops the scroll, builds a community, and drives people to buy. We handle everything — from strategy to content creation to community management — so you never have to stare at a blank feed again.</p>
+      <p>Our in-house creators shoot, edit, and publish on Instagram, Facebook, and TikTok using proven formats that new businesses need to grow fast.</p>
+      <ul class="svc-list">
+        <li>Content strategy &amp; planning</li>
+        <li>Photo &amp; video creation</li>
+        <li>Daily posting &amp; scheduling</li>
+        <li>Community management</li>
+        <li>Hashtag &amp; trend research</li>
+        <li>Monthly performance reports</li>
+      </ul>
+      <a href="#contact" class="svc-cta">Grow your social →</a>
+    </div>
+  </div>
+</section>
+
+<section class="svc-detail" id="svc-ecom">
+  <div class="svc-inner">
+    <div class="svc-media reveal">
+      <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=900&q=80" alt="E-commerce store on computer" loading="lazy"/>
+    </div>
+    <div class="svc-content reveal">
+      <span class="eyebrow">🛒 E-Commerce Solutions</span>
+      <h2>Launch an online store <em>built to sell</em></h2>
+      <p>A beautiful store means nothing if it doesn't convert. We build e-commerce sites on Shopify, WooCommerce, or custom platforms — with product pages, checkout flows, and payment gateways optimized for maximum sales.</p>
+      <p>From product photography to abandoned-cart emails to Google Shopping ads, we cover every piece of the puzzle so you can ship products, not fight with plugins.</p>
+      <ul class="svc-list">
+        <li>Shopify &amp; WooCommerce builds</li>
+        <li>Secure payment integration</li>
+        <li>Product photography</li>
+        <li>Inventory &amp; shipping setup</li>
+        <li>Abandoned-cart email flows</li>
+        <li>Google Shopping &amp; Meta Ads</li>
+      </ul>
+      <a href="#contact" class="svc-cta">Launch your store →</a>
+    </div>
+  </div>
+</section>
+
+<section class="svc-detail reverse" id="svc-ads">
+  <div class="svc-inner">
+    <div class="svc-media reveal">
+      <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80" alt="Paid ads analytics dashboard" loading="lazy"/>
+    </div>
+    <div class="svc-content reveal">
+      <span class="eyebrow">📊 Paid Ads Management</span>
+      <h2>Every ad dollar <em>tracked and optimized</em></h2>
+      <p>Running ads without a strategy is the fastest way to burn cash. Our certified ad specialists build high-converting Google Ads and Meta Ads campaigns that actually deliver a return. We track every click, every conversion, and every dollar spent.</p>
+      <p>Weekly optimization, A/B creative testing, and transparent reporting — so you always know exactly what's working and what's being cut.</p>
+      <ul class="svc-list">
+        <li>Google Ads &amp; Meta Ads</li>
+        <li>Audience research &amp; targeting</li>
+        <li>Ad creative &amp; copywriting</li>
+        <li>Conversion tracking setup</li>
+        <li>Weekly A/B testing</li>
+        <li>Transparent ROI reporting</li>
+      </ul>
+      <a href="#contact" class="svc-cta">Start running ads →</a>
     </div>
   </div>
 </section>
@@ -1403,7 +1715,7 @@ footer ul a:hover { color: #fff; }
         <div class="test-stars">★★★★★</div>
         <p class="test-quote">"Nexora built our restaurant's website in 6 days and set up our Google profile. We went from 0 reviews to 47 in 2 months. Our tables are fully booked most weekends now."</p>
         <div class="test-author">
-          <div class="test-avatar">MR</div>
+          <div class="test-avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" alt="Marco Rivera"/></div>
           <div>
             <div class="test-name">Marco Rivera</div>
             <div class="test-biz">Founder, Casa Rivera Restaurant · Miami, FL</div>
@@ -1415,7 +1727,7 @@ footer ul a:hover { color: #fff; }
         <div class="test-stars">★★★★★</div>
         <p class="test-quote">"We launched an e-commerce store for our boutique and Nexora handled everything — site, SEO, Instagram. Month 3 we hit $24K in online sales. Absolutely incredible."</p>
         <div class="test-author">
-          <div class="test-avatar">AJ</div>
+          <div class="test-avatar"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80" alt="Ashley Johnson"/></div>
           <div>
             <div class="test-name">Ashley Johnson</div>
             <div class="test-biz">Owner, Bloom Boutique · Austin, TX</div>
@@ -1427,7 +1739,7 @@ footer ul a:hover { color: #fff; }
         <div class="test-stars">★★★★★</div>
         <p class="test-quote">"As a new contractor, I had zero online presence. Nexora got me to page 1 for 'roofing contractor near me' in 45 days. My phone hasn't stopped ringing since."</p>
         <div class="test-author">
-          <div class="test-avatar">DK</div>
+          <div class="test-avatar"><img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=200&q=80" alt="Derek Kim"/></div>
           <div>
             <div class="test-name">Derek Kim</div>
             <div class="test-biz">Owner, DK Roofing Solutions · Chicago, IL</div>
@@ -1439,7 +1751,7 @@ footer ul a:hover { color: #fff; }
         <div class="test-stars">★★★★★</div>
         <p class="test-quote">"I opened my salon 4 months ago. Nexora built my website, ran Facebook ads, and my appointment slots fill up every week. Best investment I made for my new business."</p>
         <div class="test-author">
-          <div class="test-avatar">PN</div>
+          <div class="test-avatar"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80" alt="Priya Nair"/></div>
           <div>
             <div class="test-name">Priya Nair</div>
             <div class="test-biz">Owner, Glow Salon Studio · Seattle, WA</div>
@@ -1451,7 +1763,7 @@ footer ul a:hover { color: #fff; }
         <div class="test-stars">★★★★★</div>
         <p class="test-quote">"Their team set up everything in the first week — website, Yelp, Google, Facebook. I just focused on my law practice while Nexora handled my digital presence. Worth every penny."</p>
         <div class="test-author">
-          <div class="test-avatar">TW</div>
+          <div class="test-avatar"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=200&q=80" alt="Thomas Wade"/></div>
           <div>
             <div class="test-name">Thomas Wade, Esq.</div>
             <div class="test-biz">Founder, Wade Law Group · New York, NY</div>
@@ -1463,7 +1775,7 @@ footer ul a:hover { color: #fff; }
         <div class="test-stars">★★★★★</div>
         <p class="test-quote">"We went from invisible to 3,200 Instagram followers and 400% more website traffic in 90 days. The Nexora team actually cares about results and communicates clearly every step."</p>
         <div class="test-author">
-          <div class="test-avatar">SC</div>
+          <div class="test-avatar"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80" alt="Sarah Chen"/></div>
           <div>
             <div class="test-name">Sarah Chen</div>
             <div class="test-biz">Co-Founder, PureLeaf Wellness · Denver, CO</div>

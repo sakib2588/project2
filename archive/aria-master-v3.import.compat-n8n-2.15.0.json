@@ -1,0 +1,1504 @@
+﻿[
+    {
+        "name":  "Aria â€” WORKFLOW A: Lead Intake \u0026 Orchestrator (v3 Master)",
+        "nodes":  [
+                      {
+                          "id":  "wfa-001",
+                          "name":  "Lead Form Webhook",
+                          "type":  "n8n-nodes-base.webhook",
+                          "typeVersion":  2,
+                          "position":  [
+                                           200,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "httpMethod":  "POST",
+                                             "path":  "aria-lead-intake",
+                                             "responseMode":  "immediately",
+                                             "responseData":  "noData"
+                                         },
+                          "webhookId":  "aria-intake-v3"
+                      },
+                      {
+                          "id":  "wfa-002",
+                          "name":  "Schema Guard \u0026 Dedup",
+                          "type":  "n8n-nodes-base.code",
+                          "typeVersion":  2,
+                          "position":  [
+                                           420,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "jsCode":  "const body = $input.first().json || {};\n\nconst full_name = (body.full_name || body.name || \u0027\u0027).trim();\nconst email = (body.email || \u0027\u0027).toLowerCase().trim();\nconst phone_raw = (body.phone || body.phone_number || \u0027\u0027).trim();\nconst property_value = body.property_value || body.budget || \u0027undisclosed\u0027;\nconst source = body.source || body.utm_source || \u0027direct\u0027;\n\n// Hard contract: must have a name and at least one contact method\nif (!full_name) throw new Error(\u0027SCHEMA_INVALID: full_name is required\u0027);\nif (!email \u0026\u0026 !phone_raw) throw new Error(\u0027SCHEMA_INVALID: phone or email required\u0027);\n\n// Deterministic lead_id for idempotency (email+timestamp bucketed to 5min to catch double-submits)\nconst bucket = Math.floor(Date.now() / 300000);\nconst dedup_key = `${email || phone_raw}_${bucket}`;\nconst lead_id = `lead_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;\n\nreturn [{ json: {\n  full_name,\n  email,\n  phone_raw,\n  property_value,\n  source,\n  lead_id,\n  dedup_key,\n  submitted_at: new Date().toISOString()\n}}];"
+                                         }
+                      },
+                      {
+                          "id":  "wfa-003",
+                          "name":  "Normalize \u0026 Score Lead",
+                          "type":  "n8n-nodes-base.code",
+                          "typeVersion":  2,
+                          "position":  [
+                                           640,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "jsCode":  "const d = $input.first().json;\n\n// E.164 FIX: strip spaces, dashes, parens, dots ONLY â€” NOT the +\nlet phone = d.phone_raw.replace(/[\\s\\-().]/g, \u0027\u0027).trim();\n\n// Auto-detect and fix common formats\nif (phone \u0026\u0026 !phone.startsWith(\u0027+\u0027)) {\n  if (phone.startsWith(\u00271\u0027) \u0026\u0026 phone.length === 11) {\n    phone = \u0027+\u0027 + phone; // US with country code, no +\n  } else if (phone.length === 10) {\n    phone = \u0027+1\u0027 + phone; // US 10-digit, no country code\n  } else {\n    phone = \u0027+\u0027 + phone; // Unknown international â€” prepend + and let Abstract validate\n  }\n}\n\n// Quick pre-flight format check before sending to Abstract API\nconst phone_format_ok = /^\\+[1-9]\\d{7,14}$/.test(phone);\nconst email_format_ok = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(d.email);\n\n// LEAD SCORING (0-100)\nlet score = 0;\nconst pv = parseFloat(String(d.property_value).replace(/[^0-9.]/g, \u0027\u0027)) || 0;\nif (pv \u003e= 5000000) score += 50;\nelse if (pv \u003e= 2000000) score += 35;\nelse if (pv \u003e= 1000000) score += 25;\nelse if (pv \u003e= 500000) score += 15;\nelse score += 5;\n\nconst premiumSources = [\u0027referral\u0027, \u0027google_ads\u0027, \u0027facebook_ads\u0027, \u0027linkedin\u0027];\nif (premiumSources.includes(d.source)) score += 20; else score += 5;\nif (phone \u0026\u0026 phone_format_ok) score += 15;\nif (d.email \u0026\u0026 email_format_ok) score += 10;\n\nconst lead_tier = score \u003e= 70 ? \u0027A\u0027 : score \u003e= 45 ? \u0027B\u0027 : \u0027C\u0027;\n\nreturn [{ json: {\n  ...d,\n  phone,\n  phone_format_ok,\n  email_format_ok,\n  lead_score: Math.min(score, 100),\n  lead_tier\n}}];"
+                                         }
+                      },
+                      {
+                          "id":  "wfa-004",
+                          "name":  "Verify Phone (Abstract API)",
+                          "type":  "n8n-nodes-base.httpRequest",
+                          "typeVersion":  4,
+                          "position":  [
+                                           860,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "method":  "GET",
+                                             "url":  "=https://phonevalidation.abstractapi.com/v1/?api_key={{ $env.ABSTRACT_API_KEY }}\u0026phone={{ encodeURIComponent($json.phone) }}",
+                                             "options":  {
+                                                             "timeout":  10000
+                                                         },
+                                             "retryOnFail":  true,
+                                             "maxTries":  3,
+                                             "waitBetweenTries":  2000
+                                         }
+                      },
+                      {
+                          "id":  "wfa-005",
+                          "name":  "Merge Phone Verification",
+                          "type":  "n8n-nodes-base.code",
+                          "typeVersion":  2,
+                          "position":  [
+                                           1080,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "jsCode":  "const lead = $(\u0027Normalize \u0026 Score Lead\u0027).first().json;\nconst v = $input.first().json || {};\n\n// Prefer Abstract\u0027s formatted number (already correct E.164) over our normalized version\nconst phone_e164 = (v.format \u0026\u0026 v.format.international) ? v.format.international : lead.phone;\n\nreturn [{ json: {\n  ...lead,\n  phone_e164,\n  phone_verified: v.valid === true,\n  phone_is_mobile: (v.type || \u0027\u0027).toLowerCase().includes(\u0027mobile\u0027),\n  phone_carrier: (v.carrier \u0026\u0026 v.carrier.name) ? v.carrier.name : \u0027Unknown\u0027,\n  phone_country_code: (v.country \u0026\u0026 v.country.code) ? v.country.code : \u0027Unknown\u0027\n}}];"
+                                         }
+                      },
+                      {
+                          "id":  "wfa-006",
+                          "name":  "Check Business Hours",
+                          "type":  "n8n-nodes-base.code",
+                          "typeVersion":  2,
+                          "position":  [
+                                           1300,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "jsCode":  "const lead = $input.first().json;\nconst tz = $env.BUSINESS_TIMEZONE || \u0027America/New_York\u0027;\nconst now = new Date();\nconst localStr = now.toLocaleString(\u0027en-US\u0027, { timeZone: tz });\nconst local = new Date(localStr);\nconst hour = local.getHours();\nconst day = local.getDay(); // 0=Sun, 6=Sat\n\nconst isWeekday = day \u003e= 1 \u0026\u0026 day \u003c= 5;\nconst isSaturday = day === 6;\nconst isWeekdayHours = isWeekday \u0026\u0026 hour \u003e= 9 \u0026\u0026 hour \u003c 20;\nconst isSaturdayHours = isSaturday \u0026\u0026 hour \u003e= 10 \u0026\u0026 hour \u003c 16;\nconst can_call_now = isWeekdayHours || isSaturdayHours;\n\n// Calculate next business day 9am if outside hours\nlet resume_at = null;\nif (!can_call_now) {\n  const next = new Date(local);\n  next.setHours(9, 0, 0, 0);\n  if (hour \u003e= 20 || isSaturday \u0026\u0026 hour \u003e= 16) next.setDate(next.getDate() + 1);\n  // Skip Sunday\n  if (next.getDay() === 0) next.setDate(next.getDate() + 1);\n  resume_at = next.toISOString();\n}\n\nreturn [{ json: { ...lead, can_call_now, resume_at } }];"
+                                         }
+                      },
+                      {
+                          "id":  "wfa-007",
+                          "name":  "Upsert Lead to CRM",
+                          "type":  "n8n-nodes-base.googleSheets",
+                          "typeVersion":  4,
+                          "position":  [
+                                           1520,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "operation":  "append",
+                                             "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                             "sheetName":  "Leads",
+                                             "columns":  {
+                                                             "mappingMode":  "defineBelow",
+                                                             "value":  {
+                                                                           "lead_id":  "={{ $json.lead_id }}",
+                                                                           "full_name":  "={{ $json.full_name }}",
+                                                                           "email":  "={{ $json.email }}",
+                                                                           "phone":  "={{ $json.phone_e164 }}",
+                                                                           "property_value":  "={{ $json.property_value }}",
+                                                                           "source":  "={{ $json.source }}",
+                                                                           "lead_score":  "={{ $json.lead_score }}",
+                                                                           "lead_tier":  "={{ $json.lead_tier }}",
+                                                                           "phone_verified":  "={{ $json.phone_verified }}",
+                                                                           "phone_type":  "={{ $json.phone_is_mobile ? \u0027mobile\u0027 : \u0027landline\u0027 }}",
+                                                                           "phone_carrier":  "={{ $json.phone_carrier }}",
+                                                                           "phone_country":  "={{ $json.phone_country_code }}",
+                                                                           "status":  "new",
+                                                                           "submitted_at":  "={{ $json.submitted_at }}"
+                                                                       }
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfa-008",
+                          "name":  "Route by Phone Validity",
+                          "type":  "n8n-nodes-base.switch",
+                          "typeVersion":  3,
+                          "position":  [
+                                           1740,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "mode":  "rules",
+                                             "rules":  {
+                                                           "rules":  [
+                                                                         {
+                                                                             "conditions":  {
+                                                                                                "conditions":  [
+                                                                                                                   {
+                                                                                                                       "leftValue":  "={{ $json.phone_verified }}",
+                                                                                                                       "rightValue":  true,
+                                                                                                                       "operator":  {
+                                                                                                                                        "type":  "boolean",
+                                                                                                                                        "operation":  "true"
+                                                                                                                                    }
+                                                                                                                   }
+                                                                                                               ],
+                                                                                                "combinator":  "and"
+                                                                                            },
+                                                                             "renameOutput":  true,
+                                                                             "outputKey":  "phone_valid"
+                                                                         }
+                                                                     ]
+                                                       },
+                                             "options":  {
+                                                             "fallbackOutput":  "extra"
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfa-009",
+                          "name":  "Can Call Right Now?",
+                          "type":  "n8n-nodes-base.switch",
+                          "typeVersion":  3,
+                          "position":  [
+                                           1980,
+                                           160
+                                       ],
+                          "parameters":  {
+                                             "mode":  "rules",
+                                             "rules":  {
+                                                           "rules":  [
+                                                                         {
+                                                                             "conditions":  {
+                                                                                                "conditions":  [
+                                                                                                                   {
+                                                                                                                       "leftValue":  "={{ $json.can_call_now }}",
+                                                                                                                       "rightValue":  true,
+                                                                                                                       "operator":  {
+                                                                                                                                        "type":  "boolean",
+                                                                                                                                        "operation":  "true"
+                                                                                                                                    }
+                                                                                                                   }
+                                                                                                               ],
+                                                                                                "combinator":  "and"
+                                                                                            },
+                                                                             "renameOutput":  true,
+                                                                             "outputKey":  "call_now"
+                                                                         }
+                                                                     ]
+                                                       },
+                                             "options":  {
+                                                             "fallbackOutput":  "extra"
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfa-010",
+                          "name":  "Wait Until Business Hours",
+                          "type":  "n8n-nodes-base.wait",
+                          "typeVersion":  1,
+                          "position":  [
+                                           2200,
+                                           60
+                                       ],
+                          "parameters":  {
+                                             "resume":  "specificTime",
+                                             "dateTime":  "={{ $json.resume_at }}"
+                                         },
+                          "webhookId":  "wfa-biz-hours-wait"
+                      },
+                      {
+                          "id":  "wfa-011",
+                          "name":  "Trigger Retell â€” Attempt 1",
+                          "type":  "n8n-nodes-base.httpRequest",
+                          "typeVersion":  4,
+                          "position":  [
+                                           2420,
+                                           160
+                                       ],
+                          "parameters":  {
+                                             "method":  "POST",
+                                             "url":  "https://api.retellai.com/v2/create-phone-call",
+                                             "sendHeaders":  true,
+                                             "headerParameters":  {
+                                                                      "parameters":  [
+                                                                                         {
+                                                                                             "name":  "Authorization",
+                                                                                             "value":  "=Bearer {{ $env.RETELL_API_KEY }}"
+                                                                                         },
+                                                                                         {
+                                                                                             "name":  "Content-Type",
+                                                                                             "value":  "application/json"
+                                                                                         }
+                                                                                     ]
+                                                                  },
+                                             "sendBody":  true,
+                                             "specifyBody":  "json",
+                                             "jsonBody":  "={\n  \"from_number\": \"{{ $env.RETELL_FROM_NUMBER }}\",\n  \"to_number\": \"{{ $json.phone_e164 }}\",\n  \"agent_id\": \"{{ $env.RETELL_AGENT_ID }}\",\n  \"retell_llm_dynamic_variables\": {\n    \"customer_name\": \"{{ $json.full_name }}\",\n    \"property_value\": \"{{ $json.property_value }}\",\n    \"lead_tier\": \"{{ $json.lead_tier }}\",\n    \"script_hook\": \"first_contact\",\n    \"lead_id\": \"{{ $json.lead_id }}\",\n    \"attempt_number\": \"1\"\n  }\n}",
+                                             "options":  {
+                                                             "timeout":  15000
+                                                         },
+                                             "retryOnFail":  true,
+                                             "maxTries":  3,
+                                             "waitBetweenTries":  5000
+                                         }
+                      },
+                      {
+                          "id":  "wfa-012",
+                          "name":  "Log Call Initiated \u0026 Update CRM",
+                          "type":  "n8n-nodes-base.code",
+                          "typeVersion":  2,
+                          "position":  [
+                                           2640,
+                                           160
+                                       ],
+                          "parameters":  {
+                                             "jsCode":  "const retellResponse = $input.first().json;\nconst lead = $(\u0027Check Business Hours\u0027).first().json;\n\nconst call_id = retellResponse.call_id || \u0027\u0027;\nif (!call_id) throw new Error(`RETELL_NO_CALL_ID: Retell did not return a call_id. Response: ${JSON.stringify(retellResponse)}`);\n\n// We do not wait here. Workflow B will be triggered by Retell webhook when call ends.\nreturn [{ json: {\n  lead_id: lead.lead_id,\n  call_id_attempt_1: call_id,\n  status: \u0027call_initiated_attempt_1\u0027,\n  lead_name: lead.full_name,\n  lead_tier: lead.lead_tier,\n  lead_score: lead.lead_score,\n  phone_e164: lead.phone_e164,\n  property_value: lead.property_value,\n  email: lead.email\n}}];"
+                                         }
+                      },
+                      {
+                          "id":  "wfa-013",
+                          "name":  "CRM Update â€” Call Initiated",
+                          "type":  "n8n-nodes-base.googleSheets",
+                          "typeVersion":  4,
+                          "position":  [
+                                           2860,
+                                           160
+                                       ],
+                          "parameters":  {
+                                             "operation":  "update",
+                                             "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                             "sheetName":  "Leads",
+                                             "columns":  {
+                                                             "mappingMode":  "defineBelow",
+                                                             "value":  {
+                                                                           "lead_id":  "={{ $json.lead_id }}",
+                                                                           "status":  "call_initiated_attempt_1",
+                                                                           "call_id":  "={{ $json.call_id_attempt_1 }}",
+                                                                           "last_updated":  "={{ new Date().toISOString() }}"
+                                                                       }
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfa-014",
+                          "name":  "Slack â€” New Lead Incoming",
+                          "type":  "n8n-nodes-base.slack",
+                          "typeVersion":  2,
+                          "position":  [
+                                           3080,
+                                           160
+                                       ],
+                          "parameters":  {
+                                             "authentication":  "oAuth2",
+                                             "channel":  "#leads-live",
+                                             "text":  "=:telephone_receiver: *NEW LEAD â€” Aria Calling Now*\n\n:bust_in_silhouette: *Name:* {{ $json.lead_name }}\n:star: *Tier:* {{ $json.lead_tier }} (Score: {{ $json.lead_score }}/100)\n:moneybag: *Property Value:* ${{ $json.property_value }}\n:id: *Lead ID:* {{ $json.lead_id }}\n:clock1: *Time:* {{ new Date().toLocaleString() }}\n\n_Aria is calling now. Results via Retell webhook._"
+                                         }
+                      },
+                      {
+                          "id":  "wfa-015",
+                          "name":  "Validate Email (Abstract API)",
+                          "type":  "n8n-nodes-base.httpRequest",
+                          "typeVersion":  4,
+                          "position":  [
+                                           1980,
+                                           480
+                                       ],
+                          "parameters":  {
+                                             "method":  "GET",
+                                             "url":  "=https://emailvalidation.abstractapi.com/v1/?api_key={{ $env.ABSTRACT_API_KEY }}\u0026email={{ encodeURIComponent($json.email) }}",
+                                             "options":  {
+                                                             "timeout":  10000
+                                                         },
+                                             "retryOnFail":  true,
+                                             "maxTries":  3,
+                                             "waitBetweenTries":  2000
+                                         }
+                      },
+                      {
+                          "id":  "wfa-016",
+                          "name":  "Route by Email Validity",
+                          "type":  "n8n-nodes-base.switch",
+                          "typeVersion":  3,
+                          "position":  [
+                                           2200,
+                                           480
+                                       ],
+                          "parameters":  {
+                                             "mode":  "rules",
+                                             "rules":  {
+                                                           "rules":  [
+                                                                         {
+                                                                             "conditions":  {
+                                                                                                "conditions":  [
+                                                                                                                   {
+                                                                                                                       "leftValue":  "={{ $json.is_valid_format \u0026\u0026 $json.is_valid_format.value }}",
+                                                                                                                       "rightValue":  true,
+                                                                                                                       "operator":  {
+                                                                                                                                        "type":  "boolean",
+                                                                                                                                        "operation":  "true"
+                                                                                                                                    }
+                                                                                                                   }
+                                                                                                               ],
+                                                                                                "combinator":  "and"
+                                                                                            },
+                                                                             "renameOutput":  true,
+                                                                             "outputKey":  "email_valid"
+                                                                         }
+                                                                     ]
+                                                       },
+                                             "options":  {
+                                                             "fallbackOutput":  "extra"
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfa-017",
+                          "name":  "Generate AI Email (Gemini)",
+                          "type":  "@n8n/n8n-nodes-langchain.chainLlm",
+                          "typeVersion":  1,
+                          "position":  [
+                                           2420,
+                                           480
+                                       ],
+                          "parameters":  {
+                                             "promptType":  "define",
+                                             "text":  "=You are an elite real estate broker assistant crafting a personalised outreach email.\n\nLead details:\n- Name: {{ $(\u0027Check Business Hours\u0027).first().json.full_name }}\n- Property Interest: ${{ $(\u0027Check Business Hours\u0027).first().json.property_value }}\n- Source: {{ $(\u0027Check Business Hours\u0027).first().json.source }}\n- Tier: {{ $(\u0027Check Business Hours\u0027).first().json.lead_tier }}\n\nWrite a warm, professional, personalised HTML email body (NO \u003chtml\u003e, \u003chead\u003e, or \u003cbody\u003e wrapper tags).\nAcknowledge their interest. Offer a brief strategy call. Keep under 120 words.\n\nOUTPUT CONTRACT â€” MANDATORY:\n1. Start your response with \u003c (the first character MUST be an HTML tag)\n2. Do NOT include ```html fences, markdown, subject lines, or any preamble text before the HTML\n3. Do NOT mention their phone number or that we could not reach them\n4. End with \u003c/p\u003e or a closing block tag\n\nBegin HTML output now:"
+                                         }
+                      },
+                      {
+                          "id":  "wfa-018",
+                          "name":  "Sanitize LLM Output",
+                          "type":  "n8n-nodes-base.code",
+                          "typeVersion":  2,
+                          "position":  [
+                                           2640,
+                                           480
+                                       ],
+                          "parameters":  {
+                                             "jsCode":  "const rawText = ($input.first().json.text || \u0027\u0027).trim();\nconst lead = $(\u0027Check Business Hours\u0027).first().json;\n\nlet html = rawText;\n\n// Strip markdown code fences regardless of language tag\nhtml = html.replace(/```[a-z]*\\s*/gi, \u0027\u0027).replace(/```/g, \u0027\u0027).trim();\n\n// Strip any conversational preamble before the first HTML tag\nconst firstTagIdx = html.indexOf(\u0027\u003c\u0027);\nif (firstTagIdx \u003e 0) {\n  html = html.slice(firstTagIdx);\n}\n\n// VALIDATION CHECKS\nconst hasHtmlTag = /\u003c[a-z][^\u003e]*\u003e/i.test(html);\nconst minLength = html.length \u003e= 50;\nconst maxLength = html.length \u003c= 6000;\nconst firstName = lead.full_name.split(\u0027 \u0027)[0];\n\nif (!hasHtmlTag || !minLength) {\n  // LLM output is garbage â€” use bulletproof static fallback\n  console.warn(`LLM_SANITIZE_FALLBACK: Output failed validation. Length=${html.length}, hasHtml=${hasHtmlTag}`);\n  html = `\u003cp\u003eDear ${firstName},\u003c/p\u003e\n\u003cp\u003eThank you for reaching out about your property interest at the \u003cstrong\u003e$${lead.property_value}\u003c/strong\u003e level. We work with a select group of clients and would love to understand your goals better.\u003c/p\u003e\n\u003cp\u003eI\u0027d suggest a brief 15-minute strategy call â€” please book at a time that suits you below.\u003c/p\u003e`;\n}\n\nif (!maxLength) {\n  html = html.slice(0, 5800) + \u0027\u003c/p\u003e\u0027;\n}\n\nreturn [{ json: { sanitized_html: html, first_name: firstName, email: lead.email, property_value: lead.property_value, lead_id: lead.lead_id } }];"
+                                         }
+                      },
+                      {
+                          "id":  "wfa-019",
+                          "name":  "Send AI Email (Invalid Phone)",
+                          "type":  "n8n-nodes-base.gmail",
+                          "typeVersion":  2,
+                          "position":  [
+                                           2860,
+                                           480
+                                       ],
+                          "parameters":  {
+                                             "sendTo":  "={{ $json.email }}",
+                                             "subject":  "=Property Enquiry: ${{ $json.property_value }} â€” Let\u0027s Connect",
+                                             "emailType":  "html",
+                                             "message":  "={{ $json.sanitized_html }}\u003cbr\u003e\u003cbr\u003e\u003ca href=\"{{ $env.CALENDAR_LINK }}\" style=\"display:inline-block;background:#1a1a2e;color:#fff;padding:13px 28px;border-radius:5px;text-decoration:none;font-family:Arial,sans-serif;font-size:14px;letter-spacing:0.5px;\"\u003eBook a Strategy Call â†’\u003c/a\u003e"
+                                         }
+                      },
+                      {
+                          "id":  "wfa-020",
+                          "name":  "CRM Update â€” Email Sent",
+                          "type":  "n8n-nodes-base.googleSheets",
+                          "typeVersion":  4,
+                          "position":  [
+                                           3080,
+                                           480
+                                       ],
+                          "parameters":  {
+                                             "operation":  "update",
+                                             "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                             "sheetName":  "Leads",
+                                             "columns":  {
+                                                             "mappingMode":  "defineBelow",
+                                                             "value":  {
+                                                                           "lead_id":  "={{ $json.lead_id }}",
+                                                                           "status":  "invalid_phone_ai_email_sent",
+                                                                           "last_updated":  "={{ new Date().toISOString() }}"
+                                                                       }
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfa-021",
+                          "name":  "Slack â€” Email Sent (Invalid Phone)",
+                          "type":  "n8n-nodes-base.slack",
+                          "typeVersion":  2,
+                          "position":  [
+                                           3300,
+                                           480
+                                       ],
+                          "parameters":  {
+                                             "authentication":  "oAuth2",
+                                             "channel":  "#leads-live",
+                                             "text":  "=:email: *Lead â€” AI Email Sent (Invalid Phone)*\n\n:bust_in_silhouette: *Name:* {{ $(\u0027Check Business Hours\u0027).first().json.full_name }}\n:envelope: *Email:* {{ $json.email }}\n:moneybag: *Property:* ${{ $json.property_value }}\n:id: *Lead ID:* {{ $json.lead_id }}\n:warning: Phone validation failed â€” email outreach triggered."
+                                         }
+                      },
+                      {
+                          "id":  "wfa-022",
+                          "name":  "CRM Update â€” Dead Lead",
+                          "type":  "n8n-nodes-base.googleSheets",
+                          "typeVersion":  4,
+                          "position":  [
+                                           2420,
+                                           680
+                                       ],
+                          "parameters":  {
+                                             "operation":  "update",
+                                             "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                             "sheetName":  "Leads",
+                                             "columns":  {
+                                                             "mappingMode":  "defineBelow",
+                                                             "value":  {
+                                                                           "lead_id":  "={{ $(\u0027Check Business Hours\u0027).first().json.lead_id }}",
+                                                                           "status":  "dead_lead_invalid_phone_and_email",
+                                                                           "last_updated":  "={{ new Date().toISOString() }}"
+                                                                       }
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfa-023",
+                          "name":  "Slack â€” Dead Lead Alert (Ops)",
+                          "type":  "n8n-nodes-base.slack",
+                          "typeVersion":  2,
+                          "position":  [
+                                           2640,
+                                           680
+                                       ],
+                          "parameters":  {
+                                             "authentication":  "oAuth2",
+                                             "channel":  "#ops-alerts",
+                                             "text":  "=:skull: *Dead Lead â€” Both Phone \u0026 Email Invalid*\n\n:bust_in_silhouette: *Name:* {{ $(\u0027Check Business Hours\u0027).first().json.full_name }}\n:id: *Lead ID:* {{ $(\u0027Check Business Hours\u0027).first().json.lead_id }}\n:pushpin: *Source:* {{ $(\u0027Check Business Hours\u0027).first().json.source }}\n\nNo further action possible. Check lead source quality."
+                                         }
+                      }
+                  ],
+        "connections":  {
+                            "Lead Form Webhook":  {
+                                                      "main":  [
+                                                                   [
+                                                                       {
+                                                                           "node":  "Schema Guard \u0026 Dedup",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ]
+                                                               ]
+                                                  },
+                            "Schema Guard \u0026 Dedup":  {
+                                                              "main":  [
+                                                                           [
+                                                                               {
+                                                                                   "node":  "Normalize \u0026 Score Lead",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               }
+                                                                           ]
+                                                                       ]
+                                                          },
+                            "Normalize \u0026 Score Lead":  {
+                                                                "main":  [
+                                                                             [
+                                                                                 {
+                                                                                     "node":  "Verify Phone (Abstract API)",
+                                                                                     "type":  "main",
+                                                                                     "index":  0
+                                                                                 }
+                                                                             ]
+                                                                         ]
+                                                            },
+                            "Verify Phone (Abstract API)":  {
+                                                                "main":  [
+                                                                             [
+                                                                                 {
+                                                                                     "node":  "Merge Phone Verification",
+                                                                                     "type":  "main",
+                                                                                     "index":  0
+                                                                                 }
+                                                                             ]
+                                                                         ]
+                                                            },
+                            "Merge Phone Verification":  {
+                                                             "main":  [
+                                                                          [
+                                                                              {
+                                                                                  "node":  "Check Business Hours",
+                                                                                  "type":  "main",
+                                                                                  "index":  0
+                                                                              }
+                                                                          ]
+                                                                      ]
+                                                         },
+                            "Check Business Hours":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Upsert Lead to CRM",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                            "Upsert Lead to CRM":  {
+                                                       "main":  [
+                                                                    [
+                                                                        {
+                                                                            "node":  "Route by Phone Validity",
+                                                                            "type":  "main",
+                                                                            "index":  0
+                                                                        }
+                                                                    ]
+                                                                ]
+                                                   },
+                            "Route by Phone Validity":  {
+                                                            "main":  [
+                                                                         [
+                                                                             {
+                                                                                 "node":  "Can Call Right Now?",
+                                                                                 "type":  "main",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ],
+                                                                         [
+                                                                             {
+                                                                                 "node":  "Validate Email (Abstract API)",
+                                                                                 "type":  "main",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ]
+                                                                     ]
+                                                        },
+                            "Can Call Right Now?":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Trigger Retell â€” Attempt 1",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ],
+                                                                     [
+                                                                         {
+                                                                             "node":  "Wait Until Business Hours",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    },
+                            "Wait Until Business Hours":  {
+                                                              "main":  [
+                                                                           [
+                                                                               {
+                                                                                   "node":  "Trigger Retell â€” Attempt 1",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               }
+                                                                           ]
+                                                                       ]
+                                                          },
+                            "Trigger Retell â€” Attempt 1":  {
+                                                                 "main":  [
+                                                                              [
+                                                                                  {
+                                                                                      "node":  "Log Call Initiated \u0026 Update CRM",
+                                                                                      "type":  "main",
+                                                                                      "index":  0
+                                                                                  }
+                                                                              ]
+                                                                          ]
+                                                             },
+                            "Log Call Initiated \u0026 Update CRM":  {
+                                                                         "main":  [
+                                                                                      [
+                                                                                          {
+                                                                                              "node":  "CRM Update â€” Call Initiated",
+                                                                                              "type":  "main",
+                                                                                              "index":  0
+                                                                                          }
+                                                                                      ]
+                                                                                  ]
+                                                                     },
+                            "CRM Update â€” Call Initiated":  {
+                                                                  "main":  [
+                                                                               [
+                                                                                   {
+                                                                                       "node":  "Slack â€” New Lead Incoming",
+                                                                                       "type":  "main",
+                                                                                       "index":  0
+                                                                                   }
+                                                                               ]
+                                                                           ]
+                                                              },
+                            "Validate Email (Abstract API)":  {
+                                                                  "main":  [
+                                                                               [
+                                                                                   {
+                                                                                       "node":  "Route by Email Validity",
+                                                                                       "type":  "main",
+                                                                                       "index":  0
+                                                                                   }
+                                                                               ]
+                                                                           ]
+                                                              },
+                            "Route by Email Validity":  {
+                                                            "main":  [
+                                                                         [
+                                                                             {
+                                                                                 "node":  "Generate AI Email (Gemini)",
+                                                                                 "type":  "main",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ],
+                                                                         [
+                                                                             {
+                                                                                 "node":  "CRM Update â€” Dead Lead",
+                                                                                 "type":  "main",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ]
+                                                                     ]
+                                                        },
+                            "Generate AI Email (Gemini)":  {
+                                                               "main":  [
+                                                                            [
+                                                                                {
+                                                                                    "node":  "Sanitize LLM Output",
+                                                                                    "type":  "main",
+                                                                                    "index":  0
+                                                                                }
+                                                                            ]
+                                                                        ]
+                                                           },
+                            "Sanitize LLM Output":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Send AI Email (Invalid Phone)",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    },
+                            "Send AI Email (Invalid Phone)":  {
+                                                                  "main":  [
+                                                                               [
+                                                                                   {
+                                                                                       "node":  "CRM Update â€” Email Sent",
+                                                                                       "type":  "main",
+                                                                                       "index":  0
+                                                                                   }
+                                                                               ]
+                                                                           ]
+                                                              },
+                            "CRM Update â€” Email Sent":  {
+                                                              "main":  [
+                                                                           [
+                                                                               {
+                                                                                   "node":  "Slack â€” Email Sent (Invalid Phone)",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               }
+                                                                           ]
+                                                                       ]
+                                                          },
+                            "CRM Update â€” Dead Lead":  {
+                                                             "main":  [
+                                                                          [
+                                                                              {
+                                                                                  "node":  "Slack â€” Dead Lead Alert (Ops)",
+                                                                                  "type":  "main",
+                                                                                  "index":  0
+                                                                              }
+                                                                          ]
+                                                                      ]
+                                                         }
+                        },
+        "settings":  {
+                         "executionOrder":  "v1",
+                         "saveManualExecutions":  true,
+                         "callerPolicy":  "workflowsFromSameOwner"
+                     },
+        "versionId":  "aria-wfa-v3-master",
+        "id":  "aria-workflow-a-v3",
+        "tags":  [
+                     {
+                         "id":  "tag-001",
+                         "name":  "production"
+                     },
+                     {
+                         "id":  "tag-002",
+                         "name":  "lead-intake"
+                     },
+                     {
+                         "id":  "tag-003",
+                         "name":  "aria-v3"
+                     }
+                 ]
+    },
+    {
+        "name":  "Aria â€” WORKFLOW B: Retell Call Webhook Handler (v3 Master)",
+        "nodes":  [
+                      {
+                          "id":  "wfb-001",
+                          "name":  "Retell Call Webhook",
+                          "type":  "n8n-nodes-base.webhook",
+                          "typeVersion":  2,
+                          "position":  [
+                                           200,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "httpMethod":  "POST",
+                                             "path":  "aria-retell-callback",
+                                             "responseMode":  "immediately",
+                                             "responseData":  "noData"
+                                         },
+                          "webhookId":  "aria-retell-v3"
+                      },
+                      {
+                          "id":  "wfb-002",
+                          "name":  "Validate \u0026 Classify Call Outcome",
+                          "type":  "n8n-nodes-base.code",
+                          "typeVersion":  2,
+                          "position":  [
+                                           420,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "jsCode":  "const body = $input.first().json || {};\n\nconst call_id = body.call_id || \u0027\u0027;\nconst call_status = body.call_status || \u0027unknown\u0027;\nconst disconnection_reason = body.disconnection_reason || \u0027unknown\u0027;\nconst call_duration_sec = body.call_length_second || 0;\nconst call_analysis = body.call_analysis || {};\n\n// Retell echoes back whatever we put in retell_llm_dynamic_variables\nconst dynVars = body.retell_llm_dynamic_variables || {};\nconst lead_id = dynVars.lead_id || \u0027\u0027;\nconst attempt_number = parseInt(dynVars.attempt_number || \u00271\u0027, 10);\nconst customer_name = dynVars.customer_name || \u0027Unknown\u0027;\nconst property_value = dynVars.property_value || \u0027undisclosed\u0027;\n\n// Enforce contract\nif (!call_id) throw new Error(`WEBHOOK_MISSING_CALL_ID: body=${JSON.stringify(body).slice(0,200)}`);\nif (!lead_id) throw new Error(`WEBHOOK_MISSING_LEAD_ID: Retell did not echo back lead_id. check dynamic variables in Workflow A.`);\n\n// OUTCOME CLASSIFICATION\n// \u0027answered\u0027 = call ended AND the human actually picked up\n// \u0027voicemail\u0027 = call ended but hit voicemail\n// \u0027no_answer\u0027 = call ended, no one answered\n// \u0027error\u0027 = retell-side error (credits, carrier reject, internal failure)\n// \u0027unknown\u0027 = any unrecognised combination\nconst ANSWERED_REASONS = new Set([\u0027user_hangup\u0027, \u0027agent_hangup\u0027, \u0027call_transfer\u0027]);\nlet outcome;\nif (call_status === \u0027ended\u0027 \u0026\u0026 ANSWERED_REASONS.has(disconnection_reason)) {\n  outcome = \u0027answered\u0027;\n} else if (call_status === \u0027ended\u0027 \u0026\u0026 disconnection_reason === \u0027voicemail\u0027) {\n  outcome = \u0027voicemail\u0027;\n} else if (call_status === \u0027ended\u0027 \u0026\u0026 (disconnection_reason === \u0027no_answer\u0027 || disconnection_reason === \u0027dial_failed\u0027)) {\n  outcome = \u0027no_answer\u0027;\n} else if (call_status === \u0027error\u0027) {\n  outcome = \u0027error\u0027; // CRITICAL FIX #3: errors no longer route to voicemail retry loop\n} else {\n  outcome = \u0027unknown\u0027;\n}\n\nreturn [{ json: {\n  call_id,\n  call_status,\n  disconnection_reason,\n  call_duration_sec,\n  call_summary: call_analysis.call_summary || \u0027\u0027,\n  user_sentiment: call_analysis.user_sentiment || \u0027unknown\u0027,\n  lead_id,\n  attempt_number,\n  customer_name,\n  property_value,\n  outcome,\n  received_at: new Date().toISOString()\n}}];"
+                                         }
+                      },
+                      {
+                          "id":  "wfb-003",
+                          "name":  "Lookup Lead from CRM",
+                          "type":  "n8n-nodes-base.googleSheets",
+                          "typeVersion":  4,
+                          "position":  [
+                                           640,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "operation":  "read",
+                                             "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                             "sheetName":  "Leads",
+                                             "filtersUI":  {
+                                                               "values":  [
+                                                                              {
+                                                                                  "lookupColumn":  "lead_id",
+                                                                                  "lookupValue":  "={{ $json.lead_id }}"
+                                                                              }
+                                                                          ]
+                                                           },
+                                             "options":  {
+                                                             "returnFirstMatch":  true
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfb-004",
+                          "name":  "Merge Call Data + Lead Record",
+                          "type":  "n8n-nodes-base.code",
+                          "typeVersion":  2,
+                          "position":  [
+                                           860,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "jsCode":  "const callData = $(\u0027Validate \u0026 Classify Call Outcome\u0027).first().json;\nconst crmRow = $input.first().json || {};\n\n// Merge, preferring CRM data for lead fields (it\u0027s authoritative)\nreturn [{ json: {\n  ...callData,\n  full_name: crmRow.full_name || callData.customer_name,\n  email: crmRow.email || \u0027\u0027,\n  phone: crmRow.phone || \u0027\u0027,\n  lead_score: crmRow.lead_score || 0,\n  lead_tier: crmRow.lead_tier || \u0027C\u0027,\n  source: crmRow.source || \u0027unknown\u0027\n}}];"
+                                         }
+                      },
+                      {
+                          "id":  "wfb-005",
+                          "name":  "Route by Call Outcome",
+                          "type":  "n8n-nodes-base.switch",
+                          "typeVersion":  3,
+                          "position":  [
+                                           1080,
+                                           300
+                                       ],
+                          "parameters":  {
+                                             "mode":  "rules",
+                                             "rules":  {
+                                                           "rules":  [
+                                                                         {
+                                                                             "conditions":  {
+                                                                                                "conditions":  [
+                                                                                                                   {
+                                                                                                                       "leftValue":  "={{ $json.outcome }}",
+                                                                                                                       "rightValue":  "answered",
+                                                                                                                       "operator":  {
+                                                                                                                                        "type":  "string",
+                                                                                                                                        "operation":  "equals"
+                                                                                                                                    }
+                                                                                                                   }
+                                                                                                               ],
+                                                                                                "combinator":  "and"
+                                                                                            },
+                                                                             "renameOutput":  true,
+                                                                             "outputKey":  "answered"
+                                                                         },
+                                                                         {
+                                                                             "conditions":  {
+                                                                                                "conditions":  [
+                                                                                                                   {
+                                                                                                                       "leftValue":  "={{ $json.outcome }}",
+                                                                                                                       "rightValue":  "voicemail",
+                                                                                                                       "operator":  {
+                                                                                                                                        "type":  "string",
+                                                                                                                                        "operation":  "equals"
+                                                                                                                                    }
+                                                                                                                   }
+                                                                                                               ],
+                                                                                                "combinator":  "and"
+                                                                                            },
+                                                                             "renameOutput":  true,
+                                                                             "outputKey":  "voicemail"
+                                                                         },
+                                                                         {
+                                                                             "conditions":  {
+                                                                                                "conditions":  [
+                                                                                                                   {
+                                                                                                                       "leftValue":  "={{ $json.outcome }}",
+                                                                                                                       "rightValue":  "no_answer",
+                                                                                                                       "operator":  {
+                                                                                                                                        "type":  "string",
+                                                                                                                                        "operation":  "equals"
+                                                                                                                                    }
+                                                                                                                   }
+                                                                                                               ],
+                                                                                                "combinator":  "and"
+                                                                                            },
+                                                                             "renameOutput":  true,
+                                                                             "outputKey":  "no_answer"
+                                                                         },
+                                                                         {
+                                                                             "conditions":  {
+                                                                                                "conditions":  [
+                                                                                                                   {
+                                                                                                                       "leftValue":  "={{ $json.outcome }}",
+                                                                                                                       "rightValue":  "error",
+                                                                                                                       "operator":  {
+                                                                                                                                        "type":  "string",
+                                                                                                                                        "operation":  "equals"
+                                                                                                                                    }
+                                                                                                                   }
+                                                                                                               ],
+                                                                                                "combinator":  "and"
+                                                                                            },
+                                                                             "renameOutput":  true,
+                                                                             "outputKey":  "error"
+                                                                         }
+                                                                     ]
+                                                       },
+                                             "options":  {
+                                                             "fallbackOutput":  "extra"
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfb-006",
+                          "name":  "CRM Update â€” Call Answered",
+                          "type":  "n8n-nodes-base.googleSheets",
+                          "typeVersion":  4,
+                          "position":  [
+                                           1320,
+                                           60
+                                       ],
+                          "parameters":  {
+                                             "operation":  "update",
+                                             "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                             "sheetName":  "Leads",
+                                             "columns":  {
+                                                             "mappingMode":  "defineBelow",
+                                                             "value":  {
+                                                                           "lead_id":  "={{ $json.lead_id }}",
+                                                                           "status":  "=call_answered_attempt_{{ $json.attempt_number }}",
+                                                                           "call_id":  "={{ $json.call_id }}",
+                                                                           "call_duration_sec":  "={{ $json.call_duration_sec }}",
+                                                                           "call_summary":  "={{ $json.call_summary }}",
+                                                                           "user_sentiment":  "={{ $json.user_sentiment }}",
+                                                                           "last_updated":  "={{ new Date().toISOString() }}"
+                                                                       }
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfb-007",
+                          "name":  "Slack â€” HOT LEAD Answered",
+                          "type":  "n8n-nodes-base.slack",
+                          "typeVersion":  2,
+                          "position":  [
+                                           1540,
+                                           60
+                                       ],
+                          "parameters":  {
+                                             "authentication":  "oAuth2",
+                                             "channel":  "#leads-live",
+                                             "text":  "=:fire: *HOT LEAD â€” Call Answered (Attempt {{ $json.attempt_number }})*\n\n:bust_in_silhouette: *Name:* {{ $json.full_name }}\n:star: *Tier:* {{ $json.lead_tier }} | Score: {{ $json.lead_score }}/100\n:telephone_receiver: *Phone:* {{ $json.phone }}\n:moneybag: *Property:* ${{ $json.property_value }}\n:stopwatch: *Duration:* {{ $json.call_duration_sec }}s\n:bar_chart: *Sentiment:* {{ $json.user_sentiment }}\n:speech_balloon: *Summary:* {{ $json.call_summary || \u0027No summary available\u0027 }}\n:id: *Lead ID:* {{ $json.lead_id }}\n\n@here â€” Follow up NOW while they are warm."
+                                         }
+                      },
+                      {
+                          "id":  "wfb-008",
+                          "name":  "Prepare Retry Config (Voicemail)",
+                          "type":  "n8n-nodes-base.code",
+                          "typeVersion":  2,
+                          "position":  [
+                                           1320,
+                                           220
+                                       ],
+                          "parameters":  {
+                                             "jsCode":  "const d = $input.first().json;\nconst next_attempt = d.attempt_number + 1;\n// Attempt 1â†’2: wait 2 hours. Attempt 2â†’3: wait 24 hours.\nconst wait_hours = d.attempt_number === 1 ? 2 : 24;\nconst script_hook = next_attempt === 2 ? \u0027second_contact\u0027 : \u0027final_contact\u0027;\nconst attempts_exhausted = d.attempt_number \u003e= 3;\nreturn [{ json: { ...d, next_attempt, wait_hours, script_hook, attempts_exhausted } }];"
+                                         }
+                      },
+                      {
+                          "id":  "wfb-008b",
+                          "name":  "Prepare Retry Config (No Answer)",
+                          "type":  "n8n-nodes-base.code",
+                          "typeVersion":  2,
+                          "position":  [
+                                           1320,
+                                           340
+                                       ],
+                          "parameters":  {
+                                             "jsCode":  "const d = $input.first().json;\nconst next_attempt = d.attempt_number + 1;\nconst wait_hours = d.attempt_number === 1 ? 2 : 24;\nconst script_hook = next_attempt === 2 ? \u0027second_contact\u0027 : \u0027final_contact\u0027;\nconst attempts_exhausted = d.attempt_number \u003e= 3;\nreturn [{ json: { ...d, next_attempt, wait_hours, script_hook, attempts_exhausted } }];"
+                                         }
+                      },
+                      {
+                          "id":  "wfb-009",
+                          "name":  "Merge No-Contact Paths",
+                          "type":  "n8n-nodes-base.merge",
+                          "typeVersion":  3,
+                          "position":  [
+                                           1540,
+                                           280
+                                       ],
+                          "parameters":  {
+                                             "mode":  "passThrough",
+                                             "output":  "input1"
+                                         }
+                      },
+                      {
+                          "id":  "wfb-010",
+                          "name":  "Are Attempts Exhausted?",
+                          "type":  "n8n-nodes-base.if",
+                          "typeVersion":  2,
+                          "position":  [
+                                           1760,
+                                           280
+                                       ],
+                          "parameters":  {
+                                             "conditions":  {
+                                                                "conditions":  [
+                                                                                   {
+                                                                                       "id":  "cond-exhausted",
+                                                                                       "leftValue":  "={{ $json.attempts_exhausted }}",
+                                                                                       "rightValue":  true,
+                                                                                       "operator":  {
+                                                                                                        "type":  "boolean",
+                                                                                                        "operation":  "true"
+                                                                                                    }
+                                                                                   }
+                                                                               ],
+                                                                "combinator":  "and"
+                                                            }
+                                         }
+                      },
+                      {
+                          "id":  "wfb-011",
+                          "name":  "Wait Before Next Attempt",
+                          "type":  "n8n-nodes-base.wait",
+                          "typeVersion":  1,
+                          "position":  [
+                                           1980,
+                                           160
+                                       ],
+                          "parameters":  {
+                                             "amount":  "={{ $json.wait_hours }}",
+                                             "unit":  "hours"
+                                         },
+                          "webhookId":  "wfb-retry-wait"
+                      },
+                      {
+                          "id":  "wfb-012",
+                          "name":  "Trigger Retell â€” Next Attempt",
+                          "type":  "n8n-nodes-base.httpRequest",
+                          "typeVersion":  4,
+                          "position":  [
+                                           2200,
+                                           160
+                                       ],
+                          "parameters":  {
+                                             "method":  "POST",
+                                             "url":  "https://api.retellai.com/v2/create-phone-call",
+                                             "sendHeaders":  true,
+                                             "headerParameters":  {
+                                                                      "parameters":  [
+                                                                                         {
+                                                                                             "name":  "Authorization",
+                                                                                             "value":  "=Bearer {{ $env.RETELL_API_KEY }}"
+                                                                                         },
+                                                                                         {
+                                                                                             "name":  "Content-Type",
+                                                                                             "value":  "application/json"
+                                                                                         }
+                                                                                     ]
+                                                                  },
+                                             "sendBody":  true,
+                                             "specifyBody":  "json",
+                                             "jsonBody":  "={\n  \"from_number\": \"{{ $env.RETELL_FROM_NUMBER }}\",\n  \"to_number\": \"{{ $json.phone }}\",\n  \"agent_id\": \"{{ $env.RETELL_AGENT_ID }}\",\n  \"retell_llm_dynamic_variables\": {\n    \"customer_name\": \"{{ $json.full_name }}\",\n    \"property_value\": \"{{ $json.property_value }}\",\n    \"lead_tier\": \"{{ $json.lead_tier }}\",\n    \"script_hook\": \"{{ $json.script_hook }}\",\n    \"lead_id\": \"{{ $json.lead_id }}\",\n    \"attempt_number\": \"{{ $json.next_attempt }}\"\n  }\n}",
+                                             "options":  {
+                                                             "timeout":  15000
+                                                         },
+                                             "retryOnFail":  true,
+                                             "maxTries":  3,
+                                             "waitBetweenTries":  5000
+                                         }
+                      },
+                      {
+                          "id":  "wfb-013",
+                          "name":  "CRM Update â€” Next Attempt Scheduled",
+                          "type":  "n8n-nodes-base.googleSheets",
+                          "typeVersion":  4,
+                          "position":  [
+                                           2420,
+                                           160
+                                       ],
+                          "parameters":  {
+                                             "operation":  "update",
+                                             "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                             "sheetName":  "Leads",
+                                             "columns":  {
+                                                             "mappingMode":  "defineBelow",
+                                                             "value":  {
+                                                                           "lead_id":  "={{ $json.lead_id }}",
+                                                                           "status":  "=call_initiated_attempt_{{ $json.next_attempt }}",
+                                                                           "last_updated":  "={{ new Date().toISOString() }}"
+                                                                       }
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfb-014",
+                          "name":  "Generate Exhausted Fallback Email",
+                          "type":  "@n8n/n8n-nodes-langchain.chainLlm",
+                          "typeVersion":  1,
+                          "position":  [
+                                           1980,
+                                           400
+                                       ],
+                          "parameters":  {
+                                             "promptType":  "define",
+                                             "text":  "=You are an elite real estate broker assistant writing a last-chance outreach email to a lead we could not reach by phone after 3 attempts.\n\nLead details:\n- Name: {{ $json.full_name }}\n- Property Interest: ${{ $json.property_value }}\n- Tier: {{ $json.lead_tier }}\n\nWrite a warm, personalised HTML email body. Do NOT mention phone calls or failed attempts. Express genuine interest. Keep under 110 words. Offer to connect on their schedule.\n\nOUTPUT CONTRACT:\n1. First character MUST be \u003c (an HTML tag, no preamble)\n2. No ```html fences, no markdown, no subject line\n3. Close with a proper HTML block tag\n\nBegin HTML now:"
+                                         }
+                      },
+                      {
+                          "id":  "wfb-015",
+                          "name":  "Sanitize Fallback Email LLM Output",
+                          "type":  "n8n-nodes-base.code",
+                          "typeVersion":  2,
+                          "position":  [
+                                           2200,
+                                           400
+                                       ],
+                          "parameters":  {
+                                             "jsCode":  "const raw = ($input.first().json.text || \u0027\u0027).trim();\nconst lead = $(\u0027Merge Call Data + Lead Record\u0027).first().json;\n\nlet html = raw.replace(/```[a-z]*\\s*/gi, \u0027\u0027).replace(/```/g, \u0027\u0027).trim();\nconst firstTag = html.indexOf(\u0027\u003c\u0027);\nif (firstTag \u003e 0) html = html.slice(firstTag);\n\nconst hasHtml = /\u003c[a-z][^\u003e]*\u003e/i.test(html);\nconst firstName = lead.full_name.split(\u0027 \u0027)[0];\n\nif (!hasHtml || html.length \u003c 50) {\n  html = `\u003cp\u003eDear ${firstName},\u003c/p\u003e\u003cp\u003eWe\u0027ve been trying to connect with you regarding your property interest at the $${lead.property_value} level. We\u0027d love to help â€” please book a time that works for you.\u003c/p\u003e`;\n}\n\nreturn [{ json: { ...lead, sanitized_fallback_html: html, first_name: firstName } }];"
+                                         }
+                      },
+                      {
+                          "id":  "wfb-016",
+                          "name":  "Send Fallback Email (3 Strikes)",
+                          "type":  "n8n-nodes-base.gmail",
+                          "typeVersion":  2,
+                          "position":  [
+                                           2420,
+                                           400
+                                       ],
+                          "parameters":  {
+                                             "sendTo":  "={{ $json.email }}",
+                                             "subject":  "=We\u0027d love to connect, {{ $json.first_name }}",
+                                             "emailType":  "html",
+                                             "message":  "={{ $json.sanitized_fallback_html }}\u003cbr\u003e\u003cbr\u003e\u003ca href=\"{{ $env.CALENDAR_LINK }}\" style=\"display:inline-block;background:#1a1a2e;color:#fff;padding:13px 28px;border-radius:5px;text-decoration:none;font-family:Arial,sans-serif;\"\u003eBook at Your Convenience â†’\u003c/a\u003e"
+                                         }
+                      },
+                      {
+                          "id":  "wfb-017",
+                          "name":  "CRM Update â€” All Attempts Exhausted",
+                          "type":  "n8n-nodes-base.googleSheets",
+                          "typeVersion":  4,
+                          "position":  [
+                                           2640,
+                                           400
+                                       ],
+                          "parameters":  {
+                                             "operation":  "update",
+                                             "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                             "sheetName":  "Leads",
+                                             "columns":  {
+                                                             "mappingMode":  "defineBelow",
+                                                             "value":  {
+                                                                           "lead_id":  "={{ $json.lead_id }}",
+                                                                           "status":  "exhausted_all_attempts_fallback_email_sent",
+                                                                           "last_updated":  "={{ new Date().toISOString() }}"
+                                                                       }
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfb-018",
+                          "name":  "Slack â€” Lead Exhausted",
+                          "type":  "n8n-nodes-base.slack",
+                          "typeVersion":  2,
+                          "position":  [
+                                           2860,
+                                           400
+                                       ],
+                          "parameters":  {
+                                             "authentication":  "oAuth2",
+                                             "channel":  "#leads-live",
+                                             "text":  "=:zzz: *Lead Exhausted â€” 3 No-Answers + Fallback Email Sent*\n\n:bust_in_silhouette: *Name:* {{ $json.full_name }}\n:star: *Tier:* {{ $json.lead_tier }}\n:moneybag: *Property:* ${{ $json.property_value }}\n:id: *Lead ID:* {{ $json.lead_id }}\n\nFallback email sent. Consider manual outreach if Tier A."
+                                         }
+                      },
+                      {
+                          "id":  "wfb-019",
+                          "name":  "Slack â€” CRITICAL: Retell Error",
+                          "type":  "n8n-nodes-base.slack",
+                          "typeVersion":  2,
+                          "position":  [
+                                           1320,
+                                           520
+                                       ],
+                          "parameters":  {
+                                             "authentication":  "oAuth2",
+                                             "channel":  "#ops-alerts",
+                                             "text":  "=:rotating_light: *CRITICAL â€” Retell Call Error (NOT a voicemail)*\n\nRetell returned `call_status=error` for a call â€” this is a SYSTEM failure, not a lead behaviour.\n\n:id: *Call ID:* {{ $json.call_id }}\n:bust_in_silhouette: *Lead:* {{ $json.full_name }} ({{ $json.lead_id }})\n:warning: *Disconnection Reason:* {{ $json.disconnection_reason }}\n:repeat: *Attempt:* {{ $json.attempt_number }}\n\nPossible causes: Retell credits exhausted, carrier block, invalid E.164 number, Retell API outage.\n\n*Immediate action required. This lead has NOT been retried.*"
+                                         }
+                      },
+                      {
+                          "id":  "wfb-020",
+                          "name":  "CRM Update â€” Call Error",
+                          "type":  "n8n-nodes-base.googleSheets",
+                          "typeVersion":  4,
+                          "position":  [
+                                           1540,
+                                           520
+                                       ],
+                          "parameters":  {
+                                             "operation":  "update",
+                                             "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                             "sheetName":  "Leads",
+                                             "columns":  {
+                                                             "mappingMode":  "defineBelow",
+                                                             "value":  {
+                                                                           "lead_id":  "={{ $json.lead_id }}",
+                                                                           "status":  "=retell_error_attempt_{{ $json.attempt_number }}_manual_review_required",
+                                                                           "last_updated":  "={{ new Date().toISOString() }}"
+                                                                       }
+                                                         }
+                                         }
+                      },
+                      {
+                          "id":  "wfb-021",
+                          "name":  "Slack â€” Unknown Call State (Ops)",
+                          "type":  "n8n-nodes-base.slack",
+                          "typeVersion":  2,
+                          "position":  [
+                                           1320,
+                                           680
+                                       ],
+                          "parameters":  {
+                                             "authentication":  "oAuth2",
+                                             "channel":  "#ops-alerts",
+                                             "text":  "=:question: *Unknown Retell Call State â€” Needs Manual Review*\n\n:id: *Call ID:* {{ $json.call_id }}\n:bust_in_silhouette: *Lead:* {{ $json.lead_id }}\n:warning: *call_status:* {{ $json.call_status }}\n:warning: *disconnection_reason:* {{ $json.disconnection_reason }}\n:repeat: *Attempt:* {{ $json.attempt_number }}\n\nThis state is not in our routing logic. Lead has been paused pending manual review."
+                                         }
+                      },
+                      {
+                          "id":  "wfb-022",
+                          "name":  "CRM Update â€” Unknown State",
+                          "type":  "n8n-nodes-base.googleSheets",
+                          "typeVersion":  4,
+                          "position":  [
+                                           1540,
+                                           680
+                                       ],
+                          "parameters":  {
+                                             "operation":  "update",
+                                             "documentId":  "={{ $env.GOOGLE_SHEET_ID }}",
+                                             "sheetName":  "Leads",
+                                             "columns":  {
+                                                             "mappingMode":  "defineBelow",
+                                                             "value":  {
+                                                                           "lead_id":  "={{ $json.lead_id }}",
+                                                                           "status":  "=unknown_state_manual_review",
+                                                                           "last_updated":  "={{ new Date().toISOString() }}"
+                                                                       }
+                                                         }
+                                         }
+                      }
+                  ],
+        "connections":  {
+                            "Retell Call Webhook":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Validate \u0026 Classify Call Outcome",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    },
+                            "Validate \u0026 Classify Call Outcome":  {
+                                                                          "main":  [
+                                                                                       [
+                                                                                           {
+                                                                                               "node":  "Lookup Lead from CRM",
+                                                                                               "type":  "main",
+                                                                                               "index":  0
+                                                                                           }
+                                                                                       ]
+                                                                                   ]
+                                                                      },
+                            "Lookup Lead from CRM":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Merge Call Data + Lead Record",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                            "Merge Call Data + Lead Record":  {
+                                                                  "main":  [
+                                                                               [
+                                                                                   {
+                                                                                       "node":  "Route by Call Outcome",
+                                                                                       "type":  "main",
+                                                                                       "index":  0
+                                                                                   }
+                                                                               ]
+                                                                           ]
+                                                              },
+                            "Route by Call Outcome":  {
+                                                          "main":  [
+                                                                       [
+                                                                           {
+                                                                               "node":  "CRM Update â€” Call Answered",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ],
+                                                                       [
+                                                                           {
+                                                                               "node":  "Prepare Retry Config (Voicemail)",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ],
+                                                                       [
+                                                                           {
+                                                                               "node":  "Prepare Retry Config (No Answer)",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ],
+                                                                       [
+                                                                           {
+                                                                               "node":  "Slack â€” CRITICAL: Retell Error",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ],
+                                                                       [
+                                                                           {
+                                                                               "node":  "Slack â€” Unknown Call State (Ops)",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ]
+                                                                   ]
+                                                      },
+                            "CRM Update â€” Call Answered":  {
+                                                                 "main":  [
+                                                                              [
+                                                                                  {
+                                                                                      "node":  "Slack â€” HOT LEAD Answered",
+                                                                                      "type":  "main",
+                                                                                      "index":  0
+                                                                                  }
+                                                                              ]
+                                                                          ]
+                                                             },
+                            "Prepare Retry Config (Voicemail)":  {
+                                                                     "main":  [
+                                                                                  [
+                                                                                      {
+                                                                                          "node":  "Merge No-Contact Paths",
+                                                                                          "type":  "main",
+                                                                                          "index":  0
+                                                                                      }
+                                                                                  ]
+                                                                              ]
+                                                                 },
+                            "Prepare Retry Config (No Answer)":  {
+                                                                     "main":  [
+                                                                                  [
+                                                                                      {
+                                                                                          "node":  "Merge No-Contact Paths",
+                                                                                          "type":  "main",
+                                                                                          "index":  1
+                                                                                      }
+                                                                                  ]
+                                                                              ]
+                                                                 },
+                            "Merge No-Contact Paths":  {
+                                                           "main":  [
+                                                                        [
+                                                                            {
+                                                                                "node":  "Are Attempts Exhausted?",
+                                                                                "type":  "main",
+                                                                                "index":  0
+                                                                            }
+                                                                        ]
+                                                                    ]
+                                                       },
+                            "Are Attempts Exhausted?":  {
+                                                            "main":  [
+                                                                         [
+                                                                             {
+                                                                                 "node":  "Generate Exhausted Fallback Email",
+                                                                                 "type":  "main",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ],
+                                                                         [
+                                                                             {
+                                                                                 "node":  "Wait Before Next Attempt",
+                                                                                 "type":  "main",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ]
+                                                                     ]
+                                                        },
+                            "Wait Before Next Attempt":  {
+                                                             "main":  [
+                                                                          [
+                                                                              {
+                                                                                  "node":  "Trigger Retell â€” Next Attempt",
+                                                                                  "type":  "main",
+                                                                                  "index":  0
+                                                                              }
+                                                                          ]
+                                                                      ]
+                                                         },
+                            "Trigger Retell â€” Next Attempt":  {
+                                                                    "main":  [
+                                                                                 [
+                                                                                     {
+                                                                                         "node":  "CRM Update â€” Next Attempt Scheduled",
+                                                                                         "type":  "main",
+                                                                                         "index":  0
+                                                                                     }
+                                                                                 ]
+                                                                             ]
+                                                                },
+                            "Generate Exhausted Fallback Email":  {
+                                                                      "main":  [
+                                                                                   [
+                                                                                       {
+                                                                                           "node":  "Sanitize Fallback Email LLM Output",
+                                                                                           "type":  "main",
+                                                                                           "index":  0
+                                                                                       }
+                                                                                   ]
+                                                                               ]
+                                                                  },
+                            "Sanitize Fallback Email LLM Output":  {
+                                                                       "main":  [
+                                                                                    [
+                                                                                        {
+                                                                                            "node":  "Send Fallback Email (3 Strikes)",
+                                                                                            "type":  "main",
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ]
+                                                                                ]
+                                                                   },
+                            "Send Fallback Email (3 Strikes)":  {
+                                                                    "main":  [
+                                                                                 [
+                                                                                     {
+                                                                                         "node":  "CRM Update â€” All Attempts Exhausted",
+                                                                                         "type":  "main",
+                                                                                         "index":  0
+                                                                                     }
+                                                                                 ]
+                                                                             ]
+                                                                },
+                            "CRM Update â€” All Attempts Exhausted":  {
+                                                                          "main":  [
+                                                                                       [
+                                                                                           {
+                                                                                               "node":  "Slack â€” Lead Exhausted",
+                                                                                               "type":  "main",
+                                                                                               "index":  0
+                                                                                           }
+                                                                                       ]
+                                                                                   ]
+                                                                      },
+                            "Slack â€” CRITICAL: Retell Error":  {
+                                                                     "main":  [
+                                                                                  [
+                                                                                      {
+                                                                                          "node":  "CRM Update â€” Call Error",
+                                                                                          "type":  "main",
+                                                                                          "index":  0
+                                                                                      }
+                                                                                  ]
+                                                                              ]
+                                                                 },
+                            "Slack â€” Unknown Call State (Ops)":  {
+                                                                       "main":  [
+                                                                                    [
+                                                                                        {
+                                                                                            "node":  "CRM Update â€” Unknown State",
+                                                                                            "type":  "main",
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ]
+                                                                                ]
+                                                                   }
+                        },
+        "settings":  {
+                         "executionOrder":  "v1",
+                         "saveManualExecutions":  true,
+                         "callerPolicy":  "workflowsFromSameOwner"
+                     },
+        "versionId":  "aria-wfb-v3-master",
+        "id":  "aria-workflow-b-v3",
+        "tags":  [
+                     {
+                         "id":  "tag-001",
+                         "name":  "production"
+                     },
+                     {
+                         "id":  "tag-004",
+                         "name":  "retell-webhook-handler"
+                     },
+                     {
+                         "id":  "tag-003",
+                         "name":  "aria-v3"
+                     }
+                 ]
+    }
+]
