@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Paid Ads Management — Nexora Digital</title>
+<meta name="description" content="ROI-focused paid ads management across Google, Meta & TikTok. Every ad dollar tracked and optimized for maximum conversions."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ─────────────────────────────────────────────────────────────
+   NEXORA DIGITAL  –  Paid Ads Service Page
+   Dark theme: #141516 bg · #eeb75d gold · #ffffff white
+───────────────────────────────────────────────────────────── */
+
+:root {
+  --primary:    #eeb75d;
+  --primary-dk: #d4993c;
+  --primary-lt: rgba(238,183,93,.1);
+  --gold:       #eeb75d;
+  --gold-dk:    #d4993c;
+  --bg:         #141516;
+  --ink:        #141516;
+  --charcoal:   #262626;
+  --ash:        #3d3a3a;
+  --flint:      #8F8F8F;
+  --dove:       #dedede;
+  --white:      #ffffff;
+
+  --sp-1: 0.44rem;
+  --sp-2: 0.67rem;
+  --sp-3: 1rem;
+  --sp-4: 1.5rem;
+  --sp-5: 2.25rem;
+  --sp-6: 3.38rem;
+  --sp-7: 5.06rem;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  --nav-h: 74px;
+  --content-w: 800px;
+  --wide-w: 1400px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #141516;
+  color: #ffffff;
+  line-height: 1.6;
+  padding-top: var(--nav-h);
+  overflow-x: hidden;
+}
+
+/* ── Page loader ──────────────────────────────────────────── */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #141516;
+  display: grid;
+  place-items: center;
+  transition: opacity .6s ease, visibility .6s ease;
+}
+.page-loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  opacity: 0;
+  animation: loaderFade .8s .2s ease forwards;
+}
+.loader-logo span { color: var(--primary); font-style: italic; font-weight: 400; }
+.loader-bar {
+  width: 120px;
+  height: 2px;
+  background: rgba(255,255,255,.1);
+  border-radius: 2px;
+  margin-top: 1.5rem;
+  overflow: hidden;
+}
+.loader-bar::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary);
+  animation: loaderSlide 1.2s ease forwards;
+}
+@keyframes loaderFade { to { opacity: 1; } }
+@keyframes loaderSlide { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+
+h1,h2,h3,h4,h5 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  line-height: 1.1;
+  color: #ffffff;
+}
+h1 { font-size: clamp(2.6rem, 5.5vw, 4.8rem); letter-spacing: -.02em; }
+h2 { font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -.015em; margin-bottom: var(--sp-3); }
+h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); margin-bottom: .5rem; }
+h4 { font-size: 1.15rem; }
+h1 em, h2 em { font-style: italic; color: var(--primary); }
+
+p { color: rgba(255,255,255,.7); font-size: 1rem; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* ── Utilities ─────────────────────────────────────────── */
+.w { max-width: var(--wide-w); margin: 0 auto; padding: 0 var(--sp-5); }
+.w-content { max-width: var(--content-w); margin: 0 auto; padding: 0 var(--sp-5); }
+.center { text-align: center; }
+
+.eyebrow {
+  display: inline-block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: var(--sp-2);
+}
+.eyebrow.gold { color: var(--gold-dk); }
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .85rem 1.9rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .88rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: none;
+  transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.btn:hover::before { opacity: 1; }
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--ink);
+  box-shadow: 0 4px 18px rgba(238,183,93,.35);
+}
+.btn-gold:hover {
+  background: var(--gold-dk);
+  color: #fff;
+  box-shadow: 0 8px 28px rgba(238,183,93,.45);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,.22);
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+.btn-white {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
+}
+.btn-white:hover { background: rgba(255,255,255,.9); }
+
+.btn-lg { padding: 1.05rem 2.4rem; font-size: .95rem; }
+
+/* ── Nav ────────────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: rgba(20,21,22,.85);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid rgba(238,183,93,.15);
+  z-index: 100;
+  transition: background .4s, box-shadow .4s, border-color .4s;
+}
+.nav.scrolled {
+  background: rgba(20,21,22,.95);
+  box-shadow: 0 4px 30px rgba(0,0,0,.5);
+  border-color: rgba(238,183,93,.3);
+}
+.nav-inner {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: 0 var(--sp-5);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -.02em;
+  flex-shrink: 0;
+  display: flex;
+  align-items: baseline;
+  gap: .2rem;
+}
+.nav-logo span { color: var(--primary); font-style: italic; font-weight: 400; }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex: 1;
+  justify-content: center;
+  list-style: none;
+}
+.nav-links a {
+  font-size: .88rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.7);
+  transition: color .2s;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -3px;
+  width: 0; height: 1.5px;
+  background: var(--primary);
+  transition: width .25s;
+}
+.nav-links a:hover { color: var(--primary); }
+.nav-links a:hover::after { width: 100%; }
+
+/* Services mega dropdown */
+.nav-dropdown {
+  position: static;
+}
+.nav-dropdown > a {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.nav-dropdown > a .dd-arrow {
+  display: inline-block;
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid currentColor;
+  transition: transform .25s;
+}
+.nav-dropdown:hover > a .dd-arrow { transform: rotate(180deg); }
+.nav-dropdown-menu {
+  position: absolute;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  background: rgba(14,15,16,.98);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(238,183,93,.15);
+  border-bottom: 1px solid rgba(238,183,93,.1);
+  padding: 3rem 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 200;
+  box-shadow: 0 30px 80px rgba(0,0,0,.6);
+}
+.nav-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0; right: 0;
+  height: 20px;
+}
+.nav-dropdown:hover .nav-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.nav-dropdown-grid {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: 0 var(--sp-5);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem 4rem;
+}
+.nav-dropdown-menu a {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  padding: 1.1rem 1.5rem;
+  border-radius: var(--radius-sm);
+  transition: all .2s;
+}
+.nav-dropdown-menu a::after { display: none; }
+.nav-dropdown-menu a:hover {
+  background: rgba(238,183,93,.06);
+}
+.dd-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.9);
+  transition: color .2s;
+}
+.nav-dropdown-menu a:hover .dd-title { color: var(--primary); }
+.dd-sub {
+  font-size: .85rem;
+  color: rgba(255,255,255,.4);
+  font-weight: 400;
+  line-height: 1.5;
+}
+.nav-dropdown-footer {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: 1.5rem var(--sp-5) 0;
+  border-top: 1px solid rgba(255,255,255,.06);
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.nav-dropdown-footer a {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--primary);
+  transition: color .2s;
+  padding: 0;
+}
+.nav-dropdown-footer a::after { display: none; }
+.nav-dropdown-footer a:hover { color: var(--gold-dk); }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-shrink: 0;
+}
+.nav-phone {
+  font-size: .85rem;
+  color: rgba(255,255,255,.7);
+  font-weight: 500;
+  transition: color .2s;
+}
+.nav-phone:hover { color: var(--primary); }
+
+/* Mobile hamburger */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 6px;
+  z-index: 200;
+}
+.nav-hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: transform .3s, opacity .3s;
+}
+.nav-hamburger.open span:first-child { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:last-child { transform: translateY(-7px) rotate(-45deg); }
+
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: var(--nav-h);
+  left: 0; right: 0; bottom: 0;
+  background: rgba(20,21,22,.97);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  z-index: 90;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+.mobile-menu.open { display: flex; opacity: 1; }
+.mobile-menu a {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.8);
+  transition: color .2s;
+}
+.mobile-menu a:hover { color: var(--primary); }
+.mobile-menu .btn { margin-top: 1rem; }
+
+@media (max-width: 980px) {
+  .nav-links, .nav-phone { display: none; }
+  .nav-hamburger { display: flex; }
+}
+
+/* ── Cursor glow (desktop only) ──────────────────────────── */
+.cursor-glow {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(238,183,93,.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity .3s;
+  opacity: 0;
+}
+.cursor-glow.visible { opacity: 1; }
+
+/* ── Section base ────────────────────────────────────────── */
+.section { padding: var(--sp-7) 0; }
+.section-head { margin-bottom: var(--sp-6); }
+.section-head p {
+  font-size: 1.05rem;
+  color: rgba(255,255,255,.55);
+  max-width: 52ch;
+  margin-top: .75rem;
+  line-height: 1.7;
+}
+.section-head.center p { margin: .75rem auto 0; }
+
+/* ── Hero ───────────────────────────────────────────────── */
+.hero {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  background: url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 21, 22, .45);
+  backdrop-filter: blur(3px) saturate(1.1);
+  -webkit-backdrop-filter: blur(3px) saturate(1.1);
+  z-index: 0;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.hero-bg .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .35;
+  animation: orbFloat 12s ease-in-out infinite;
+}
+.hero-bg .orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(238,183,93,.4), transparent 70%);
+  top: -15%; left: -10%;
+}
+.hero-bg .orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(82,93,220,.3), transparent 70%);
+  bottom: -20%; right: -5%;
+  animation-delay: -4s;
+  animation-duration: 15s;
+}
+.hero-bg .orb-3 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(77,190,142,.2), transparent 70%);
+  top: 40%; right: 30%;
+  animation-delay: -8s;
+  animation-duration: 18s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -40px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(.95); }
+  75% { transform: translate(40px, 30px) scale(1.03); }
+}
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(238,183,93,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(238,183,93,.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 80%);
+}
+
+.hero-inner {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: var(--sp-7) var(--sp-5);
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.hero-badge {
+  display: inline-block;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: var(--sp-3);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.hero h1 { max-width: 16ch; margin: 0 auto var(--sp-4); }
+.hero-sub {
+  font-size: 1.15rem;
+  color: rgba(255,255,255,.82);
+  max-width: 54ch;
+  margin: 0 auto var(--sp-5);
+  line-height: 1.7;
+}
+.hero-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ── Platforms Section ──────────────────────────────────── */
+.platforms { background: #141516; position: relative; }
+.platforms::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(238,183,93,.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: .5;
+}
+.platform-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 860px) { .platform-grid { grid-template-columns: 1fr; } }
+
+.platform-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem;
+  transition: all .4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.platform-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--card-accent, var(--gold));
+  opacity: 0;
+  transition: opacity .3s;
+}
+.platform-card:hover {
+  border-color: rgba(255,255,255,.15);
+  background: rgba(255,255,255,.05);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+.platform-card:hover::before { opacity: 1; }
+
+.platform-icon {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  display: grid; place-items: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.platform-card:nth-child(1) { --card-accent: #4285f4; }
+.platform-card:nth-child(1) .platform-icon { background: rgba(66,133,244,.15); }
+.platform-card:nth-child(2) { --card-accent: #e1306c; }
+.platform-card:nth-child(2) .platform-icon { background: rgba(225,48,108,.15); }
+.platform-card:nth-child(3) { --card-accent: #00f2ea; }
+.platform-card:nth-child(3) .platform-icon { background: rgba(0,242,234,.12); }
+
+.platform-card h3 { color: #fff; margin-bottom: .5rem; }
+.platform-card > p { font-size: .92rem; color: rgba(255,255,255,.55); margin-bottom: 1.25rem; }
+.platform-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+.platform-features li {
+  font-size: .88rem;
+  color: rgba(255,255,255,.65);
+  padding-left: 1.4rem;
+  position: relative;
+}
+.platform-features li::before {
+  content: '\2713';
+  position: absolute;
+  left: 0;
+  color: var(--card-accent, var(--gold));
+  font-weight: 700;
+  font-size: .8rem;
+}
+
+/* ── What's Included ───────────────────────────────────── */
+.included { background: #0f1011; position: relative; }
+.included::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(238,183,93,.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.included-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 860px) { .included-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .included-grid { grid-template-columns: 1fr; } }
+
+.included-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: var(--radius-md);
+  padding: 2rem 1.75rem;
+  transition: all .4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.included-card:hover {
+  border-color: rgba(238,183,93,.2);
+  background: rgba(255,255,255,.05);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(238,183,93,.08);
+}
+.included-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: var(--primary-lt);
+  display: grid; place-items: center;
+  font-size: 1.1rem;
+  margin-bottom: 1.25rem;
+}
+.included-card h4 { color: #fff; margin-bottom: .5rem; font-size: 1.05rem; }
+.included-card p { font-size: .88rem; color: rgba(255,255,255,.5); line-height: 1.6; }
+
+/* ── Process ───────────────────────────────────────────── */
+.process { background: #141516; }
+.process-timeline {
+  display: flex;
+  gap: 0;
+  position: relative;
+  z-index: 1;
+}
+.process-timeline::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(to right, rgba(238,183,93,.2), var(--gold) 50%, rgba(238,183,93,.2));
+  z-index: 1;
+}
+.process-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  padding: 0 .75rem;
+}
+.step-num {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: #1a1810;
+  border: 2px solid var(--gold);
+  display: grid; place-items: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin: 0 auto 1.25rem;
+  position: relative;
+  z-index: 2;
+  transition: all .3s;
+}
+.process-step:hover .step-num {
+  background: var(--gold);
+  color: var(--ink);
+  box-shadow: 0 0 24px rgba(238,183,93,.4);
+}
+.process-step h4 { color: #fff; font-size: 1rem; margin-bottom: .4rem; }
+.process-step p { font-size: .82rem; color: rgba(255,255,255,.45); line-height: 1.5; }
+
+@media (max-width: 768px) {
+  .process-timeline {
+    flex-direction: column;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+  .process-timeline::before {
+    top: 0; bottom: 0;
+    left: 23px; right: auto;
+    width: 2px; height: auto;
+  }
+  .process-step {
+    text-align: left;
+    padding-left: 4rem;
+  }
+  .step-num {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+  }
+}
+
+/* ── Results Dashboard ──────────────────────────────────── */
+.dashboard { background: #0f1011; position: relative; overflow: hidden; }
+.dashboard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(238,183,93,.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 860px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+.dash-mock {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  position: relative;
+}
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.dash-header h4 { font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 600; color: rgba(255,255,255,.7); }
+.dash-badge {
+  font-size: .7rem;
+  font-weight: 700;
+  padding: .3rem .7rem;
+  border-radius: 20px;
+  background: rgba(77,190,142,.15);
+  color: #4dbe8e;
+  letter-spacing: .05em;
+}
+.dash-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.dash-metric {
+  background: rgba(255,255,255,.04);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,.05);
+  transition: border-color .3s;
+}
+.dash-metric:hover { border-color: rgba(238,183,93,.2); }
+.dash-metric-label {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.4);
+  margin-bottom: .4rem;
+}
+.dash-metric-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.dash-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: .5rem;
+  height: 80px;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.dash-bar {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(to top, rgba(238,183,93,.3), rgba(238,183,93,.8));
+  transition: height .6s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 8px;
+}
+
+.dash-content h2 { margin-bottom: var(--sp-3); }
+.dash-content p { color: rgba(255,255,255,.55); margin-bottom: var(--sp-4); line-height: 1.7; }
+.dash-img {
+  border-radius: var(--radius-md);
+  margin-top: 1.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.06);
+}
+.dash-img img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Testimonial ────────────────────────────────────────── */
+.testimonial { background: #141516; }
+.test-card {
+  max-width: 680px;
+  margin: 0 auto;
+  background: rgba(255,255,255,.03);
+  border-radius: var(--radius-lg);
+  padding: 3rem;
+  border: 1px solid rgba(255,255,255,.08);
+  text-align: center;
+  transition: all .4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.test-card:hover {
+  border-color: rgba(238,183,93,.2);
+  background: rgba(255,255,255,.05);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(238,183,93,.08);
+}
+.test-stars { color: var(--gold); font-size: 1.1rem; letter-spacing: 3px; margin-bottom: 1.25rem; }
+.test-quote {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: rgba(255,255,255,.85);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+.test-author {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+.test-avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(238,183,93,.3);
+}
+.test-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.test-name { font-size: .95rem; font-weight: 600; color: #fff; }
+.test-biz { font-size: .82rem; color: rgba(255,255,255,.45); }
+
+/* ── FAQ ─────────────────────────────────────────────────── */
+.faq { background: #0f1011; }
+.faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: .75rem; }
+.faq-item {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color .3s;
+}
+.faq-item:hover { border-color: rgba(238,183,93,.15); }
+.faq-item.open { border-color: rgba(238,183,93,.3); }
+.faq-q {
+  width: 100%; text-align: left;
+  padding: 1.25rem 1.5rem;
+  background: rgba(255,255,255,.03);
+  border: none; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem; font-weight: 600;
+  color: #fff;
+  transition: background .2s;
+}
+.faq-q:hover { background: rgba(255,255,255,.06); }
+.faq-q svg {
+  flex-shrink: 0;
+  transition: transform .3s;
+  color: var(--primary);
+}
+.faq-item.open .faq-q svg { transform: rotate(180deg); }
+.faq-item.open .faq-q { background: rgba(238,183,93,.05); }
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s ease, padding .35s ease;
+  padding: 0 1.5rem;
+  font-size: .92rem;
+  color: rgba(255,255,255,.55);
+  line-height: 1.7;
+}
+.faq-item.open .faq-a { max-height: 300px; padding: 0 1.5rem 1.25rem; }
+
+/* ── CTA Banner ──────────────────────────────────────────── */
+.cta-banner {
+  background: var(--ink);
+  padding: var(--sp-7) 0;
+  position: relative;
+  overflow: hidden;
+}
+.cta-banner::before {
+  content: '';
+  position: absolute;
+  top: -100px; left: -100px;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: .1;
+  filter: blur(60px);
+}
+.cta-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: -80px;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: .07;
+  filter: blur(50px);
+}
+.cta-banner-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.cta-banner h2 { color: #fff; margin-bottom: .75rem; }
+.cta-banner p { color: rgba(255,255,255,.6); font-size: 1.05rem; max-width: 50ch; margin: 0 auto 2.5rem; }
+.cta-banner-btns { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+
+/* ── Footer ──────────────────────────────────────────────── */
+footer {
+  background: #0a0b0c;
+  color: #fff;
+  padding: var(--sp-7) 0 var(--sp-5);
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+.foot-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr;
+  gap: 3rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+@media (max-width: 860px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
+
+.foot-brand .nav-logo { color: #fff; font-size: 1.5rem; margin-bottom: 1rem; }
+.foot-brand .nav-logo span { color: var(--gold); }
+.foot-brand p {
+  color: rgba(255,255,255,.4);
+  font-size: .88rem;
+  line-height: 1.7;
+  max-width: 30ch;
+  margin-bottom: 1.5rem;
+}
+.foot-newsletter {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1.5rem;
+}
+.foot-newsletter input {
+  flex: 1;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-sm);
+  padding: .65rem 1rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .85rem;
+  color: #fff;
+  outline: none;
+  transition: border-color .3s;
+}
+.foot-newsletter input::placeholder { color: rgba(255,255,255,.25); }
+.foot-newsletter input:focus { border-color: var(--primary); }
+.foot-newsletter button {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: .65rem 1.25rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s;
+  white-space: nowrap;
+}
+.foot-newsletter button:hover { background: var(--gold-dk); }
+
+.foot-social { display: flex; gap: .75rem; }
+.foot-social a {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.06);
+  display: grid; place-items: center;
+  font-size: .85rem;
+  color: rgba(255,255,255,.5);
+  transition: all .3s;
+}
+.foot-social a:hover { background: var(--primary); color: #fff; transform: translateY(-2px); }
+
+footer h6 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+  margin-bottom: 1.25rem;
+}
+footer ul { list-style: none; display: flex; flex-direction: column; gap: .65rem; }
+footer ul a {
+  font-size: .88rem;
+  color: rgba(255,255,255,.45);
+  transition: color .2s, transform .2s;
+  display: inline-block;
+}
+footer ul a:hover { color: var(--primary); transform: translateX(4px); }
+
+.foot-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 2rem;
+}
+.foot-bottom p { font-size: .8rem; color: rgba(255,255,255,.25); }
+.foot-legal { display: flex; gap: 1.5rem; }
+.foot-legal a { font-size: .8rem; color: rgba(255,255,255,.25); transition: color .2s; }
+.foot-legal a:hover { color: rgba(255,255,255,.6); }
+
+/* ── Scroll reveal ───────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  filter: blur(4px);
+  transition:
+    opacity .8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform .8s cubic-bezier(0.16, 1, 0.3, 1),
+    filter .8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.d1 { transition-delay: .12s; }
+.reveal.d2 { transition-delay: .24s; }
+.reveal.d3 { transition-delay: .36s; }
+.reveal.d4 { transition-delay: .48s; }
+.reveal.in { opacity: 1; transform: none; filter: blur(0); }
+
+/* ── Section gold dividers ───────────────────────────────── */
+.fade-d2l, .fade-l2d {
+  height: 2px;
+  background: linear-gradient(to right, transparent 0%, rgba(238,183,93,.4) 20%, rgba(238,183,93,.4) 80%, transparent 100%);
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Scroll-to-top button ────────────────────────────────── */
+#back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 200;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(20,21,22,.9);
+  backdrop-filter: blur(10px);
+  color: var(--gold);
+  border: 1.5px solid rgba(238,183,93,.3);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(0,0,0,.4);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: all .3s ease;
+  pointer-events: none;
+}
+#back-to-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+#back-to-top:hover {
+  background: var(--gold);
+  color: var(--ink);
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+#back-to-top svg {
+  width: 18px; height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Smooth scroll progress bar ──────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--gold-dk));
+  z-index: 999;
+  width: 0%;
+  transition: width .1s linear;
+}
+</style>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div class="page-loader" id="page-loader">
+  <div style="text-align:center">
+    <div class="loader-logo">Nexora<span>Digital</span></div>
+    <div class="loader-bar"></div>
+  </div>
+</div>
+
+<!-- Scroll Progress -->
+<div class="scroll-progress" id="scroll-progress"></div>
+
+<!-- Cursor Glow -->
+<div class="cursor-glow" id="cursor-glow"></div>
+
+<!-- ─── NAV ──────────────────────────────────────────────────── -->
+<header class="nav" id="main-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Nexora<span>Digital</span></a>
+
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="index.html#services">Services <span class="dd-arrow"></span></a>
+        <div class="nav-dropdown-menu">
+          <div class="nav-dropdown-grid">
+            <a href="website-design.html">
+              <span class="dd-title">Website Design</span>
+              <span class="dd-sub">Launch a stunning, conversion-focused website</span>
+            </a>
+            <a href="business-profiles.html">
+              <span class="dd-title">Business Profiles</span>
+              <span class="dd-sub">Get found on Google, Yelp &amp; 40+ directories</span>
+            </a>
+            <a href="seo.html">
+              <span class="dd-title">SEO</span>
+              <span class="dd-sub">Rank on page 1 for the keywords that matter</span>
+            </a>
+            <a href="social-media.html">
+              <span class="dd-title">Social Media Marketing</span>
+              <span class="dd-sub">Turn followers into real paying customers</span>
+            </a>
+            <a href="ecommerce.html">
+              <span class="dd-title">E-Commerce Solutions</span>
+              <span class="dd-sub">Launch an online store built to sell</span>
+            </a>
+            <a href="paid-ads.html">
+              <span class="dd-title">Paid Ads Management</span>
+              <span class="dd-sub">Every ad dollar tracked and optimized</span>
+            </a>
+          </div>
+          <div class="nav-dropdown-footer">
+            <a href="pricing.html">View Pricing &rarr;</a>
+            <a href="index.html#contact">Book a Free Call &rarr;</a>
+          </div>
+        </div>
+      </li>
+      <li><a href="why-us.html">Why Us</a></li>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="tel:+13109551077" class="nav-phone">(310) 955-1077</a>
+      <a href="index.html#contact" class="btn btn-gold">Get Started Free</a>
+    </div>
+
+    <div class="nav-hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html" class="mobile-link">Home</a>
+  <a href="index.html#services" class="mobile-link">Services</a>
+  <a href="why-us.html" class="mobile-link">Why Us</a>
+  <a href="how-it-works.html" class="mobile-link">How It Works</a>
+  <a href="pricing.html" class="mobile-link">Pricing</a>
+  <a href="index.html#contact" class="btn btn-gold btn-lg">Get Started Free</a>
+</div>
+
+<!-- ─── HERO ─────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="hero-inner">
+    <div class="hero-badge reveal"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Paid Ads Management</div>
+    <h1 class="reveal d1">Every ad dollar <em>tracked and optimized</em></h1>
+    <p class="hero-sub reveal d2">We build and manage ROI-focused ad campaigns across Google, Meta, and TikTok &mdash; so every dollar you spend drives real customers and measurable revenue for your business.</p>
+    <div class="hero-cta reveal d3">
+      <a href="index.html#contact" class="btn btn-gold btn-lg">Launch My Ads &rarr;</a>
+      <a href="tel:+13109551077" class="btn btn-ghost btn-lg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/></svg> Call (310) 955-1077</a>
+    </div>
+  </div>
+</section>
+
+<div class="fade-d2l"></div>
+
+<!-- ─── PLATFORMS ─────────────────────────────────────────────── -->
+<section class="section platforms" id="platforms">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Platforms We Manage</span>
+      <h2>Advertise where your <em>customers are</em></h2>
+      <p>We run high-performance campaigns across the three most powerful advertising platforms on the internet.</p>
+    </div>
+
+    <div class="platform-grid">
+      <div class="platform-card reveal">
+        <div class="platform-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg></div>
+        <h3>Google Ads</h3>
+        <p>Capture high-intent buyers actively searching for your products and services on the world's largest search engine.</p>
+        <ul class="platform-features">
+          <li>Search campaign management</li>
+          <li>Display &amp; remarketing ads</li>
+          <li>YouTube video advertising</li>
+          <li>Google Shopping campaigns</li>
+        </ul>
+      </div>
+
+      <div class="platform-card reveal d1">
+        <div class="platform-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+        <h3>Meta Ads</h3>
+        <p>Reach your ideal audience on Facebook and Instagram with scroll-stopping creative and laser-targeted audiences.</p>
+        <ul class="platform-features">
+          <li>Facebook feed &amp; story ads</li>
+          <li>Instagram Reels &amp; carousel ads</li>
+          <li>Lookalike &amp; custom audiences</li>
+          <li>Lead generation campaigns</li>
+        </ul>
+      </div>
+
+      <div class="platform-card reveal d2">
+        <div class="platform-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg></div>
+        <h3>TikTok Ads</h3>
+        <p>Tap into the fastest-growing social platform with short-form video ads that generate massive reach and engagement.</p>
+        <ul class="platform-features">
+          <li>In-feed video ads</li>
+          <li>Spark Ads (boosted organic)</li>
+          <li>Interest &amp; behavior targeting</li>
+          <li>Conversion-optimized campaigns</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="fade-l2d"></div>
+
+<!-- ─── WHAT'S INCLUDED ──────────────────────────────────────── -->
+<section class="section included" id="included">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">What's Included</span>
+      <h2>Full-service ads management, <em>nothing hidden</em></h2>
+      <p>Everything you need to launch, run, and scale profitable ad campaigns &mdash; managed entirely by our team.</p>
+    </div>
+
+    <div class="included-grid">
+      <div class="included-card reveal">
+        <div class="included-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg></div>
+        <h4>Google Ads &amp; Meta Ads Management</h4>
+        <p>Full campaign setup, optimization, and daily management across Google and Meta platforms for maximum ROI.</p>
+      </div>
+      <div class="included-card reveal d1">
+        <div class="included-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg></div>
+        <h4>Audience Research &amp; Targeting</h4>
+        <p>Deep audience segmentation using demographics, interests, behaviors, and custom/lookalike audiences to reach ideal buyers.</p>
+      </div>
+      <div class="included-card reveal d2">
+        <div class="included-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+        <h4>Ad Creative &amp; Copywriting</h4>
+        <p>Thumb-stopping ad creatives and persuasive copy designed to drive clicks, conversions, and brand recall.</p>
+      </div>
+      <div class="included-card reveal">
+        <div class="included-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        <h4>Conversion Tracking Setup</h4>
+        <p>Pixel installation, event tracking, and conversion API setup so every lead and sale is accurately attributed.</p>
+      </div>
+      <div class="included-card reveal d1">
+        <div class="included-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+        <h4>Weekly A/B Testing</h4>
+        <p>Systematic split tests on headlines, creatives, audiences, and landing pages to continuously improve performance.</p>
+      </div>
+      <div class="included-card reveal d2">
+        <div class="included-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <h4>Transparent ROI Reporting</h4>
+        <p>Weekly and monthly performance reports with clear metrics: spend, leads, cost-per-lead, ROAS, and actionable insights.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="fade-d2l"></div>
+
+<!-- ─── OUR PROCESS ──────────────────────────────────────────── -->
+<section class="section process" id="process">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Our Process</span>
+      <h2>From strategy to <em>scale</em></h2>
+      <p>A proven 5-step framework that turns ad spend into predictable, scalable customer acquisition.</p>
+    </div>
+
+    <div class="process-timeline reveal">
+      <div class="process-step">
+        <div class="step-num">1</div>
+        <h4>Audit &amp; Strategy</h4>
+        <p>We analyze your market, competitors, and past ad performance to build a data-backed launch plan.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num">2</div>
+        <h4>Campaign Setup</h4>
+        <p>Account structure, pixel setup, audience building, and campaign architecture designed for scale.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num">3</div>
+        <h4>Creative Development</h4>
+        <p>We produce scroll-stopping ad creatives, compelling copy, and landing page recommendations.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num">4</div>
+        <h4>Launch &amp; Monitor</h4>
+        <p>Campaigns go live with real-time monitoring and daily optimizations to hit targets fast.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num">5</div>
+        <h4>Optimize &amp; Scale</h4>
+        <p>We double down on winners, cut losers, and scale your budget where the ROI is strongest.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="fade-l2d"></div>
+
+<!-- ─── RESULTS DASHBOARD ────────────────────────────────────── -->
+<section class="section dashboard" id="results">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Results You Can See</span>
+      <h2>Real-time performance, <em>real results</em></h2>
+      <p>Here's what a typical month looks like for our paid ads clients.</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="dash-mock reveal">
+        <div class="dash-header">
+          <h4>Campaign Dashboard</h4>
+          <span class="dash-badge">LIVE</span>
+        </div>
+        <div class="dash-metrics">
+          <div class="dash-metric">
+            <div class="dash-metric-label">CPC</div>
+            <div class="dash-metric-value">$1.24</div>
+          </div>
+          <div class="dash-metric">
+            <div class="dash-metric-label">CTR</div>
+            <div class="dash-metric-value">4.8%</div>
+          </div>
+          <div class="dash-metric">
+            <div class="dash-metric-label">ROAS</div>
+            <div class="dash-metric-value">5.2x</div>
+          </div>
+          <div class="dash-metric">
+            <div class="dash-metric-label">Conversions</div>
+            <div class="dash-metric-value">340/mo</div>
+          </div>
+        </div>
+        <div class="dash-bar-chart" id="dash-chart">
+          <div class="dash-bar" style="height:45%"></div>
+          <div class="dash-bar" style="height:62%"></div>
+          <div class="dash-bar" style="height:38%"></div>
+          <div class="dash-bar" style="height:75%"></div>
+          <div class="dash-bar" style="height:55%"></div>
+          <div class="dash-bar" style="height:88%"></div>
+          <div class="dash-bar" style="height:70%"></div>
+          <div class="dash-bar" style="height:95%"></div>
+          <div class="dash-bar" style="height:82%"></div>
+          <div class="dash-bar" style="height:100%"></div>
+        </div>
+      </div>
+
+      <div class="dash-content reveal d1">
+        <h2>Your ads, <em>always improving</em></h2>
+        <p>We don't just set it and forget it. Every campaign is actively managed with daily bid adjustments, audience refinements, and creative refreshes to keep your cost-per-acquisition dropping and your return on ad spend climbing.</p>
+        <a href="index.html#contact" class="btn btn-gold">See What We Can Do For You &rarr;</a>
+        <div class="dash-img">
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80" alt="Analytics dashboard showing ad performance" loading="lazy"/>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="fade-d2l"></div>
+
+<!-- ─── TESTIMONIAL ──────────────────────────────────────────── -->
+<section class="section testimonial" id="testimonial">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Client Success</span>
+      <h2>Real results from <em>real businesses</em></h2>
+    </div>
+
+    <div class="test-card reveal d1">
+      <div class="test-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="test-quote">"Nexora completely transformed our ad strategy. Before them, we were burning money on Facebook with no clue what was working. Within 60 days they cut our cost-per-lead in half and tripled our bookings. The weekly reports are crystal clear and I finally feel confident about where my ad dollars are going."</p>
+      <div class="test-author">
+        <div class="test-avatar">
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80" alt="Priya Nair"/>
+        </div>
+        <div>
+          <div class="test-name">Priya Nair</div>
+          <div class="test-biz">Glow Salon Studio &middot; Seattle, WA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="fade-l2d"></div>
+
+<!-- ─── FAQ ───────────────────────────────────────────────────── -->
+<section class="section faq" id="faq">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Common Questions</span>
+      <h2>Paid ads <em>FAQ</em></h2>
+    </div>
+
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <button class="faq-q">
+          How much should I budget for paid ads?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a">We recommend starting with a minimum ad spend of $1,000&ndash;$2,000/month per platform. This gives us enough data to optimize quickly and find winning audiences. Our management fee is separate from your ad spend, so 100% of your budget goes directly to the ad platforms.</div>
+      </div>
+
+      <div class="faq-item reveal d1">
+        <button class="faq-q">
+          How soon will I see results from paid ads?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a">Most clients start seeing leads and traffic within the first 48&ndash;72 hours of launch. However, the real optimization magic happens in weeks 2&ndash;4 as we gather data, A/B test creatives, and refine audiences. By month 2, campaigns are typically hitting their stride with a strong, predictable ROAS.</div>
+      </div>
+
+      <div class="faq-item reveal d2">
+        <button class="faq-q">
+          Do you create the ad creatives or do I need to provide them?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a">We handle everything. Our team creates all ad copy, headlines, descriptions, and visual creatives (static images and basic video). If you have existing brand assets or photos, we'll incorporate those. You'll approve all creatives before they go live.</div>
+      </div>
+
+      <div class="faq-item reveal d3">
+        <button class="faq-q">
+          What's the difference between paid ads and SEO?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a">Paid ads give you immediate visibility &mdash; you pay for each click or impression and results start within hours. SEO is a long-term strategy that builds organic rankings over months. We recommend both: paid ads for instant traffic and leads while SEO builds your free traffic foundation over time.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="fade-d2l"></div>
+
+<!-- ─── CTA BANNER ────────────────────────────────────────────── -->
+<section class="cta-banner">
+  <div class="w cta-banner-inner">
+    <span class="eyebrow gold reveal">Ready to Scale?</span>
+    <h2 class="reveal d1">Stop wasting ad spend.<br>Start getting <em>real results</em></h2>
+    <p class="reveal d2">Join 500+ businesses that trust Nexora Digital to turn their ad budget into predictable, scalable revenue.</p>
+    <div class="cta-banner-btns reveal d3">
+      <a href="tel:+13109551077" class="btn btn-white btn-lg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/></svg> Call (310) 955-1077</a>
+      <a href="index.html#contact" class="btn btn-gold btn-lg">Book a Free Strategy Call &rarr;</a>
+    </div>
+    <p class="reveal d4" style="color:rgba(255,255,255,.35);font-size:.82rem;margin-top:1.5rem">
+      Response within 2 hours &middot; No credit card required &middot; No long-term commitment
+    </p>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────────────────── -->
+<footer>
+  <div class="w">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="index.html" class="nav-logo">Nexora<span>Digital</span></a>
+        <p>The growth platform for new businesses across the USA. Websites, SEO, social media, and paid ads &mdash; all in one place.</p>
+        <div class="foot-newsletter">
+          <input type="email" placeholder="Enter your email" />
+          <button>Subscribe</button>
+        </div>
+        <div class="foot-social">
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="LinkedIn">in</a>
+          <a href="#" aria-label="Instagram">ig</a>
+          <a href="#" aria-label="X/Twitter">x</a>
+        </div>
+      </div>
+      <div>
+        <h6>Services</h6>
+        <ul>
+          <li><a href="website-design.html">Website Design</a></li>
+          <li><a href="business-profiles.html">Business Profiles</a></li>
+          <li><a href="seo.html">SEO</a></li>
+          <li><a href="social-media.html">Social Media</a></li>
+          <li><a href="ecommerce.html">E-Commerce</a></li>
+          <li><a href="paid-ads.html">Paid Ads</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Company</h6>
+        <ul>
+          <li><a href="index.html">About Us</a></li>
+          <li><a href="how-it-works.html">Our Process</a></li>
+          <li><a href="index.html#testimonials">Case Studies</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Contact</h6>
+        <ul>
+          <li><a href="tel:+13109551077">(310) 955-1077</a></li>
+          <li><a href="mailto:hello@nexoradigital.com">hello@nexoradigital.com</a></li>
+          <li><a href="index.html#contact">Free Strategy Call</a></li>
+          <li><a href="#">Support Center</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p>&copy; 2026 Nexora Digital LLC. All rights reserved. USA.</p>
+      <div class="foot-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">DMCA</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Scroll-to-top button -->
+<button id="back-to-top" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script>
+/* ── Page Loader ──────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('page-loader').classList.add('done'), 1400);
+});
+
+/* ── Scroll Progress Bar ──────────────────────────────────── */
+const progressBar = document.getElementById('scroll-progress');
+window.addEventListener('scroll', () => {
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const scrolled = (window.scrollY / docHeight) * 100;
+  progressBar.style.width = scrolled + '%';
+}, { passive: true });
+
+/* ── Nav scroll effect ────────────────────────────────────── */
+const nav = document.getElementById('main-nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+}, { passive: true });
+
+/* ── Mobile menu ──────────────────────────────────────────── */
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+  document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+});
+document.querySelectorAll('.mobile-link').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+});
+
+/* ── Cursor glow (desktop only) ──────────────────────────── */
+if (window.matchMedia('(pointer: fine)').matches) {
+  const glow = document.getElementById('cursor-glow');
+  let glowVisible = false;
+  document.addEventListener('mousemove', (e) => {
+    if (!glowVisible) { glow.classList.add('visible'); glowVisible = true; }
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  });
+}
+
+/* ── Button mouse tracking ────────────────────────────────── */
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    btn.style.setProperty('--x', ((e.clientX - rect.left) / rect.width * 100) + '%');
+    btn.style.setProperty('--y', ((e.clientY - rect.top) / rect.height * 100) + '%');
+  });
+});
+
+/* ── Scroll Reveal ─────────────────────────────────────────── */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ── FAQ accordion ─────────────────────────────────────────── */
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  });
+});
+
+/* ── Smooth scroll for anchor links ───────────────────────── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href').slice(1);
+    const el = id ? document.getElementById(id) : null;
+    if (el) {
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+/* ── Back to top ───────────────────────────────────────────── */
+const btt = document.getElementById('back-to-top');
+window.addEventListener('scroll', () => {
+  btt.classList.toggle('visible', window.scrollY > 400);
+}, { passive: true });
+btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+/* ── Animate dashboard bars on scroll ─────────────────────── */
+const dashChart = document.getElementById('dash-chart');
+if (dashChart) {
+  const dashObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        dashChart.querySelectorAll('.dash-bar').forEach((bar, i) => {
+          const h = bar.style.height;
+          bar.style.height = '0%';
+          setTimeout(() => { bar.style.height = h; }, i * 80);
+        });
+        dashObserver.unobserve(dashChart);
+      }
+    });
+  }, { threshold: 0.3 });
+  dashObserver.observe(dashChart);
+}
+</script>
+
+</body>
+</html>

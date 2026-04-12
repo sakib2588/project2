@@ -15,14 +15,13 @@
 ───────────────────────────────────────────────────────────── */
 
 :root {
-  /* ── Gold · Black · White  (LP palette) ── */
-  --primary:    #eeb75d;   /* gold  */
-  --primary-dk: #d4993c;   /* dark gold */
-  --primary-lt: rgba(238,183,93,.1); /* gold tint */
+  --primary:    #eeb75d;
+  --primary-dk: #d4993c;
+  --primary-lt: rgba(238,183,93,.1);
   --gold:       #eeb75d;
   --gold-dk:    #d4993c;
-  --bg:         #F1EFEB;   /* LP off-white */
-  --ink:        #141516;   /* LP ink dark  */
+  --bg:         #F1EFEB;
+  --ink:        #141516;
   --charcoal:   #262626;
   --ash:        #3d3a3a;
   --flint:      #8F8F8F;
@@ -30,7 +29,6 @@
   --white:      #ffffff;
   --card-bg:    #ffffff;
 
-  /* spacing (LP scale) */
   --sp-1: 0.44rem;
   --sp-2: 0.67rem;
   --sp-3: 1rem;
@@ -42,6 +40,7 @@
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 20px;
+  --radius-xl: 28px;
 
   --nav-h: 74px;
   --content-w: 800px;
@@ -57,7 +56,47 @@ body {
   color: #ffffff;
   line-height: 1.6;
   padding-top: var(--nav-h);
+  overflow-x: hidden;
 }
+
+/* ── Page loader ──────────────────────────────────────────── */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #141516;
+  display: grid;
+  place-items: center;
+  transition: opacity .6s ease, visibility .6s ease;
+}
+.page-loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  opacity: 0;
+  animation: loaderFade .8s .2s ease forwards;
+}
+.loader-logo span { color: var(--primary); font-style: italic; font-weight: 400; }
+.loader-bar {
+  width: 120px;
+  height: 2px;
+  background: rgba(255,255,255,.1);
+  border-radius: 2px;
+  margin-top: 1.5rem;
+  overflow: hidden;
+}
+.loader-bar::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary);
+  animation: loaderSlide 1.2s ease forwards;
+}
+@keyframes loaderFade { to { opacity: 1; } }
+@keyframes loaderSlide { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 
 h1,h2,h3,h4,h5 {
   font-family: 'Playfair Display', serif;
@@ -105,8 +144,19 @@ img { max-width: 100%; display: block; }
   border-radius: var(--radius-sm);
   cursor: pointer;
   border: none;
-  transition: background .2s, color .2s, transform .2s, box-shadow .2s;
+  transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.btn:hover::before { opacity: 1; }
 .btn:hover { transform: translateY(-2px); }
 .btn:active { transform: translateY(0); }
 
@@ -152,10 +202,17 @@ img { max-width: 100%; display: block; }
   position: fixed;
   top: 0; left: 0; right: 0;
   height: var(--nav-h);
-  background: #141516;
-  border-bottom: 1px solid rgba(238,183,93,.25);
+  background: rgba(20,21,22,.85);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid rgba(238,183,93,.15);
   z-index: 100;
-  box-shadow: 0 1px 12px rgba(0,0,0,.4);
+  transition: background .4s, box-shadow .4s, border-color .4s;
+}
+.nav.scrolled {
+  background: rgba(20,21,22,.95);
+  box-shadow: 0 4px 30px rgba(0,0,0,.5);
+  border-color: rgba(238,183,93,.3);
 }
 .nav-inner {
   max-width: var(--wide-w);
@@ -205,6 +262,108 @@ img { max-width: 100%; display: block; }
 .nav-links a:hover { color: var(--primary); }
 .nav-links a:hover::after { width: 100%; }
 
+/* Services mega dropdown */
+.nav-dropdown {
+  position: static;
+}
+.nav-dropdown > a {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.nav-dropdown > a .dd-arrow {
+  display: inline-block;
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid currentColor;
+  transition: transform .25s;
+}
+.nav-dropdown:hover > a .dd-arrow { transform: rotate(180deg); }
+.nav-dropdown-menu {
+  position: absolute;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  background: rgba(14,15,16,.98);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(238,183,93,.15);
+  border-bottom: 1px solid rgba(238,183,93,.1);
+  padding: 3rem 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 200;
+  box-shadow: 0 30px 80px rgba(0,0,0,.6);
+}
+.nav-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0; right: 0;
+  height: 20px;
+}
+.nav-dropdown:hover .nav-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.nav-dropdown-grid {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: 0 var(--sp-5);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem 4rem;
+}
+.nav-dropdown-menu a {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  padding: 1.1rem 1.5rem;
+  border-radius: var(--radius-sm);
+  transition: all .2s;
+}
+.nav-dropdown-menu a::after { display: none; }
+.nav-dropdown-menu a:hover {
+  background: rgba(238,183,93,.06);
+}
+.dd-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.9);
+  transition: color .2s;
+}
+.nav-dropdown-menu a:hover .dd-title { color: var(--primary); }
+.dd-sub {
+  font-size: .85rem;
+  color: rgba(255,255,255,.4);
+  font-weight: 400;
+  line-height: 1.5;
+}
+.nav-dropdown-footer {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: 1.5rem var(--sp-5) 0;
+  border-top: 1px solid rgba(255,255,255,.06);
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.nav-dropdown-footer a {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--primary);
+  transition: color .2s;
+  padding: 0;
+}
+.nav-dropdown-footer a::after { display: none; }
+.nav-dropdown-footer a:hover { color: var(--gold-dk); }
+
 .nav-right {
   display: flex;
   align-items: center;
@@ -219,31 +378,145 @@ img { max-width: 100%; display: block; }
 }
 .nav-phone:hover { color: var(--primary); }
 
+/* Mobile hamburger */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 6px;
+  z-index: 200;
+}
+.nav-hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: transform .3s, opacity .3s;
+}
+.nav-hamburger.open span:first-child { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:last-child { transform: translateY(-7px) rotate(-45deg); }
+
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: var(--nav-h);
+  left: 0; right: 0; bottom: 0;
+  background: rgba(20,21,22,.97);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  z-index: 90;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+.mobile-menu.open { display: flex; opacity: 1; }
+.mobile-menu a {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.8);
+  transition: color .2s;
+}
+.mobile-menu a:hover { color: var(--primary); }
+.mobile-menu .btn { margin-top: 1rem; }
+
 @media (max-width: 980px) {
   .nav-links, .nav-phone { display: none; }
+  .nav-hamburger { display: flex; }
 }
+
+/* ── Cursor glow (desktop only) ──────────────────────────── */
+.cursor-glow {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(238,183,93,.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity .3s;
+  opacity: 0;
+}
+.cursor-glow.visible { opacity: 1; }
 
 /* ── Hero ───────────────────────────────────────────────── */
 .hero {
-  background:
-    linear-gradient(rgba(20,21,22,.82), rgba(20,21,22,.88)),
-    url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
   min-height: calc(100vh - var(--nav-h));
   display: flex;
   align-items: center;
   overflow: hidden;
   position: relative;
+  background: url('https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
 }
-/* subtle gold radial glow top-left */
-.hero::before {
+.hero::after {
   content: '';
   position: absolute;
-  top: -120px; left: -120px;
-  width: 600px; height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(238,183,93,.12) 0%, transparent 70%);
-  pointer-events: none;
+  inset: 0;
+  background: rgba(20, 21, 22, .45);
+  backdrop-filter: blur(3px) saturate(1.1);
+  -webkit-backdrop-filter: blur(3px) saturate(1.1);
+  z-index: 0;
 }
+/* Animated gradient mesh background */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero-bg .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .35;
+  animation: orbFloat 12s ease-in-out infinite;
+}
+.hero-bg .orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(238,183,93,.4), transparent 70%);
+  top: -15%; left: -10%;
+}
+.hero-bg .orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(82,93,220,.3), transparent 70%);
+  bottom: -20%; right: -5%;
+  animation-delay: -4s;
+  animation-duration: 15s;
+}
+.hero-bg .orb-3 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(77,190,142,.2), transparent 70%);
+  top: 40%; right: 30%;
+  animation-delay: -8s;
+  animation-duration: 18s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -40px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(.95); }
+  75% { transform: translate(40px, 30px) scale(1.03); }
+}
+/* Grid pattern overlay */
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(238,183,93,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(238,183,93,.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 80%);
+}
+
 .hero-inner {
   max-width: var(--wide-w);
   margin: 0 auto;
@@ -257,8 +530,12 @@ img { max-width: 100%; display: block; }
   z-index: 1;
 }
 @media (max-width: 900px) {
-  .hero-inner { grid-template-columns: 1fr; }
+  .hero-inner { grid-template-columns: 1fr; text-align: center; }
   .hero-visual { display: none; }
+  .hero-content { max-width: 100%; }
+  .hero-cta { justify-content: center; }
+  .hero-proof { justify-content: center; }
+  .hero-counters { justify-content: center; }
 }
 
 .hero-content { max-width: 580px; }
@@ -293,9 +570,9 @@ img { max-width: 100%; display: block; }
 
 .hero-sub {
   font-size: 1.1rem;
-  color: rgba(255,255,255,.6);
+  color: rgba(255,255,255,.82);
   line-height: 1.7;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
   max-width: 48ch;
 }
 .hero-cta {
@@ -303,9 +580,8 @@ img { max-width: 100%; display: block; }
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
-/* ghost button on dark bg */
 .hero-cta .btn-ghost {
   color: #fff;
   border-color: rgba(255,255,255,.25);
@@ -314,12 +590,39 @@ img { max-width: 100%; display: block; }
   border-color: var(--gold);
   color: var(--gold);
 }
+
+/* Hero social proof counters */
+.hero-counters {
+  display: flex;
+  gap: 2.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.hero-counter {
+  display: flex;
+  flex-direction: column;
+}
+.hero-counter-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+.hero-counter-label {
+  font-size: .75rem;
+  color: rgba(255,255,255,.45);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-top: .25rem;
+}
+
 .hero-proof {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  padding-top: 2rem;
+  padding-top: 1.5rem;
   border-top: 1px solid rgba(255,255,255,.1);
 }
 .hero-proof-item {
@@ -354,6 +657,10 @@ img { max-width: 100%; display: block; }
   overflow: hidden;
   width: 100%;
   max-width: 520px;
+  transition: transform .6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero-visual:hover .hero-visual-card {
+  transform: perspective(800px) rotateY(-2deg) rotateX(1deg);
 }
 .hero-visual-header {
   background: var(--ink);
@@ -428,9 +735,7 @@ img { max-width: 100%; display: block; }
   overflow: hidden;
   box-shadow: 0 2px 6px rgba(0,0,0,.07);
 }
-.hero-site-card-mock-img {
-  height: 40px;
-}
+.hero-site-card-mock-img { height: 40px; }
 .hero-site-card-mock-img:nth-child(1) { background: rgba(82,93,220,.12); }
 .hero-site-card-mock:nth-child(2) .hero-site-card-mock-img { background: rgba(238,183,93,.15); }
 .hero-site-card-mock:nth-child(3) .hero-site-card-mock-img { background: var(--bg); }
@@ -442,10 +747,11 @@ img { max-width: 100%; display: block; }
 /* Floating badges on hero */
 .hero-float {
   position: absolute;
-  background: #fff;
+  background: rgba(255,255,255,.95);
+  backdrop-filter: blur(10px);
   border-radius: var(--radius-md);
   padding: .75rem 1rem;
-  box-shadow: 0 10px 40px rgba(0,0,0,.12);
+  box-shadow: 0 10px 40px rgba(0,0,0,.15), 0 0 0 1px rgba(255,255,255,.1);
   display: flex;
   align-items: center;
   gap: .6rem;
@@ -503,7 +809,7 @@ img { max-width: 100%; display: block; }
   font-weight: 600;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: #bbb;
+  color: rgba(255,255,255,.25);
   white-space: nowrap;
   transition: color .25s;
 }
@@ -538,50 +844,90 @@ img { max-width: 100%; display: block; }
 @media (max-width: 900px) { .services-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 600px) { .services-grid { grid-template-columns: 1fr; } }
 
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes spin-border {
+  to { --border-angle: 360deg; }
+}
 .service-card {
-  background: var(--white);
+  background: rgba(255,255,255,.03);
   border-radius: var(--radius-md);
   padding: 2.25rem;
-  border: 1px solid var(--dove);
-  transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+  border: 1px solid rgba(255,255,255,.08);
+  transition: transform .4s cubic-bezier(0.16, 1, 0.3, 1),
+              background .4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow .4s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color .3s ease;
   position: relative;
   overflow: hidden;
   cursor: default;
+  color: #fff;
 }
+/* Animated gradient border overlay */
 .service-card::after {
   content: '';
   position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--primary);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform .35s ease;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--border-angle, 0deg),
+    transparent 25%,
+    rgba(238,183,93,.6) 35%,
+    var(--primary) 50%,
+    rgba(238,183,93,.6) 65%,
+    transparent 75%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .4s ease;
+  pointer-events: none;
+  animation: spin-border 3s linear infinite;
+}
+/* Mouse-follow glow */
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(238,183,93,.08) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity .4s;
+  z-index: 1;
 }
 .service-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(238,183,93,.15);
+  background: rgba(255,255,255,.06);
   border-color: transparent;
+  box-shadow: 0 20px 60px rgba(238,183,93,.12), 0 0 30px rgba(238,183,93,.06);
 }
-.service-card:hover::after { transform: scaleX(1); }
+.service-card:hover::after { opacity: 1; }
+.service-card:hover::before { opacity: 1; }
 
 .service-icon {
-  width: 52px; height: 52px;
-  border-radius: var(--radius-sm);
+  width: 56px; height: 56px;
+  border-radius: var(--radius-md);
   display: grid; place-items: center;
   font-size: 1.5rem;
   margin-bottom: 1.25rem;
-  background: var(--primary-lt);
+  background: rgba(238,183,93,.1);
+  position: relative;
+  z-index: 1;
 }
-.service-card:nth-child(2) .service-icon { background: rgba(238,183,93,.12); }
-.service-card:nth-child(3) .service-icon { background: var(--bg); }
-.service-card:nth-child(4) .service-icon { background: rgba(20,21,22,.05); }
-.service-card:nth-child(5) .service-icon { background: rgba(238,183,93,.1); }
-.service-card:nth-child(6) .service-icon { background: rgba(20,21,22,.05); }
+.service-card:nth-child(2) .service-icon { background: rgba(82,93,220,.12); }
+.service-card:nth-child(3) .service-icon { background: rgba(77,190,142,.12); }
+.service-card:nth-child(4) .service-icon { background: rgba(232,93,126,.1); }
+.service-card:nth-child(5) .service-icon { background: rgba(238,183,93,.12); }
+.service-card:nth-child(6) .service-icon { background: rgba(82,93,220,.1); }
 
-.service-card { color: var(--charcoal); }
-.service-card h3 { color: var(--ink) !important; margin-bottom: .5rem; font-size: 1.25rem; }
-.service-card p { font-size: .92rem; color: var(--flint); line-height: 1.65; margin-bottom: 1.25rem; }
+.service-card h3 { color: #fff; margin-bottom: .5rem; font-size: 1.25rem; position: relative; z-index: 1; }
+.service-card p { font-size: .92rem; color: rgba(255,255,255,.55); line-height: 1.65; margin-bottom: 1.25rem; position: relative; z-index: 1; }
 .service-link {
   font-size: .82rem;
   font-weight: 600;
@@ -590,6 +936,8 @@ img { max-width: 100%; display: block; }
   align-items: center;
   gap: .35rem;
   transition: gap .2s;
+  position: relative;
+  z-index: 1;
 }
 .service-link:hover { gap: .65rem; }
 
@@ -600,22 +948,6 @@ img { max-width: 100%; display: block; }
   scroll-margin-top: 100px;
   overflow: hidden;
   position: relative;
-}
-.svc-detail::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(to right, transparent 0%, #eeb75d 20%, #eeb75d 80%, transparent 100%);
-  z-index: 2;
-}
-#svc-ads::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(to right, transparent 0%, #eeb75d 20%, #eeb75d 80%, transparent 100%);
-  z-index: 2;
 }
 .svc-detail:nth-of-type(even) { background: #1a1b1c; }
 .svc-inner {
@@ -635,6 +967,7 @@ img { max-width: 100%; display: block; }
   width: 100%;
   height: 100%;
   min-height: 560px;
+  overflow: hidden;
 }
 @media (max-width: 900px) { .svc-media { min-height: 360px; } }
 .svc-media img {
@@ -642,7 +975,9 @@ img { max-width: 100%; display: block; }
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 8s ease;
 }
+.svc-media:hover img { transform: scale(1.05); }
 .svc-media::after {
   content: '';
   position: absolute;
@@ -724,7 +1059,7 @@ img { max-width: 100%; display: block; }
   border-radius: 99px;
   font-weight: 600;
   font-size: .95rem;
-  transition: transform .2s, box-shadow .2s;
+  transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .svc-cta:hover {
   transform: translateY(-2px);
@@ -738,7 +1073,6 @@ img { max-width: 100%; display: block; }
 .why .section-head p { color: rgba(255,255,255,.55); }
 .why-feat h4 { color: #ffffff; }
 .why-feat p { color: rgba(255,255,255,.5); }
-/* why-feat hover handled below */
 .why-inner {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -780,8 +1114,9 @@ img { max-width: 100%; display: block; }
 
 /* Why visual panel */
 .why-visual {
-  background: var(--ink);
-  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, #1a1b1c, #141516);
+  border: 1px solid rgba(238,183,93,.15);
+  border-radius: var(--radius-xl);
   padding: 2.5rem;
   color: #fff;
   position: relative;
@@ -794,7 +1129,8 @@ img { max-width: 100%; display: block; }
   width: 240px; height: 240px;
   border-radius: 50%;
   background: var(--primary);
-  opacity: .18;
+  opacity: .12;
+  filter: blur(40px);
 }
 .why-visual-title {
   font-family: 'Playfair Display', serif;
@@ -817,10 +1153,15 @@ img { max-width: 100%; display: block; }
   position: relative;
 }
 .why-stat {
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-md);
   padding: 1.25rem;
+  transition: border-color .3s, background .3s;
+}
+.why-stat:hover {
+  border-color: rgba(238,183,93,.25);
+  background: rgba(238,183,93,.05);
 }
 .why-stat strong {
   font-family: 'Playfair Display', serif;
@@ -844,8 +1185,18 @@ img { max-width: 100%; display: block; }
 /* ── How It Works ────────────────────────────────────────── */
 .how {
   background:
-    linear-gradient(rgba(20,21,22,.97), rgba(20,21,22,.98)),
-    url('https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat fixed;
+    linear-gradient(180deg, rgba(14,15,16,.92) 0%, rgba(14,15,16,.78) 50%, rgba(14,15,16,.92) 100%),
+    url('https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed;
+  position: relative;
+  overflow: hidden;
+}
+.how::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(238,183,93,.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
 }
 .how .section-head h2,
 .how .section-head .eyebrow { color: #ffffff; }
@@ -866,11 +1217,10 @@ img { max-width: 100%; display: block; }
 .steps::before {
   content: '';
   position: absolute;
-  top: 26px; left: calc(12.5% + 1rem); right: calc(12.5% + 1rem);
+  top: 24px; left: 10%; right: 10%;
   height: 2px;
-  background: linear-gradient(90deg, var(--primary), var(--gold));
-  opacity: .3;
-  z-index: 0;
+  background: linear-gradient(to right, rgba(238,183,93,.2), var(--gold) 50%, rgba(238,183,93,.2));
+  z-index: 1;
 }
 @media (max-width: 860px) { .steps::before { display: none; } }
 
@@ -882,29 +1232,29 @@ img { max-width: 100%; display: block; }
 .step-num {
   width: 52px; height: 52px;
   border-radius: 50%;
-  background: #525ddc;
-  color: #fff;
+  background: #1a1810;
+  border: 2px solid var(--gold);
+  color: var(--gold);
   font-family: 'Playfair Display', serif;
   font-size: 1.2rem;
   font-weight: 600;
   display: grid; place-items: center;
   margin: 0 auto 1.25rem;
-  box-shadow: 0 4px 16px rgba(82,93,220,.35);
+  box-shadow: 0 4px 16px rgba(238,183,93,.35);
+  transition: transform .3s, box-shadow .3s;
 }
-.step:nth-child(2) .step-num { background: #4dbe8e; box-shadow: 0 4px 16px rgba(77,190,142,.35); }
-.step:nth-child(3) .step-num { background: #eeb75d; color: #141516; box-shadow: 0 4px 16px rgba(238,183,93,.4); }
-.step:nth-child(4) .step-num { background: #e85d7e; box-shadow: 0 4px 16px rgba(232,93,126,.35); }
-.step h4 { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: .5rem; }
-.step p { font-size: .88rem; color: var(--flint); line-height: 1.6; }
+.step:hover .step-num { transform: scale(1.1); }
+.step:nth-child(2) .step-num { background: #1a1810; box-shadow: 0 4px 16px rgba(238,183,93,.35); }
+.step:nth-child(3) .step-num { background: #1a1810; color: var(--gold); box-shadow: 0 4px 16px rgba(238,183,93,.35); }
+.step:nth-child(4) .step-num { background: #1a1810; box-shadow: 0 4px 16px rgba(238,183,93,.35); }
+.step h4 { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: .5rem; }
+.step p { font-size: .88rem; color: rgba(255,255,255,.6); line-height: 1.6; }
 
 /* ── Testimonials ────────────────────────────────────────── */
-.testimonials { background: #141516; }
+.testimonials { background: #141516; overflow: hidden; }
 .testimonials .section-head h2,
 .testimonials .section-head .eyebrow { color: #ffffff; }
 .testimonials .section-head p { color: rgba(255,255,255,.55); }
-.test-card { background: #1e1f20; border-color: rgba(255,255,255,.08); }
-.test-quote { color: #ffffff; }
-.test-name { color: #ffffff; }
 .test-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -914,19 +1264,24 @@ img { max-width: 100%; display: block; }
 @media (max-width: 560px) { .test-grid { grid-template-columns: 1fr; } }
 
 .test-card {
-  background: #141516;
+  background: rgba(255,255,255,.03);
   border-radius: var(--radius-md);
   padding: 2rem;
-  border: 1px solid var(--dove);
-  transition: box-shadow .3s;
+  border: 1px solid rgba(255,255,255,.08);
+  transition: all .4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.test-card:hover { box-shadow: 0 12px 40px rgba(238,183,93,.12); }
+.test-card:hover {
+  border-color: rgba(238,183,93,.2);
+  background: rgba(255,255,255,.05);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(238,183,93,.08);
+}
 .test-stars { color: var(--gold); font-size: 1rem; letter-spacing: 2px; margin-bottom: 1rem; }
 .test-quote {
   font-family: 'Playfair Display', serif;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-style: italic;
-  color: var(--ink);
+  color: rgba(255,255,255,.85);
   line-height: 1.5;
   margin-bottom: 1.25rem;
 }
@@ -942,8 +1297,8 @@ img { max-width: 100%; display: block; }
   font-family: 'DM Sans', sans-serif;
 }
 .test-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.test-name { font-size: .9rem; font-weight: 600; color: var(--ink); }
-.test-biz { font-size: .78rem; color: var(--flint); }
+.test-name { font-size: .9rem; font-weight: 600; color: #fff; }
+.test-biz { font-size: .78rem; color: rgba(255,255,255,.45); }
 
 /* ── Pricing ─────────────────────────────────────────────── */
 .pricing { background: #141516; position: relative; }
@@ -955,7 +1310,7 @@ img { max-width: 100%; display: block; }
   content: '';
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(rgba(238,183,93,.06) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(238,183,93,.04) 1px, transparent 1px);
   background-size: 28px 28px;
   pointer-events: none;
 }
@@ -972,28 +1327,33 @@ img { max-width: 100%; display: block; }
 @media (max-width: 560px) { .pricing-grid { grid-template-columns: 1fr; } }
 
 .pricing-card {
-  background: var(--white);
-  color: var(--charcoal);
-  border-radius: var(--radius-md);
+  background: rgba(255,255,255,.03);
+  color: #fff;
+  border-radius: var(--radius-lg);
   padding: 2.5rem 2rem;
-  border: 1px solid var(--dove);
+  border: 1px solid rgba(255,255,255,.08);
   position: relative;
-  transition: transform .3s, box-shadow .3s;
+  transition: all .4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.pricing-card h1, .pricing-card h2, .pricing-card h3, .pricing-card h4 { color: var(--ink); }
-.pricing-card p { color: var(--flint); }
-.pricing-card:hover { transform: translateY(-4px); box-shadow: 0 16px 50px rgba(0,0,0,.08); }
+.pricing-card h1, .pricing-card h2, .pricing-card h3, .pricing-card h4 { color: #fff; }
+.pricing-card p { color: rgba(255,255,255,.55); }
+.pricing-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,255,255,.15);
+  box-shadow: 0 16px 50px rgba(0,0,0,.3);
+}
 .pricing-card.popular {
   border-color: var(--gold);
   border-width: 2px;
-  box-shadow: 0 20px 60px rgba(238,183,93,.2);
+  background: rgba(238,183,93,.05);
+  box-shadow: 0 20px 60px rgba(238,183,93,.15);
 }
-.pricing-card.popular:hover { transform: translateY(-4px); }
+.pricing-card.popular:hover { transform: translateY(-6px); box-shadow: 0 24px 70px rgba(238,183,93,.2); }
 .pricing-badge {
   position: absolute;
   top: -14px; left: 50%; transform: translateX(-50%);
   background: var(--primary);
-  color: #fff;
+  color: var(--ink);
   font-size: .72rem;
   font-weight: 700;
   letter-spacing: .1em;
@@ -1008,30 +1368,30 @@ img { max-width: 100%; display: block; }
   font-weight: 700;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--flint);
+  color: rgba(255,255,255,.45);
   margin-bottom: .75rem;
 }
 .pricing-price {
   font-family: 'Playfair Display', serif;
   font-size: 3rem;
   font-weight: 700;
-  color: var(--ink);
+  color: #fff;
   line-height: 1;
   margin-bottom: .4rem;
 }
 .pricing-price sup { font-size: 1.5rem; vertical-align: super; }
-.pricing-price sub { font-family: 'DM Sans', sans-serif; font-size: .85rem; color: var(--flint); vertical-align: baseline; font-weight: 400; }
+.pricing-price sub { font-family: 'DM Sans', sans-serif; font-size: .85rem; color: rgba(255,255,255,.45); vertical-align: baseline; font-weight: 400; }
 .pricing-desc {
   font-size: .88rem;
-  color: var(--flint);
+  color: rgba(255,255,255,.5);
   margin-bottom: 1.75rem;
   padding-bottom: 1.75rem;
-  border-bottom: 1px solid var(--dove);
+  border-bottom: 1px solid rgba(255,255,255,.1);
 }
 .pricing-features { list-style: none; display: flex; flex-direction: column; gap: .75rem; margin-bottom: 2rem; }
 .pricing-features li {
   display: flex; align-items: flex-start; gap: .6rem;
-  font-size: .88rem; color: var(--ash);
+  font-size: .88rem; color: rgba(255,255,255,.7);
 }
 .pricing-features li::before {
   content: '✓';
@@ -1039,6 +1399,139 @@ img { max-width: 100%; display: block; }
   font-weight: 700;
   flex-shrink: 0;
   margin-top: .1rem;
+}
+
+/* ── Contact Form ────────────────────────────────────────── */
+.contact-section {
+  background: #0e0f10;
+  padding: var(--sp-7) 0;
+  position: relative;
+  overflow: hidden;
+}
+.contact-section::before {
+  content: '';
+  position: absolute;
+  top: -150px; right: -150px;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(238,183,93,.08), transparent 70%);
+  pointer-events: none;
+}
+.contact-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 860px) { .contact-inner { grid-template-columns: 1fr; } }
+
+.contact-info h2 { margin-bottom: 1rem; }
+.contact-info > p { margin-bottom: 2rem; color: rgba(255,255,255,.6); line-height: 1.7; }
+.contact-detail {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.contact-detail-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-sm);
+  background: rgba(238,183,93,.1);
+  display: grid; place-items: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.contact-detail-text strong {
+  display: block;
+  font-size: .9rem;
+  color: #fff;
+  margin-bottom: .15rem;
+}
+.contact-detail-text span {
+  font-size: .85rem;
+  color: rgba(255,255,255,.5);
+}
+.contact-detail-text a {
+  color: var(--primary);
+  transition: color .2s;
+}
+.contact-detail-text a:hover { color: var(--gold-dk); }
+
+.contact-form-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+}
+.contact-form { display: flex; flex-direction: column; gap: 1.25rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: .4rem; }
+.form-group label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.5);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-sm);
+  padding: .85rem 1rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .9rem;
+  color: #fff;
+  transition: border-color .3s, background .3s;
+  outline: none;
+  width: 100%;
+}
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: rgba(255,255,255,.25);
+}
+.form-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,.4)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+.form-group select option { background: #1a1b1c; color: #fff; }
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary);
+  background: rgba(238,183,93,.05);
+}
+.form-group textarea { resize: vertical; min-height: 100px; }
+.form-submit {
+  width: 100%;
+  padding: 1rem;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all .3s;
+}
+.form-submit:hover {
+  background: var(--gold-dk);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(238,183,93,.3);
+}
+.form-note {
+  text-align: center;
+  font-size: .78rem;
+  color: rgba(255,255,255,.35);
+  margin-top: .25rem;
 }
 
 /* ── CTA Banner ──────────────────────────────────────────── */
@@ -1055,7 +1548,8 @@ img { max-width: 100%; display: block; }
   width: 400px; height: 400px;
   border-radius: 50%;
   background: var(--primary);
-  opacity: .15;
+  opacity: .1;
+  filter: blur(60px);
 }
 .cta-banner::after {
   content: '';
@@ -1064,7 +1558,8 @@ img { max-width: 100%; display: block; }
   width: 320px; height: 320px;
   border-radius: 50%;
   background: var(--gold);
-  opacity: .1;
+  opacity: .07;
+  filter: blur(50px);
 }
 .cta-banner-inner {
   position: relative;
@@ -1077,39 +1572,76 @@ img { max-width: 100%; display: block; }
 
 /* ── Footer ──────────────────────────────────────────────── */
 footer {
-  background: var(--ink);
+  background: #0a0b0c;
   color: #fff;
   padding: var(--sp-7) 0 var(--sp-5);
+  border-top: 1px solid rgba(255,255,255,.05);
 }
 .foot-grid {
   display: grid;
   grid-template-columns: 1.8fr 1fr 1fr 1fr;
   gap: 3rem;
   padding-bottom: 3rem;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255,255,255,.06);
 }
 @media (max-width: 860px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
 
 .foot-brand .nav-logo { color: #fff; font-size: 1.5rem; margin-bottom: 1rem; }
 .foot-brand .nav-logo span { color: var(--gold); }
 .foot-brand p {
-  color: rgba(255,255,255,.5);
+  color: rgba(255,255,255,.4);
   font-size: .88rem;
   line-height: 1.7;
   max-width: 30ch;
   margin-bottom: 1.5rem;
 }
+
+/* Newsletter in footer */
+.foot-newsletter {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1.5rem;
+}
+.foot-newsletter input {
+  flex: 1;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-sm);
+  padding: .65rem 1rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .85rem;
+  color: #fff;
+  outline: none;
+  transition: border-color .3s;
+}
+.foot-newsletter input::placeholder { color: rgba(255,255,255,.25); }
+.foot-newsletter input:focus { border-color: var(--primary); }
+.foot-newsletter button {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: .65rem 1.25rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s;
+  white-space: nowrap;
+}
+.foot-newsletter button:hover { background: var(--gold-dk); }
+
 .foot-social { display: flex; gap: .75rem; }
 .foot-social a {
   width: 36px; height: 36px;
   border-radius: 8px;
-  background: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.06);
   display: grid; place-items: center;
   font-size: .85rem;
-  color: rgba(255,255,255,.6);
-  transition: background .2s, color .2s;
+  color: rgba(255,255,255,.5);
+  transition: all .3s;
 }
-.foot-social a:hover { background: var(--primary); color: #fff; }
+.foot-social a:hover { background: var(--primary); color: #fff; transform: translateY(-2px); }
 
 footer h6 {
   font-family: 'DM Sans', sans-serif;
@@ -1117,16 +1649,17 @@ footer h6 {
   font-weight: 700;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.35);
+  color: rgba(255,255,255,.3);
   margin-bottom: 1.25rem;
 }
 footer ul { list-style: none; display: flex; flex-direction: column; gap: .65rem; }
 footer ul a {
   font-size: .88rem;
-  color: rgba(255,255,255,.55);
-  transition: color .2s;
+  color: rgba(255,255,255,.45);
+  transition: color .2s, transform .2s;
+  display: inline-block;
 }
-footer ul a:hover { color: #fff; }
+footer ul a:hover { color: var(--primary); transform: translateX(4px); }
 
 .foot-bottom {
   display: flex;
@@ -1136,49 +1669,49 @@ footer ul a:hover { color: #fff; }
   gap: 1rem;
   padding-top: 2rem;
 }
-.foot-bottom p { font-size: .8rem; color: rgba(255,255,255,.3); }
+.foot-bottom p { font-size: .8rem; color: rgba(255,255,255,.25); }
 .foot-legal { display: flex; gap: 1.5rem; }
-.foot-legal a { font-size: .8rem; color: rgba(255,255,255,.3); transition: color .2s; }
-.foot-legal a:hover { color: rgba(255,255,255,.7); }
+.foot-legal a { font-size: .8rem; color: rgba(255,255,255,.25); transition: color .2s; }
+.foot-legal a:hover { color: rgba(255,255,255,.6); }
 
 /* ── FAQ ─────────────────────────────────────────────────── */
 .faq { background: #141516; }
 .faq .section-head h2,
 .faq .section-head .eyebrow { color: #ffffff; }
-.faq-item { border-color: rgba(255,255,255,.1); }
-.faq-q { background: #1e1f20; color: #ffffff; }
-.faq-q:hover { background: #262626; }
-.faq-a { color: rgba(255,255,255,.55); }
 .faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: .75rem; }
 .faq-item {
-  border: 1px solid var(--dove);
-  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-md);
   overflow: hidden;
+  transition: border-color .3s;
 }
+.faq-item:hover { border-color: rgba(238,183,93,.15); }
+.faq-item.open { border-color: rgba(238,183,93,.3); }
 .faq-q {
   width: 100%; text-align: left;
   padding: 1.25rem 1.5rem;
-  background: var(--white);
+  background: rgba(255,255,255,.03);
   border: none; cursor: pointer;
   display: flex; justify-content: space-between; align-items: center;
   font-family: 'DM Sans', sans-serif;
   font-size: .95rem; font-weight: 600;
-  color: var(--ink);
+  color: #fff;
   transition: background .2s;
 }
-.faq-q:hover { background: var(--bg); }
+.faq-q:hover { background: rgba(255,255,255,.06); }
 .faq-q svg {
   flex-shrink: 0;
   transition: transform .3s;
   color: var(--primary);
 }
 .faq-item.open .faq-q svg { transform: rotate(180deg); }
+.faq-item.open .faq-q { background: rgba(238,183,93,.05); }
 .faq-a {
   max-height: 0; overflow: hidden;
   transition: max-height .35s ease, padding .35s ease;
   padding: 0 1.5rem;
   font-size: .92rem;
-  color: var(--flint);
+  color: rgba(255,255,255,.55);
   line-height: 1.7;
 }
 .faq-item.open .faq-a { max-height: 300px; padding: 0 1.5rem 1.25rem; }
@@ -1186,12 +1719,12 @@ footer ul a:hover { color: #fff; }
 /* ── Scroll reveal ───────────────────────────────────────── */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(28px);
   filter: blur(4px);
   transition:
-    opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity .8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform .8s cubic-bezier(0.16, 1, 0.3, 1),
+    filter .8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal.d1 { transition-delay: .12s; }
 .reveal.d2 { transition-delay: .24s; }
@@ -1206,19 +1739,43 @@ footer ul a:hover { color: #fff; }
 }
 
 /* ── Section gold border dividers ───────────────────────── */
-.fade-d2l {
+.fade-d2l, .fade-l2d {
   height: 2px;
-  background: linear-gradient(to right, transparent 0%, #eeb75d 20%, #eeb75d 80%, transparent 100%);
+  background: linear-gradient(to right, transparent 0%, rgba(238,183,93,.4) 20%, rgba(238,183,93,.4) 80%, transparent 100%);
   display: block;
   margin: 0;
   padding: 0;
 }
-.fade-l2d {
-  height: 2px;
-  background: linear-gradient(to right, transparent 0%, #eeb75d 20%, #eeb75d 80%, transparent 100%);
+/* ── Geometric divider (service showcase only) ─────────── */
+.svc-divider {
+  height: 0;
   display: block;
   margin: 0;
   padding: 0;
+  position: relative;
+  z-index: 10;
+}
+.svc-divider::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(to right, transparent 2%, rgba(238,183,93,.5) 12%, rgba(238,183,93,.5) 42%, transparent 47%, transparent 53%, rgba(238,183,93,.5) 58%, rgba(238,183,93,.5) 88%, transparent 98%);
+  z-index: 10;
+}
+.svc-divider::after {
+  content: '';
+  position: absolute;
+  top: -6px; left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 10px; height: 10px;
+  border: 2px solid #eeb75d;
+  background: #141516;
+  z-index: 11;
+  box-shadow:
+    -26px 0 0 -3px #eeb75d,
+    26px 0 0 -3px #eeb75d,
+    0 0 10px rgba(238,183,93,.3);
 }
 
 /* ── Scroll-to-top button ────────────────────────────────── */
@@ -1230,16 +1787,17 @@ footer ul a:hover { color: #fff; }
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--ink);
+  background: rgba(20,21,22,.9);
+  backdrop-filter: blur(10px);
   color: var(--gold);
-  border: 2px solid var(--gold);
+  border: 1.5px solid rgba(238,183,93,.3);
   display: grid;
   place-items: center;
   cursor: pointer;
-  box-shadow: 0 6px 24px rgba(20,21,22,.3);
+  box-shadow: 0 6px 24px rgba(0,0,0,.4);
   opacity: 0;
   transform: translateY(16px);
-  transition: opacity .3s ease, transform .3s ease, background .2s, color .2s;
+  transition: all .3s ease;
   pointer-events: none;
 }
 #back-to-top.visible {
@@ -1250,6 +1808,8 @@ footer ul a:hover { color: #fff; }
 #back-to-top:hover {
   background: var(--gold);
   color: var(--ink);
+  border-color: var(--gold);
+  transform: translateY(-2px);
 }
 #back-to-top svg {
   width: 18px; height: 18px;
@@ -1259,43 +1819,140 @@ footer ul a:hover { color: #fff; }
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* ── Smooth scroll progress bar ──────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--gold-dk));
+  z-index: 999;
+  width: 0%;
+  transition: width .1s linear;
+}
 </style>
 </head>
 <body>
 
+<!-- Page Loader -->
+<div class="page-loader" id="page-loader">
+  <div style="text-align:center">
+    <div class="loader-logo">Nexora<span>Digital</span></div>
+    <div class="loader-bar"></div>
+  </div>
+</div>
+
+<!-- Scroll Progress -->
+<div class="scroll-progress" id="scroll-progress"></div>
+
+<!-- Cursor Glow -->
+<div class="cursor-glow" id="cursor-glow"></div>
+
 <!-- ─── NAV ──────────────────────────────────────────────────── -->
-<header class="nav">
+<header class="nav" id="main-nav">
   <div class="nav-inner">
     <a href="#" class="nav-logo">Nexora<span>Digital</span></a>
 
     <ul class="nav-links">
-      <li><a href="#services">Services</a></li>
-      <li><a href="#why">Why Us</a></li>
-      <li><a href="#how">How It Works</a></li>
-      <li><a href="#testimonials">Results</a></li>
-      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="index.html">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="#services">Services <span class="dd-arrow"></span></a>
+        <div class="nav-dropdown-menu">
+          <div class="nav-dropdown-grid">
+            <a href="website-design.html">
+              <span class="dd-title">Website Design</span>
+              <span class="dd-sub">Launch a stunning, conversion-focused website</span>
+            </a>
+            <a href="business-profiles.html">
+              <span class="dd-title">Business Profiles</span>
+              <span class="dd-sub">Get found on Google, Yelp &amp; 40+ directories</span>
+            </a>
+            <a href="seo.html">
+              <span class="dd-title">SEO</span>
+              <span class="dd-sub">Rank on page 1 for the keywords that matter</span>
+            </a>
+            <a href="social-media.html">
+              <span class="dd-title">Social Media Marketing</span>
+              <span class="dd-sub">Turn followers into real paying customers</span>
+            </a>
+            <a href="ecommerce.html">
+              <span class="dd-title">E-Commerce Solutions</span>
+              <span class="dd-sub">Launch an online store built to sell</span>
+            </a>
+            <a href="paid-ads.html">
+              <span class="dd-title">Paid Ads Management</span>
+              <span class="dd-sub">Every ad dollar tracked and optimized</span>
+            </a>
+          </div>
+          <div class="nav-dropdown-footer">
+            <a href="pricing.html">View Pricing &rarr;</a>
+            <a href="#contact">Book a Free Call &rarr;</a>
+          </div>
+        </div>
+      </li>
+      <li><a href="why-us.html">Why Us</a></li>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
     </ul>
 
     <div class="nav-right">
       <a href="tel:+13109551077" class="nav-phone">(310) 955-1077</a>
       <a href="#contact" class="btn btn-gold">Get Started Free</a>
     </div>
+
+    <div class="nav-hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
   </div>
 </header>
 
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html" class="mobile-link">Home</a>
+  <a href="#services" class="mobile-link">Services</a>
+  <a href="why-us.html" class="mobile-link">Why Us</a>
+  <a href="how-it-works.html" class="mobile-link">How It Works</a>
+  <a href="pricing.html" class="mobile-link">Pricing</a>
+  <a href="#contact" class="btn btn-gold btn-lg">Get Started Free</a>
+</div>
+
 <!-- ─── HERO ─────────────────────────────────────────────────── -->
 <section class="hero">
+  <!-- Animated background -->
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
   <div class="hero-inner">
 
     <div class="hero-content">
-      <div class="hero-badge">🇺🇸 Serving New Businesses Across the USA</div>
-      <h1>The growth platform for <em>new businesses</em></h1>
-      <p class="hero-sub">We build your professional website, set up your business profiles, and run SEO &amp; social media marketing — everything you need to get found, get customers, and grow fast.</p>
-      <div class="hero-cta">
+      <div class="hero-badge reveal"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Serving New Businesses Across the USA</div>
+      <h1 class="reveal d1">The growth platform for <em>new businesses</em></h1>
+      <p class="hero-sub reveal d2">We build your professional website, set up your business profiles, and run SEO &amp; social media marketing — everything you need to get found, get customers, and grow fast.</p>
+
+      <div class="hero-counters reveal d2">
+        <div class="hero-counter">
+          <span class="hero-counter-num" data-target="500" data-suffix="+">0</span>
+          <span class="hero-counter-label">Businesses Helped</span>
+        </div>
+        <div class="hero-counter">
+          <span class="hero-counter-num" data-target="4.9" data-suffix="★" data-decimal="true">0</span>
+          <span class="hero-counter-label">Google Rating</span>
+        </div>
+        <div class="hero-counter">
+          <span class="hero-counter-num" data-target="30" data-suffix=" Day" data-prefix="<">0</span>
+          <span class="hero-counter-label">Average Launch</span>
+        </div>
+      </div>
+
+      <div class="hero-cta reveal d3">
         <a href="#contact" class="btn btn-gold btn-lg">Get a Free Consultation</a>
         <a href="#services" class="btn btn-ghost btn-lg">See Our Services</a>
       </div>
-      <div class="hero-proof">
+      <div class="hero-proof reveal d4">
         <div class="hero-proof-item">
           <span class="check">✓</span> No long-term contracts
         </div>
@@ -1308,7 +1965,7 @@ footer ul a:hover { color: #fff; }
       </div>
     </div>
 
-    <div class="hero-visual">
+    <div class="hero-visual reveal d2">
       <!-- Website preview mockup -->
       <div class="hero-visual-card">
         <div class="hero-visual-header">
@@ -1341,22 +1998,22 @@ footer ul a:hover { color: #fff; }
             </div>
           </div>
           <div style="display:flex;gap:.75rem;margin-top:.75rem">
-            <div style="flex:1;background:var(--primary-lt);border-radius:6px;padding:.75rem;font-size:.75rem;font-weight:600;color:var(--primary)">📈 +0% Traffic</div>
-            <div style="flex:1;background:rgba(238,183,93,.12);border-radius:6px;padding:.75rem;font-size:.75rem;font-weight:600;color:var(--gold-dk)">⭐ 0 Google Rating</div>
+            <div style="flex:1;background:var(--primary-lt);border-radius:6px;padding:.75rem;font-size:.75rem;font-weight:600;color:var(--primary)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> +340% Traffic</div>
+            <div style="flex:1;background:rgba(238,183,93,.12);border-radius:6px;padding:.75rem;font-size:.75rem;font-weight:600;color:var(--gold-dk)">⭐ 4.9 Google Rating</div>
           </div>
         </div>
       </div>
 
       <!-- Floating badges -->
       <div class="hero-float hero-float-1">
-        <div class="ico">🌐</div>
+        <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
         <div>
           <div>Website Live</div>
           <div class="hero-float-sub">Built in 7 days</div>
         </div>
       </div>
       <div class="hero-float hero-float-2">
-        <div class="ico">🏆</div>
+        <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div>
         <div>
           <div>Page 1 Google</div>
           <div class="hero-float-sub">Local SEO result</div>
@@ -1406,43 +2063,43 @@ footer ul a:hover { color: #fff; }
     </div>
     <div class="services-grid">
 
-      <a href="#svc-website" class="service-card reveal">
-        <div class="service-icon">🌐</div>
+      <a href="website-design.html" class="service-card reveal">
+        <div class="service-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
         <h3>Professional Website Design</h3>
         <p>A stunning, mobile-first website built in 7–14 days. Fully custom, SEO-ready, and built to convert visitors into paying customers.</p>
         <span class="service-link">Learn more →</span>
       </a>
 
-      <a href="#svc-profile" class="service-card reveal d1">
-        <div class="service-icon">📍</div>
+      <a href="business-profiles.html" class="service-card reveal d1">
+        <div class="service-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
         <h3>Business Profile Setup</h3>
         <p>We set up and fully optimize your Google Business Profile, Yelp, Facebook, and 40+ directories so local customers can find you instantly.</p>
         <span class="service-link">Learn more →</span>
       </a>
 
-      <a href="#svc-seo" class="service-card reveal d2">
-        <div class="service-icon">🔍</div>
+      <a href="seo.html" class="service-card reveal d2">
+        <div class="service-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
         <h3>Search Engine Optimization</h3>
         <p>Rank on the first page of Google for the keywords your customers are searching. We do keyword research, on-page SEO, and link building.</p>
         <span class="service-link">Learn more →</span>
       </a>
 
-      <a href="#svc-social" class="service-card reveal">
-        <div class="service-icon">📱</div>
+      <a href="social-media.html" class="service-card reveal">
+        <div class="service-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
         <h3>Social Media Marketing</h3>
         <p>We create and manage your Instagram, Facebook, and TikTok content — building a loyal following that turns into real revenue for your business.</p>
         <span class="service-link">Learn more →</span>
       </a>
 
-      <a href="#svc-ecom" class="service-card reveal d1">
-        <div class="service-icon">🛒</div>
+      <a href="ecommerce.html" class="service-card reveal d1">
+        <div class="service-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>
         <h3>E-Commerce Solutions</h3>
         <p>Launch your online store with product pages that sell. We integrate payment gateways, inventory tools, and run Google Shopping &amp; Meta Ads.</p>
         <span class="service-link">Learn more →</span>
       </a>
 
-      <a href="#svc-ads" class="service-card reveal d2">
-        <div class="service-icon">📊</div>
+      <a href="paid-ads.html" class="service-card reveal d2">
+        <div class="service-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
         <h3>Paid Ads Management</h3>
         <p>Google Ads and Meta Ads campaigns managed by certified specialists. We track every dollar and optimize weekly so your ad spend actually works.</p>
         <span class="service-link">Learn more →</span>
@@ -1452,7 +2109,7 @@ footer ul a:hover { color: #fff; }
   </div>
 </section>
 
-<div class="fade-d2l"></div>
+<div class="svc-divider"></div>
 <!-- ─── SERVICE DETAILS ──────────────────────────────────────── -->
 
 <section class="svc-detail" id="svc-website">
@@ -1461,7 +2118,7 @@ footer ul a:hover { color: #fff; }
       <img src="https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&w=900&q=80" alt="Professional website design on laptop" loading="lazy"/>
     </div>
     <div class="svc-content reveal">
-      <span class="eyebrow">🌐 Website Design</span>
+      <span class="eyebrow"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Website Design</span>
       <h2>Websites that <em>actually convert</em> visitors into customers</h2>
       <p>Your website is the first impression most customers will ever get of your business — so we make sure it's unforgettable. Every site we build is handcrafted, mobile-first, and designed around one goal: turning browsers into buyers.</p>
       <p>We don't use cookie-cutter templates. Every page, every button, and every headline is built around your brand, your audience, and the action you want visitors to take.</p>
@@ -1478,13 +2135,15 @@ footer ul a:hover { color: #fff; }
   </div>
 </section>
 
+<div class="svc-divider"></div>
+
 <section class="svc-detail reverse" id="svc-profile">
   <div class="svc-inner">
     <div class="svc-media reveal">
       <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=900&q=80" alt="Local business profile on phone" loading="lazy"/>
     </div>
     <div class="svc-content reveal">
-      <span class="eyebrow">📍 Business Profiles</span>
+      <span class="eyebrow"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Business Profiles</span>
       <h2>Get found by <em>local customers</em> on every platform</h2>
       <p>80% of customers search online before visiting a business — and if you're not showing up on Google Maps, Yelp, or Facebook, you're invisible. We fix that.</p>
       <p>We claim, verify, and fully optimize your listings across 40+ business directories so your phone, address, hours, and photos are consistent everywhere. This builds trust with both customers and search engines.</p>
@@ -1501,13 +2160,15 @@ footer ul a:hover { color: #fff; }
   </div>
 </section>
 
+<div class="svc-divider"></div>
+
 <section class="svc-detail" id="svc-seo">
   <div class="svc-inner">
     <div class="svc-media reveal">
       <img src="https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?auto=format&fit=crop&w=900&q=80" alt="SEO analytics dashboard" loading="lazy"/>
     </div>
     <div class="svc-content reveal">
-      <span class="eyebrow">🔍 Search Engine Optimization</span>
+      <span class="eyebrow"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search Engine Optimization</span>
       <h2>Rank on page 1 for the keywords <em>that matter</em></h2>
       <p>SEO isn't magic — it's strategy. We research exactly what your ideal customers are typing into Google, then we build your pages to rank for those terms. No black-hat tricks, no fluff reports, just real organic traffic month after month.</p>
       <p>Our process starts with a deep technical audit, then moves into keyword strategy, on-page optimization, content creation, and trusted link-building. Most clients see meaningful ranking movement within 60–90 days.</p>
@@ -1524,13 +2185,15 @@ footer ul a:hover { color: #fff; }
   </div>
 </section>
 
+<div class="svc-divider"></div>
+
 <section class="svc-detail reverse" id="svc-social">
   <div class="svc-inner">
     <div class="svc-media reveal">
       <img src="https://images.unsplash.com/photo-1611926653458-09294b3142bf?auto=format&fit=crop&w=900&q=80" alt="Social media content creation" loading="lazy"/>
     </div>
     <div class="svc-content reveal">
-      <span class="eyebrow">📱 Social Media Marketing</span>
+      <span class="eyebrow"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Social Media Marketing</span>
       <h2>Turn followers into <em>real paying customers</em></h2>
       <p>Posting isn't enough. You need content that stops the scroll, builds a community, and drives people to buy. We handle everything — from strategy to content creation to community management — so you never have to stare at a blank feed again.</p>
       <p>Our in-house creators shoot, edit, and publish on Instagram, Facebook, and TikTok using proven formats that new businesses need to grow fast.</p>
@@ -1547,13 +2210,15 @@ footer ul a:hover { color: #fff; }
   </div>
 </section>
 
+<div class="svc-divider"></div>
+
 <section class="svc-detail" id="svc-ecom">
   <div class="svc-inner">
     <div class="svc-media reveal">
       <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=900&q=80" alt="E-commerce store on computer" loading="lazy"/>
     </div>
     <div class="svc-content reveal">
-      <span class="eyebrow">🛒 E-Commerce Solutions</span>
+      <span class="eyebrow"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> E-Commerce Solutions</span>
       <h2>Launch an online store <em>built to sell</em></h2>
       <p>A beautiful store means nothing if it doesn't convert. We build e-commerce sites on Shopify, WooCommerce, or custom platforms — with product pages, checkout flows, and payment gateways optimized for maximum sales.</p>
       <p>From product photography to abandoned-cart emails to Google Shopping ads, we cover every piece of the puzzle so you can ship products, not fight with plugins.</p>
@@ -1570,13 +2235,15 @@ footer ul a:hover { color: #fff; }
   </div>
 </section>
 
+<div class="svc-divider"></div>
+
 <section class="svc-detail reverse" id="svc-ads">
   <div class="svc-inner">
     <div class="svc-media reveal">
       <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80" alt="Paid ads analytics dashboard" loading="lazy"/>
     </div>
     <div class="svc-content reveal">
-      <span class="eyebrow">📊 Paid Ads Management</span>
+      <span class="eyebrow"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Paid Ads Management</span>
       <h2>Every ad dollar <em>tracked and optimized</em></h2>
       <p>Running ads without a strategy is the fastest way to burn cash. Our certified ad specialists build high-converting Google Ads and Meta Ads campaigns that actually deliver a return. We track every click, every conversion, and every dollar spent.</p>
       <p>Weekly optimization, A/B creative testing, and transparent reporting — so you always know exactly what's working and what's being cut.</p>
@@ -1593,7 +2260,7 @@ footer ul a:hover { color: #fff; }
   </div>
 </section>
 
-<div class="fade-l2d"></div>
+<div class="svc-divider"></div>
 <!-- ─── WHY US ────────────────────────────────────────────────── -->
 <section class="section why" id="why">
   <div class="w">
@@ -1614,21 +2281,21 @@ footer ul a:hover { color: #fff; }
             </div>
           </div>
           <div class="why-feat reveal d1">
-            <div class="why-feat-icon">💰</div>
+            <div class="why-feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
             <div>
               <h4>Startup-friendly pricing</h4>
               <p>Affordable packages designed for new business budgets — no hidden fees, no bloated agency markups.</p>
             </div>
           </div>
           <div class="why-feat reveal d2">
-            <div class="why-feat-icon">📞</div>
+            <div class="why-feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/></svg></div>
             <div>
               <h4>A real team, not a freelancer</h4>
               <p>You get a dedicated account manager plus a full team of designers, SEO experts, and marketers working on your business.</p>
             </div>
           </div>
           <div class="why-feat reveal d3">
-            <div class="why-feat-icon">📈</div>
+            <div class="why-feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
             <div>
               <h4>Transparent monthly reporting</h4>
               <p>Every month we send you a clear report showing exactly what we did, your traffic, rankings, and ROI.</p>
@@ -1642,19 +2309,19 @@ footer ul a:hover { color: #fff; }
         <p>Average metrics across our clients after 90 days of working with Nexora Digital.</p>
         <div class="why-stats">
           <div class="why-stat">
-            <strong>0%</strong>
+            <strong data-count="340" data-suffix="%">0%</strong>
             <span>Increase in web traffic</span>
           </div>
           <div class="why-stat">
-            <strong>0★</strong>
+            <strong data-count="4.9" data-suffix="★" data-decimal="true">0★</strong>
             <span>Average Google rating</span>
           </div>
           <div class="why-stat">
-            <strong>0%</strong>
+            <strong data-count="280" data-suffix="%">0%</strong>
             <span>More inbound leads</span>
           </div>
           <div class="why-stat">
-            <strong>0</strong>
+            <strong data-count="7" data-suffix=" Days">0</strong>
             <span>Average site launch</span>
           </div>
         </div>
@@ -1787,75 +2454,6 @@ footer ul a:hover { color: #fff; }
   </div>
 </section>
 
-<div class="fade-d2l"></div>
-<!-- ─── PRICING ────────────────────────────────────────────────── -->
-<section class="section pricing" id="pricing">
-  <div class="w">
-    <div class="section-head center reveal">
-      <span class="eyebrow">Transparent Pricing</span>
-      <h2>Simple plans for <em>every stage</em> of growth</h2>
-      <p>No hidden fees. No long-term lock-in. Cancel any time. All plans include a free strategy call.</p>
-    </div>
-    <div class="pricing-grid">
-
-      <!-- Starter -->
-      <div class="pricing-card reveal">
-        <div class="pricing-name">Starter</div>
-        <div class="pricing-price"><sup>$</sup>0<sub>/mo</sub></div>
-        <p class="pricing-desc">Perfect for brand-new businesses that need a professional online presence fast.</p>
-        <ul class="pricing-features">
-          <li>5-page professional website</li>
-          <li>Google Business Profile setup</li>
-          <li>Basic on-page SEO</li>
-          <li>3 social media posts/week</li>
-          <li>Monthly analytics report</li>
-          <li>Email &amp; chat support</li>
-        </ul>
-        <a href="#contact" class="btn btn-ghost" style="width:100%;justify-content:center">Get Started</a>
-      </div>
-
-      <!-- Growth (Popular) -->
-      <div class="pricing-card popular reveal d1">
-        <div class="pricing-badge">Most Popular</div>
-        <div class="pricing-name">Growth</div>
-        <div class="pricing-price"><sup>$</sup>0<sub>/mo</sub></div>
-        <p class="pricing-desc">For businesses serious about ranking on Google and generating consistent leads.</p>
-        <ul class="pricing-features">
-          <li>10-page custom website</li>
-          <li>Full business profile optimization (40+ directories)</li>
-          <li>Full local &amp; national SEO</li>
-          <li>Daily social media + content creation</li>
-          <li>Google &amp; Meta Ads management</li>
-          <li>Bi-weekly strategy calls</li>
-          <li>Priority dedicated account manager</li>
-        </ul>
-        <a href="#contact" class="btn btn-primary" style="width:100%;justify-content:center">Get Started</a>
-      </div>
-
-      <!-- Scale -->
-      <div class="pricing-card reveal d2">
-        <div class="pricing-name">Scale</div>
-        <div class="pricing-price"><sup>$</sup>0<sub>/mo</sub></div>
-        <p class="pricing-desc">Full-service digital marketing for businesses ready to dominate their market.</p>
-        <ul class="pricing-features">
-          <li>Unlimited pages + e-commerce</li>
-          <li>Full business profile management</li>
-          <li>Aggressive SEO + link building</li>
-          <li>Full social media management</li>
-          <li>Google, Meta &amp; TikTok Ads</li>
-          <li>Email marketing automation</li>
-          <li>Weekly reporting + weekly calls</li>
-          <li>Dedicated team of 3 specialists</li>
-        </ul>
-        <a href="#contact" class="btn btn-ghost" style="width:100%;justify-content:center">Get Started</a>
-      </div>
-
-    </div>
-    <p class="center reveal" style="margin-top:2rem;font-size:.88rem;color:var(--flint)">
-      Need something custom? <a href="#contact" style="color:var(--primary);font-weight:600">Contact us for a custom quote →</a>
-    </p>
-  </div>
-</section>
 
 <div class="fade-l2d"></div>
 <!-- ─── FAQ ────────────────────────────────────────────────────── -->
@@ -1911,17 +2509,92 @@ footer ul a:hover { color: #fff; }
   </div>
 </section>
 
+<!-- ─── CONTACT FORM ─────────────────────────────────────────── -->
+<section class="contact-section" id="contact">
+  <div class="w">
+    <div class="contact-inner">
+      <div class="contact-info reveal">
+        <span class="eyebrow">Get In Touch</span>
+        <h2>Ready to grow your business <em>online?</em></h2>
+        <p>Book a free 30-minute strategy call and we'll show you exactly how to grow your business online — no obligation, no fluff.</p>
+
+        <div class="contact-detail">
+          <div class="contact-detail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/></svg></div>
+          <div class="contact-detail-text">
+            <strong>Call us directly</strong>
+            <span><a href="tel:+13109551077">(310) 955-1077</a></span>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div class="contact-detail-text">
+            <strong>Email us</strong>
+            <span><a href="mailto:hello@nexoradigital.com">hello@nexoradigital.com</a></span>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="contact-detail-text">
+            <strong>Response time</strong>
+            <span>Within 2 hours during business hours</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-form-card reveal d2">
+        <form class="contact-form" id="contact-form" action="#" method="POST">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cf-name">Full Name</label>
+              <input type="text" id="cf-name" name="name" placeholder="John Smith" required />
+            </div>
+            <div class="form-group">
+              <label for="cf-email">Email Address</label>
+              <input type="email" id="cf-email" name="email" placeholder="john@mybusiness.com" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cf-phone">Phone Number</label>
+              <input type="tel" id="cf-phone" name="phone" placeholder="(555) 123-4567" />
+            </div>
+            <div class="form-group">
+              <label for="cf-service">Service Interested In</label>
+              <select id="cf-service" name="service">
+                <option value="">Select a service...</option>
+                <option value="website">Website Design</option>
+                <option value="profiles">Business Profile Setup</option>
+                <option value="seo">SEO</option>
+                <option value="social">Social Media Marketing</option>
+                <option value="ecom">E-Commerce</option>
+                <option value="ads">Paid Ads</option>
+                <option value="bundle">Full Service Bundle</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="cf-message">Tell us about your business</label>
+            <textarea id="cf-message" name="message" placeholder="What does your business do? What are your goals?" rows="4"></textarea>
+          </div>
+          <button type="submit" class="form-submit">Book My Free Strategy Call →</button>
+          <p class="form-note">No credit card required · No obligation · Response within 2 hours</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ─── CTA BANNER ────────────────────────────────────────────── -->
-<section class="cta-banner" id="contact">
+<section class="cta-banner">
   <div class="w cta-banner-inner">
     <span class="eyebrow gold reveal">Ready to Grow?</span>
     <h2 class="reveal d1">Start getting customers<br>from the internet <em>this week</em></h2>
-    <p class="reveal d2">Book a free 30-minute strategy call and we'll show you exactly how to grow your business online — no obligation, no fluff.</p>
+    <p class="reveal d2">Join 500+ businesses that trust Nexora Digital to build their online presence and drive real revenue.</p>
     <div class="cta-banner-btns reveal d3">
-      <a href="tel:+13109551077" class="btn btn-white btn-lg">📞 Call (310) 955-1077</a>
-      <a href="mailto:hello@nexoradigital.com" class="btn btn-gold btn-lg">Book a Free Call →</a>
+      <a href="tel:+13109551077" class="btn btn-white btn-lg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/></svg> Call (310) 955-1077</a>
+      <a href="#contact" class="btn btn-gold btn-lg">Book a Free Call →</a>
     </div>
-    <p class="reveal d4" style="color:rgba(255,255,255,.4);font-size:.82rem;margin-top:1.5rem">
+    <p class="reveal d4" style="color:rgba(255,255,255,.35);font-size:.82rem;margin-top:1.5rem">
       Response within 2 hours · No credit card required · No long-term commitment
     </p>
   </div>
@@ -1934,30 +2607,34 @@ footer ul a:hover { color: #fff; }
       <div class="foot-brand">
         <a href="#" class="nav-logo">Nexora<span>Digital</span></a>
         <p>The growth platform for new businesses across the USA. Websites, SEO, social media, and paid ads — all in one place.</p>
+        <div class="foot-newsletter">
+          <input type="email" placeholder="Enter your email" />
+          <button>Subscribe</button>
+        </div>
         <div class="foot-social">
-          <a href="#">f</a>
-          <a href="#">in</a>
-          <a href="#">ig</a>
-          <a href="#">x</a>
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="LinkedIn">in</a>
+          <a href="#" aria-label="Instagram">ig</a>
+          <a href="#" aria-label="X/Twitter">x</a>
         </div>
       </div>
       <div>
         <h6>Services</h6>
         <ul>
-          <li><a href="#services">Website Design</a></li>
-          <li><a href="#services">Business Profiles</a></li>
-          <li><a href="#services">SEO</a></li>
-          <li><a href="#services">Social Media</a></li>
-          <li><a href="#services">E-Commerce</a></li>
-          <li><a href="#services">Paid Ads</a></li>
+          <li><a href="website-design.html">Website Design</a></li>
+          <li><a href="business-profiles.html">Business Profiles</a></li>
+          <li><a href="seo.html">SEO</a></li>
+          <li><a href="social-media.html">Social Media</a></li>
+          <li><a href="ecommerce.html">E-Commerce</a></li>
+          <li><a href="paid-ads.html">Paid Ads</a></li>
         </ul>
       </div>
       <div>
         <h6>Company</h6>
         <ul>
           <li><a href="#">About Us</a></li>
-          <li><a href="#">Our Process</a></li>
-          <li><a href="#">Case Studies</a></li>
+          <li><a href="how-it-works.html">Our Process</a></li>
+          <li><a href="#testimonials">Case Studies</a></li>
           <li><a href="#">Blog</a></li>
           <li><a href="#">Careers</a></li>
         </ul>
@@ -1967,13 +2644,13 @@ footer ul a:hover { color: #fff; }
         <ul>
           <li><a href="tel:+13109551077">(310) 955-1077</a></li>
           <li><a href="mailto:hello@nexoradigital.com">hello@nexoradigital.com</a></li>
-          <li><a href="#">Free Strategy Call</a></li>
+          <li><a href="#contact">Free Strategy Call</a></li>
           <li><a href="#">Support Center</a></li>
         </ul>
       </div>
     </div>
     <div class="foot-bottom">
-      <p>© 2026 Nexora Digital LLC. All rights reserved. USA.</p>
+      <p>&copy; 2026 Nexora Digital LLC. All rights reserved. USA.</p>
       <div class="foot-legal">
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Service</a>
@@ -1983,7 +2660,76 @@ footer ul a:hover { color: #fff; }
   </div>
 </footer>
 
+<!-- Scroll-to-top button -->
+<button id="back-to-top" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
 <script>
+/* ── Page Loader ──────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('page-loader').classList.add('done'), 1400);
+});
+
+/* ── Scroll Progress Bar ──────────────────────────────────── */
+const progressBar = document.getElementById('scroll-progress');
+window.addEventListener('scroll', () => {
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const scrolled = (window.scrollY / docHeight) * 100;
+  progressBar.style.width = scrolled + '%';
+}, { passive: true });
+
+/* ── Nav scroll effect ────────────────────────────────────── */
+const nav = document.getElementById('main-nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+}, { passive: true });
+
+/* ── Mobile menu ──────────────────────────────────────────── */
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+  document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+});
+document.querySelectorAll('.mobile-link').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+});
+
+/* ── Cursor glow (desktop only) ──────────────────────────── */
+if (window.matchMedia('(pointer: fine)').matches) {
+  const glow = document.getElementById('cursor-glow');
+  let glowVisible = false;
+  document.addEventListener('mousemove', (e) => {
+    if (!glowVisible) { glow.classList.add('visible'); glowVisible = true; }
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  });
+}
+
+/* ── Service card mouse tracking ─────────────────────────── */
+document.querySelectorAll('.service-card').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', ((e.clientX - rect.left) / rect.width * 100) + '%');
+    card.style.setProperty('--my', ((e.clientY - rect.top) / rect.height * 100) + '%');
+  });
+});
+
+/* ── Button mouse tracking ────────────────────────────────── */
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    btn.style.setProperty('--x', ((e.clientX - rect.left) / rect.width * 100) + '%');
+    btn.style.setProperty('--y', ((e.clientY - rect.top) / rect.height * 100) + '%');
+  });
+});
+
 /* ── Scroll Reveal ─────────────────────────────────────────── */
 const io = new IntersectionObserver((entries) => {
   entries.forEach(e => {
@@ -1991,6 +2737,42 @@ const io = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ── Animated counters ─────────────────────────────────────── */
+function animateCounter(el, target, duration, suffix, prefix, isDecimal) {
+  const start = 0;
+  const startTime = performance.now();
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    let current;
+    if (isDecimal) {
+      current = (start + (target - start) * eased).toFixed(1);
+    } else {
+      current = Math.floor(start + (target - start) * eased);
+    }
+    el.textContent = (prefix || '') + current + (suffix || '');
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const el = e.target;
+      const target = parseFloat(el.dataset.target || el.dataset.count);
+      const suffix = el.dataset.suffix || '';
+      const prefix = el.dataset.prefix || '';
+      const isDecimal = el.dataset.decimal === 'true';
+      animateCounter(el, target, 2000, suffix, prefix, isDecimal);
+      counterObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('[data-target], [data-count]').forEach(el => counterObserver.observe(el));
 
 /* ── FAQ accordion ─────────────────────────────────────────── */
 document.querySelectorAll('.faq-q').forEach(btn => {
@@ -2020,11 +2802,28 @@ window.addEventListener('scroll', () => {
   btt.classList.toggle('visible', window.scrollY > 400);
 }, { passive: true });
 btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+/* ── Contact form handling ─────────────────────────────────── */
+document.getElementById('contact-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const btn = e.target.querySelector('.form-submit');
+  const originalText = btn.textContent;
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '✓ Message Sent!';
+    btn.style.background = '#4dbe8e';
+    btn.style.color = '#fff';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.disabled = false;
+      e.target.reset();
+    }, 3000);
+  }, 1500);
+});
 </script>
 
-<!-- Scroll-to-top button -->
-<button id="back-to-top" aria-label="Back to top">
-  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-</button>
 </body>
 </html>

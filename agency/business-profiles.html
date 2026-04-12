@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Business Profile Setup — Nexora Digital</title>
+<meta name="description" content="Get found by local customers on Google, Yelp, Apple Maps & 40+ directories. Professional business profile setup & optimization by Nexora Digital."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ─────────────────────────────────────────────────────────────
+   NEXORA DIGITAL  –  Business Profiles Service Page
+   #eeb75d gold · #141516 ink · #F1EFEB off-white · #ffffff white
+───────────────────────────────────────────────────────────── */
+
+:root {
+  --primary:    #eeb75d;
+  --primary-dk: #d4993c;
+  --primary-lt: rgba(238,183,93,.1);
+  --gold:       #eeb75d;
+  --gold-dk:    #d4993c;
+  --bg:         #F1EFEB;
+  --ink:        #141516;
+  --charcoal:   #262626;
+  --ash:        #3d3a3a;
+  --flint:      #8F8F8F;
+  --dove:       #dedede;
+  --white:      #ffffff;
+  --card-bg:    #ffffff;
+
+  --sp-1: 0.44rem;
+  --sp-2: 0.67rem;
+  --sp-3: 1rem;
+  --sp-4: 1.5rem;
+  --sp-5: 2.25rem;
+  --sp-6: 3.38rem;
+  --sp-7: 5.06rem;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  --nav-h: 74px;
+  --content-w: 800px;
+  --wide-w: 1400px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #141516;
+  color: #ffffff;
+  line-height: 1.6;
+  padding-top: var(--nav-h);
+  overflow-x: hidden;
+}
+
+/* ── Page loader ──────────────────────────────────────────── */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #141516;
+  display: grid;
+  place-items: center;
+  transition: opacity .6s ease, visibility .6s ease;
+}
+.page-loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  opacity: 0;
+  animation: loaderFade .8s .2s ease forwards;
+}
+.loader-logo span { color: var(--primary); font-style: italic; font-weight: 400; }
+.loader-bar {
+  width: 120px;
+  height: 2px;
+  background: rgba(255,255,255,.1);
+  border-radius: 2px;
+  margin-top: 1.5rem;
+  overflow: hidden;
+}
+.loader-bar::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary);
+  animation: loaderSlide 1.2s ease forwards;
+}
+@keyframes loaderFade { to { opacity: 1; } }
+@keyframes loaderSlide { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+
+h1,h2,h3,h4,h5 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  line-height: 1.1;
+  color: #ffffff;
+}
+h1 { font-size: clamp(2.6rem, 5.5vw, 4.8rem); letter-spacing: -.02em; }
+h2 { font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -.015em; margin-bottom: var(--sp-3); }
+h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); margin-bottom: .5rem; }
+h4 { font-size: 1.15rem; }
+h1 em, h2 em { font-style: italic; color: var(--primary); }
+
+p { color: rgba(255,255,255,.7); font-size: 1rem; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* ── Utilities ─────────────────────────────────────────── */
+.w { max-width: var(--wide-w); margin: 0 auto; padding: 0 var(--sp-5); }
+.w-content { max-width: var(--content-w); margin: 0 auto; padding: 0 var(--sp-5); }
+.center { text-align: center; }
+
+.eyebrow {
+  display: inline-block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: var(--sp-2);
+}
+.eyebrow.gold { color: var(--gold-dk); }
+
+.section { padding: var(--sp-7) 0; }
+.section-head { margin-bottom: var(--sp-6); }
+.section-head p {
+  color: rgba(255,255,255,.6);
+  font-size: 1.05rem;
+  max-width: 50ch;
+  line-height: 1.7;
+}
+.section-head.center p { margin: .75rem auto 0; }
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .85rem 1.9rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .88rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: none;
+  transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.btn:hover::before { opacity: 1; }
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+
+.btn-primary {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(20,21,22,.3);
+}
+.btn-primary:hover {
+  background: var(--charcoal);
+  box-shadow: 0 8px 28px rgba(20,21,22,.4);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,.22);
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--ink);
+  box-shadow: 0 4px 18px rgba(238,183,93,.35);
+}
+.btn-gold:hover {
+  background: var(--gold-dk);
+  color: #fff;
+  box-shadow: 0 8px 28px rgba(238,183,93,.45);
+}
+
+.btn-white {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
+}
+.btn-white:hover { background: var(--bg); }
+
+.btn-lg { padding: 1.05rem 2.4rem; font-size: .95rem; }
+
+/* ── Nav ────────────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: rgba(20,21,22,.85);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid rgba(238,183,93,.15);
+  z-index: 100;
+  transition: background .4s, box-shadow .4s, border-color .4s;
+}
+.nav.scrolled {
+  background: rgba(20,21,22,.95);
+  box-shadow: 0 4px 30px rgba(0,0,0,.5);
+  border-color: rgba(238,183,93,.3);
+}
+.nav-inner {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: 0 var(--sp-5);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -.02em;
+  flex-shrink: 0;
+  display: flex;
+  align-items: baseline;
+  gap: .2rem;
+}
+.nav-logo span { color: var(--primary); font-style: italic; font-weight: 400; }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex: 1;
+  justify-content: center;
+  list-style: none;
+}
+.nav-links a {
+  font-size: .88rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.7);
+  transition: color .2s;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -3px;
+  width: 0; height: 1.5px;
+  background: var(--primary);
+  transition: width .25s;
+}
+.nav-links a:hover { color: var(--primary); }
+.nav-links a:hover::after { width: 100%; }
+
+/* Services mega dropdown */
+.nav-dropdown {
+  position: static;
+}
+.nav-dropdown > a {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.nav-dropdown > a .dd-arrow {
+  display: inline-block;
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid currentColor;
+  transition: transform .25s;
+}
+.nav-dropdown:hover > a .dd-arrow { transform: rotate(180deg); }
+.nav-dropdown-menu {
+  position: absolute;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  background: rgba(14,15,16,.98);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(238,183,93,.15);
+  border-bottom: 1px solid rgba(238,183,93,.1);
+  padding: 3rem 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 200;
+  box-shadow: 0 30px 80px rgba(0,0,0,.6);
+}
+.nav-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0; right: 0;
+  height: 20px;
+}
+.nav-dropdown:hover .nav-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.nav-dropdown-grid {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: 0 var(--sp-5);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem 4rem;
+}
+.nav-dropdown-menu a {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  padding: 1.1rem 1.5rem;
+  border-radius: var(--radius-sm);
+  transition: all .2s;
+}
+.nav-dropdown-menu a::after { display: none; }
+.nav-dropdown-menu a:hover {
+  background: rgba(238,183,93,.06);
+}
+.dd-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.9);
+  transition: color .2s;
+}
+.nav-dropdown-menu a:hover .dd-title { color: var(--primary); }
+.dd-sub {
+  font-size: .85rem;
+  color: rgba(255,255,255,.4);
+  font-weight: 400;
+  line-height: 1.5;
+}
+.nav-dropdown-footer {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: 1.5rem var(--sp-5) 0;
+  border-top: 1px solid rgba(255,255,255,.06);
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.nav-dropdown-footer a {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--primary);
+  transition: color .2s;
+  padding: 0;
+}
+.nav-dropdown-footer a::after { display: none; }
+.nav-dropdown-footer a:hover { color: var(--gold-dk); }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-shrink: 0;
+}
+.nav-phone {
+  font-size: .85rem;
+  color: rgba(255,255,255,.7);
+  font-weight: 500;
+  transition: color .2s;
+}
+.nav-phone:hover { color: var(--primary); }
+
+/* Mobile hamburger */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 6px;
+  z-index: 200;
+}
+.nav-hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: transform .3s, opacity .3s;
+}
+.nav-hamburger.open span:first-child { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:last-child { transform: translateY(-7px) rotate(-45deg); }
+
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: var(--nav-h);
+  left: 0; right: 0; bottom: 0;
+  background: rgba(20,21,22,.97);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  z-index: 90;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+.mobile-menu.open { display: flex; opacity: 1; }
+.mobile-menu a {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.8);
+  transition: color .2s;
+}
+.mobile-menu a:hover { color: var(--primary); }
+.mobile-menu .btn { margin-top: 1rem; }
+
+@media (max-width: 980px) {
+  .nav-links, .nav-phone { display: none; }
+  .nav-hamburger { display: flex; }
+}
+
+/* ── Cursor glow ──────────────────────────────────────────── */
+.cursor-glow {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(238,183,93,.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity .3s;
+  opacity: 0;
+}
+.cursor-glow.visible { opacity: 1; }
+
+/* ── Hero ───────────────────────────────────────────────── */
+.hero {
+  min-height: calc(100vh - var(--nav-h));
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  background: url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 21, 22, .45);
+  backdrop-filter: blur(3px) saturate(1.1);
+  -webkit-backdrop-filter: blur(3px) saturate(1.1);
+  z-index: 0;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.hero-bg .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .35;
+  animation: orbFloat 12s ease-in-out infinite;
+}
+.hero-bg .orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(238,183,93,.4), transparent 70%);
+  top: -15%; left: -10%;
+}
+.hero-bg .orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(82,93,220,.3), transparent 70%);
+  bottom: -20%; right: -5%;
+  animation-delay: -4s;
+  animation-duration: 15s;
+}
+.hero-bg .orb-3 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(77,190,142,.2), transparent 70%);
+  top: 40%; right: 30%;
+  animation-delay: -8s;
+  animation-duration: 18s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -40px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(.95); }
+  75% { transform: translate(40px, 30px) scale(1.03); }
+}
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(238,183,93,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(238,183,93,.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 80%);
+}
+
+.hero-inner {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: var(--sp-7) var(--sp-5);
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  width: 100%;
+}
+.hero-badge {
+  display: inline-block;
+  padding: .5rem 1.25rem;
+  border-radius: 100px;
+  background: rgba(238,183,93,.08);
+  border: 1px solid rgba(238,183,93,.2);
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: var(--sp-4);
+  letter-spacing: .02em;
+}
+.hero h1 { max-width: 18ch; margin: 0 auto var(--sp-4); }
+.hero-sub {
+  font-size: 1.15rem;
+  color: rgba(255,255,255,.82);
+  max-width: 55ch;
+  margin: 0 auto var(--sp-5);
+  line-height: 1.7;
+}
+.hero-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-4);
+}
+.hero-proof {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.hero-proof-item {
+  font-size: .85rem;
+  color: rgba(255,255,255,.45);
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.hero-proof-item .check { color: var(--primary); font-weight: 700; }
+
+/* ── What's Included ──────────────────────────────────────── */
+.included-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+@media (max-width: 860px) { .included-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .included-grid { grid-template-columns: 1fr; } }
+
+.included-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  transition: all .35s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.included-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(238,183,93,.06) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.included-card:hover::before { opacity: 1; }
+.included-card:hover {
+  border-color: rgba(238,183,93,.2);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,.3);
+}
+.included-card-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: rgba(238,183,93,.1);
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+  margin-bottom: 1.25rem;
+}
+.included-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+.included-card p { font-size: .9rem; color: rgba(255,255,255,.5); line-height: 1.65; }
+
+/* ── Platforms Grid ───────────────────────────────────────── */
+.platforms-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+@media (max-width: 860px) { .platforms-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px) { .platforms-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.platform-badge {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  transition: all .3s ease;
+}
+.platform-badge:hover {
+  border-color: rgba(238,183,93,.25);
+  background: rgba(238,183,93,.05);
+  transform: translateY(-2px);
+}
+.platform-badge-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+.platform-badge-name {
+  font-size: .9rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.8);
+}
+
+/* ── Stats / Why It Matters ───────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+@media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } }
+
+.stat-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  transition: all .35s ease;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.stat-card:hover {
+  border-color: rgba(238,183,93,.2);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,.3);
+}
+.stat-card:hover::after { opacity: 1; }
+.stat-icon {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  background: rgba(238,183,93,.08);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  margin: 0 auto 1.25rem;
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: .5rem;
+  line-height: 1;
+}
+.stat-card h3 {
+  font-size: 1rem;
+  margin-bottom: .5rem;
+  color: #fff;
+}
+.stat-card p {
+  font-size: .88rem;
+  color: rgba(255,255,255,.5);
+  line-height: 1.65;
+  max-width: 30ch;
+  margin: 0 auto;
+}
+
+/* ── Before & After ──────────────────────────────────────── */
+.ba-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+@media (max-width: 860px) {
+  .ba-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .ba-arrow { transform: rotate(90deg); }
+}
+.ba-card {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+}
+.ba-card img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+}
+.ba-card-body {
+  padding: 1.5rem 2rem;
+}
+.ba-label {
+  display: inline-block;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  padding: .35rem .9rem;
+  border-radius: 100px;
+  margin-bottom: .75rem;
+}
+.ba-label.before {
+  background: rgba(232,93,93,.12);
+  color: #e85d5d;
+}
+.ba-label.after {
+  background: rgba(77,190,142,.12);
+  color: #4dbe8e;
+}
+.ba-card h3 { font-size: 1.15rem; margin-bottom: .5rem; }
+.ba-card p { font-size: .9rem; color: rgba(255,255,255,.5); line-height: 1.65; }
+.ba-arrow {
+  font-size: 2.5rem;
+  color: var(--primary);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ── Process Steps ────────────────────────────────────────── */
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  position: relative;
+}
+@media (max-width: 860px) { .process-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .process-grid { grid-template-columns: 1fr; } }
+
+.process-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  text-align: center;
+  transition: all .35s ease;
+  position: relative;
+  z-index: 2;
+}
+.process-card:hover {
+  border-color: rgba(238,183,93,.2);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,.3);
+}
+.process-step {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: #1a1810;
+  border: 2px solid var(--gold);
+  display: grid;
+  place-items: center;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--primary);
+  margin: 0 auto 1.25rem;
+  position: relative;
+  z-index: 2;
+}
+.process-card h3 { font-size: 1.05rem; margin-bottom: .5rem; }
+.process-card p { font-size: .88rem; color: rgba(255,255,255,.5); line-height: 1.65; }
+.process-connector {
+  display: none;
+}
+@media (min-width: 861px) {
+  .process-connector {
+    display: block;
+    position: absolute;
+    top: calc(2rem + 22px);
+    left: 12.5%;
+    right: 12.5%;
+    width: auto;
+    height: 2px;
+    background: linear-gradient(to right, rgba(238,183,93,.2), var(--gold) 50%, rgba(238,183,93,.2));
+    z-index: 1;
+  }
+}
+
+/* ── Testimonial ──────────────────────────────────────────── */
+.testimonial-card {
+  max-width: 720px;
+  margin: 0 auto;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-lg);
+  padding: 3rem;
+  text-align: center;
+  position: relative;
+}
+.testimonial-card::before {
+  content: '\201C';
+  font-family: 'Playfair Display', serif;
+  font-size: 6rem;
+  color: var(--primary);
+  opacity: .2;
+  position: absolute;
+  top: .5rem;
+  left: 2rem;
+  line-height: 1;
+}
+.testimonial-avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 1.5rem;
+  border: 3px solid rgba(238,183,93,.3);
+}
+.testimonial-card blockquote {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,.75);
+  font-style: italic;
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
+  max-width: 50ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+.testimonial-name {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: .95rem;
+  color: #fff;
+}
+.testimonial-role {
+  font-size: .82rem;
+  color: rgba(255,255,255,.4);
+  margin-top: .25rem;
+}
+.testimonial-stars {
+  color: var(--gold);
+  font-size: 1.1rem;
+  letter-spacing: .15em;
+  margin-bottom: 1rem;
+}
+
+/* ── FAQ ─────────────────────────────────────────────────── */
+.faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: .75rem; }
+.faq-item {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color .3s;
+}
+.faq-item:hover { border-color: rgba(238,183,93,.15); }
+.faq-item.open { border-color: rgba(238,183,93,.3); }
+.faq-q {
+  width: 100%; text-align: left;
+  padding: 1.25rem 1.5rem;
+  background: rgba(255,255,255,.03);
+  border: none; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem; font-weight: 600;
+  color: #fff;
+  transition: background .2s;
+}
+.faq-q:hover { background: rgba(255,255,255,.06); }
+.faq-q svg {
+  flex-shrink: 0;
+  transition: transform .3s;
+  color: var(--primary);
+}
+.faq-item.open .faq-q svg { transform: rotate(180deg); }
+.faq-item.open .faq-q { background: rgba(238,183,93,.05); }
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s ease, padding .35s ease;
+  padding: 0 1.5rem;
+  font-size: .92rem;
+  color: rgba(255,255,255,.55);
+  line-height: 1.7;
+}
+.faq-item.open .faq-a { max-height: 300px; padding: 0 1.5rem 1.25rem; }
+
+/* ── CTA Banner ──────────────────────────────────────────── */
+.cta-banner {
+  background: var(--ink);
+  padding: var(--sp-7) 0;
+  position: relative;
+  overflow: hidden;
+}
+.cta-banner::before {
+  content: '';
+  position: absolute;
+  top: -100px; left: -100px;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: .1;
+  filter: blur(60px);
+}
+.cta-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: -80px;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: .07;
+  filter: blur(50px);
+}
+.cta-banner-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.cta-banner h2 { color: #fff; margin-bottom: .75rem; }
+.cta-banner p { color: rgba(255,255,255,.6); font-size: 1.05rem; max-width: 50ch; margin: 0 auto 2.5rem; }
+.cta-banner-btns { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+
+/* ── Footer ──────────────────────────────────────────────── */
+footer {
+  background: #0a0b0c;
+  color: #fff;
+  padding: var(--sp-7) 0 var(--sp-5);
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+.foot-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr;
+  gap: 3rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+@media (max-width: 860px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
+
+.foot-brand .nav-logo { color: #fff; font-size: 1.5rem; margin-bottom: 1rem; }
+.foot-brand .nav-logo span { color: var(--gold); }
+.foot-brand p {
+  color: rgba(255,255,255,.4);
+  font-size: .88rem;
+  line-height: 1.7;
+  max-width: 30ch;
+  margin-bottom: 1.5rem;
+}
+
+.foot-newsletter {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1.5rem;
+}
+.foot-newsletter input {
+  flex: 1;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-sm);
+  padding: .65rem 1rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .85rem;
+  color: #fff;
+  outline: none;
+  transition: border-color .3s;
+}
+.foot-newsletter input::placeholder { color: rgba(255,255,255,.25); }
+.foot-newsletter input:focus { border-color: var(--primary); }
+.foot-newsletter button {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: .65rem 1.25rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s;
+  white-space: nowrap;
+}
+.foot-newsletter button:hover { background: var(--gold-dk); }
+
+.foot-social { display: flex; gap: .75rem; }
+.foot-social a {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.06);
+  display: grid; place-items: center;
+  font-size: .85rem;
+  color: rgba(255,255,255,.5);
+  transition: all .3s;
+}
+.foot-social a:hover { background: var(--primary); color: #fff; transform: translateY(-2px); }
+
+footer h6 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+  margin-bottom: 1.25rem;
+}
+footer ul { list-style: none; display: flex; flex-direction: column; gap: .65rem; }
+footer ul a {
+  font-size: .88rem;
+  color: rgba(255,255,255,.45);
+  transition: color .2s, transform .2s;
+  display: inline-block;
+}
+footer ul a:hover { color: var(--primary); transform: translateX(4px); }
+
+.foot-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 2rem;
+}
+.foot-bottom p { font-size: .8rem; color: rgba(255,255,255,.25); }
+.foot-legal { display: flex; gap: 1.5rem; }
+.foot-legal a { font-size: .8rem; color: rgba(255,255,255,.25); transition: color .2s; }
+.foot-legal a:hover { color: rgba(255,255,255,.6); }
+
+/* ── Scroll reveal ───────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  filter: blur(4px);
+  transition:
+    opacity .8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform .8s cubic-bezier(0.16, 1, 0.3, 1),
+    filter .8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.d1 { transition-delay: .12s; }
+.reveal.d2 { transition-delay: .24s; }
+.reveal.d3 { transition-delay: .36s; }
+.reveal.d4 { transition-delay: .48s; }
+.reveal.in { opacity: 1; transform: none; filter: blur(0); }
+
+/* ── Section gold border dividers ───────────────────────── */
+.fade-d2l, .fade-l2d {
+  height: 2px;
+  background: linear-gradient(to right, transparent 0%, rgba(238,183,93,.4) 20%, rgba(238,183,93,.4) 80%, transparent 100%);
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Scroll-to-top button ────────────────────────────────── */
+#back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 200;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(20,21,22,.9);
+  backdrop-filter: blur(10px);
+  color: var(--gold);
+  border: 1.5px solid rgba(238,183,93,.3);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(0,0,0,.4);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: all .3s ease;
+  pointer-events: none;
+}
+#back-to-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+#back-to-top:hover {
+  background: var(--gold);
+  color: var(--ink);
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+#back-to-top svg {
+  width: 18px; height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Scroll progress bar ──────────────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--gold-dk));
+  z-index: 999;
+  width: 0%;
+  transition: width .1s linear;
+}
+</style>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div class="page-loader" id="page-loader">
+  <div style="text-align:center">
+    <div class="loader-logo">Nexora<span>Digital</span></div>
+    <div class="loader-bar"></div>
+  </div>
+</div>
+
+<!-- Scroll Progress -->
+<div class="scroll-progress" id="scroll-progress"></div>
+
+<!-- Cursor Glow -->
+<div class="cursor-glow" id="cursor-glow"></div>
+
+<!-- ─── NAV ──────────────────────────────────────────────────── -->
+<header class="nav" id="main-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Nexora<span>Digital</span></a>
+
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="index.html#services">Services <span class="dd-arrow"></span></a>
+        <div class="nav-dropdown-menu">
+          <div class="nav-dropdown-grid">
+            <a href="website-design.html">
+              <span class="dd-title">Website Design</span>
+              <span class="dd-sub">Launch a stunning, conversion-focused website</span>
+            </a>
+            <a href="business-profiles.html">
+              <span class="dd-title">Business Profiles</span>
+              <span class="dd-sub">Get found on Google, Yelp &amp; 40+ directories</span>
+            </a>
+            <a href="seo.html">
+              <span class="dd-title">SEO</span>
+              <span class="dd-sub">Rank on page 1 for the keywords that matter</span>
+            </a>
+            <a href="social-media.html">
+              <span class="dd-title">Social Media Marketing</span>
+              <span class="dd-sub">Turn followers into real paying customers</span>
+            </a>
+            <a href="ecommerce.html">
+              <span class="dd-title">E-Commerce Solutions</span>
+              <span class="dd-sub">Launch an online store built to sell</span>
+            </a>
+            <a href="paid-ads.html">
+              <span class="dd-title">Paid Ads Management</span>
+              <span class="dd-sub">Every ad dollar tracked and optimized</span>
+            </a>
+          </div>
+          <div class="nav-dropdown-footer">
+            <a href="pricing.html">View Pricing &rarr;</a>
+            <a href="index.html#contact">Book a Free Call &rarr;</a>
+          </div>
+        </div>
+      </li>
+      <li><a href="why-us.html">Why Us</a></li>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="tel:+13109551077" class="nav-phone">(310) 955-1077</a>
+      <a href="index.html#contact" class="btn btn-gold">Get Started Free</a>
+    </div>
+
+    <div class="nav-hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html" class="mobile-link">Home</a>
+  <a href="index.html#services" class="mobile-link">Services</a>
+  <a href="why-us.html" class="mobile-link">Why Us</a>
+  <a href="how-it-works.html" class="mobile-link">How It Works</a>
+  <a href="pricing.html" class="mobile-link">Pricing</a>
+  <a href="index.html#contact" class="btn btn-gold btn-lg">Get Started Free</a>
+</div>
+
+<!-- ─── HERO ─────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="hero-inner">
+    <div class="hero-badge reveal"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Business Profiles</div>
+    <h1 class="reveal d1">Get found by <em>local customers</em> on every platform</h1>
+    <p class="hero-sub reveal d2">80% of consumers search online before visiting a local business. We make sure they find you first — on Google, Yelp, Apple Maps, and 40+ directories.</p>
+
+    <div class="hero-cta reveal d3">
+      <a href="index.html#contact" class="btn btn-gold btn-lg">Get Your Profiles Set Up</a>
+      <a href="#included" class="btn btn-ghost btn-lg">See What's Included</a>
+    </div>
+    <div class="hero-proof reveal d4">
+      <div class="hero-proof-item">
+        <span class="check">&#x2713;</span> 40+ directory submissions
+      </div>
+      <div class="hero-proof-item">
+        <span class="check">&#x2713;</span> Review generation strategy
+      </div>
+      <div class="hero-proof-item">
+        <span class="check">&#x2713;</span> Monthly maintenance
+      </div>
+    </div>
+  </div>
+</section>
+
+<span class="fade-d2l"></span>
+
+<!-- ─── WHAT'S INCLUDED ──────────────────────────────────────── -->
+<section class="section" id="included">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">What's Included</span>
+      <h2>Everything you need to <em>dominate local search</em></h2>
+      <p>From initial setup to ongoing optimization, we handle every detail of your business presence online.</p>
+    </div>
+
+    <div class="included-grid">
+      <div class="included-card reveal">
+        <div class="included-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h3>Google Business Profile</h3>
+        <p>Complete setup and optimization of your Google Business Profile with accurate info, categories, attributes, and a keyword-rich description to rank higher in local search.</p>
+      </div>
+      <div class="included-card reveal d1">
+        <div class="included-card-icon" style="background:rgba(82,93,220,.12)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <h3>Yelp, Facebook & Apple Maps</h3>
+        <p>Claim and optimize your business on the platforms that customers actually use. Consistent NAP (Name, Address, Phone) across every listing to boost trust and rankings.</p>
+      </div>
+      <div class="included-card reveal d2">
+        <div class="included-card-icon" style="background:rgba(77,190,142,.12)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <h3>40+ Directory Submissions</h3>
+        <p>We submit your business to over 40 high-authority directories including Bing Places, Nextdoor, Yellow Pages, BBB, and industry-specific platforms to maximize your reach.</p>
+      </div>
+      <div class="included-card reveal d3">
+        <div class="included-card-icon" style="background:rgba(232,93,126,.12)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h3>Review Generation Strategy</h3>
+        <p>Get more 5-star reviews with our proven review generation strategy including automated review request flows, QR codes, and response templates for every situation.</p>
+      </div>
+      <div class="included-card reveal d4">
+        <div class="included-card-icon" style="background:rgba(238,183,93,.12)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+        <h3>Photo & Content Optimization</h3>
+        <p>Professional photos, branded cover images, and compelling business descriptions optimized with local keywords to attract and convert more customers from search.</p>
+      </div>
+      <div class="included-card reveal d4">
+        <div class="included-card-icon" style="background:rgba(82,93,220,.1)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+        <h3>Monthly Profile Maintenance</h3>
+        <p>Ongoing monitoring and updates to keep your profiles fresh — including holiday hours, new photos, posts, Q&A management, and duplicate listing suppression.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<span class="fade-d2l"></span>
+
+<!-- ─── PLATFORMS WE COVER ───────────────────────────────────── -->
+<section class="section" id="platforms">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Platforms We Cover</span>
+      <h2>Your business, listed <em>everywhere that matters</em></h2>
+      <p>We set up and optimize your presence across all the platforms your customers are searching.</p>
+    </div>
+
+    <div class="platforms-grid">
+      <div class="platform-badge reveal">
+        <div class="platform-badge-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <span class="platform-badge-name">Google Maps</span>
+      </div>
+      <div class="platform-badge reveal d1">
+        <div class="platform-badge-icon" style="background:rgba(232,93,93,.1)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <span class="platform-badge-name">Yelp</span>
+      </div>
+      <div class="platform-badge reveal d1">
+        <div class="platform-badge-icon" style="background:rgba(82,93,220,.12)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></div>
+        <span class="platform-badge-name">Facebook</span>
+      </div>
+      <div class="platform-badge reveal d2">
+        <div class="platform-badge-icon" style="background:rgba(255,255,255,.08)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <span class="platform-badge-name">Apple Maps</span>
+      </div>
+      <div class="platform-badge reveal d2">
+        <div class="platform-badge-icon" style="background:rgba(0,164,239,.1)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <span class="platform-badge-name">Bing Places</span>
+      </div>
+      <div class="platform-badge reveal d2">
+        <div class="platform-badge-icon" style="background:rgba(77,190,142,.12)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <span class="platform-badge-name">Nextdoor</span>
+      </div>
+      <div class="platform-badge reveal d3">
+        <div class="platform-badge-icon" style="background:rgba(52,224,161,.1)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+        <span class="platform-badge-name">TripAdvisor</span>
+      </div>
+      <div class="platform-badge reveal d3">
+        <div class="platform-badge-icon" style="background:rgba(238,183,93,.12)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+        <span class="platform-badge-name">Yellow Pages</span>
+      </div>
+      <div class="platform-badge reveal d3">
+        <div class="platform-badge-icon" style="background:rgba(82,93,220,.1)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+        <span class="platform-badge-name">BBB</span>
+      </div>
+      <div class="platform-badge reveal d4">
+        <div class="platform-badge-icon" style="background:rgba(232,93,126,.1)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+        <span class="platform-badge-name">Angi</span>
+      </div>
+      <div class="platform-badge reveal d4">
+        <div class="platform-badge-icon" style="background:rgba(77,190,142,.12)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <span class="platform-badge-name">Thumbtack</span>
+      </div>
+      <div class="platform-badge reveal d4">
+        <div class="platform-badge-icon" style="background:rgba(255,255,255,.06)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <span class="platform-badge-name">30+ More</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<span class="fade-d2l"></span>
+
+<!-- ─── WHY IT MATTERS ───────────────────────────────────────── -->
+<section class="section" id="stats">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Why It Matters</span>
+      <h2>Local search drives <em>real-world results</em></h2>
+      <p>The numbers don't lie. Your online presence directly impacts foot traffic, phone calls, and revenue.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card reveal">
+        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <div class="stat-num" data-target="88" data-suffix="%">0</div>
+        <h3>Search Before Visiting</h3>
+        <p>88% of consumers search online before visiting a local business. If you're not showing up, you're invisible.</p>
+      </div>
+      <div class="stat-card reveal d1">
+        <div class="stat-icon" style="background:rgba(82,93,220,.08)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div class="stat-num" data-target="46" data-suffix="%">0</div>
+        <h3>Local Search Intent</h3>
+        <p>46% of all Google searches have local intent. Nearly half of all searchers are looking for a business like yours nearby.</p>
+      </div>
+      <div class="stat-card reveal d2">
+        <div class="stat-icon" style="background:rgba(77,190,142,.08)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+        <div class="stat-num" data-target="78" data-suffix="%">0</div>
+        <h3>Offline Purchases</h3>
+        <p>78% of local mobile searches result in an offline purchase. The customers are searching — make sure they find you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<span class="fade-d2l"></span>
+
+<!-- ─── BEFORE & AFTER ───────────────────────────────────────── -->
+<section class="section" id="before-after">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">The Transformation</span>
+      <h2>From invisible to <em>impossible to miss</em></h2>
+      <p>See the difference a professional business profile setup makes for your online presence.</p>
+    </div>
+
+    <div class="ba-grid">
+      <div class="ba-card reveal">
+        <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=800&q=80" alt="Before: Incomplete business profile on phone" loading="lazy"/>
+        <div class="ba-card-body">
+          <span class="ba-label before">Before</span>
+          <h3>Incomplete & Inconsistent</h3>
+          <p>Unclaimed profiles, outdated info, no photos, zero reviews. Customers can't find you — or worse, they find wrong information and go to your competitor instead.</p>
+        </div>
+      </div>
+
+      <div class="ba-arrow reveal d2">&#x2192;</div>
+
+      <div class="ba-card reveal d3">
+        <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80" alt="After: Thriving business with customers" loading="lazy"/>
+        <div class="ba-card-body">
+          <span class="ba-label after">After</span>
+          <h3>Optimized & Generating Leads</h3>
+          <p>Fully claimed profiles, professional photos, consistent NAP across 40+ directories, 5-star reviews rolling in, and a steady stream of calls and visits from local search.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<span class="fade-d2l"></span>
+
+<!-- ─── PROCESS ──────────────────────────────────────────────── -->
+<section class="section" id="process">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Our Process</span>
+      <h2>From setup to results in <em>4 simple steps</em></h2>
+      <p>We handle everything so you can focus on running your business.</p>
+    </div>
+
+    <div class="process-grid">
+      <div class="process-connector"></div>
+      <div class="process-card reveal">
+        <div class="process-step">1</div>
+        <h3>Audit</h3>
+        <p>We audit your current online presence across all major platforms. We identify missing profiles, incorrect information, and opportunities for improvement.</p>
+      </div>
+      <div class="process-card reveal d1">
+        <div class="process-step">2</div>
+        <h3>Claim & Verify</h3>
+        <p>We claim your business on Google, Yelp, Apple Maps, Facebook, and 40+ other directories. Every profile is verified to ensure you have full ownership.</p>
+      </div>
+      <div class="process-card reveal d2">
+        <div class="process-step">3</div>
+        <h3>Optimize</h3>
+        <p>Professional photos, keyword-rich descriptions, accurate categories, business hours, and all the details that make your profiles stand out from the competition.</p>
+      </div>
+      <div class="process-card reveal d3">
+        <div class="process-step">4</div>
+        <h3>Monitor & Report</h3>
+        <p>Monthly monitoring, review management, profile updates, and detailed reports showing your visibility growth, search impressions, and customer actions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<span class="fade-d2l"></span>
+
+<!-- ─── TESTIMONIAL ──────────────────────────────────────────── -->
+<section class="section" id="testimonial">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Client Success</span>
+      <h2>Real results from <em>real businesses</em></h2>
+    </div>
+
+    <div class="testimonial-card reveal d1">
+      <img class="testimonial-avatar" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=200&q=80" alt="Thomas Wade, Esq." loading="lazy"/>
+      <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <blockquote>"Before Nexora, we were practically invisible online. Within 60 days of them setting up our business profiles, we went from zero to showing up in the Google Maps 3-pack for every major keyword. Our phone calls from new clients tripled."</blockquote>
+      <div class="testimonial-name">Thomas Wade, Esq.</div>
+      <div class="testimonial-role">Law Firm Owner &middot; New York, NY</div>
+    </div>
+  </div>
+</section>
+
+<span class="fade-d2l"></span>
+
+<!-- ─── FAQ ──────────────────────────────────────────────────── -->
+<section class="section" id="faq">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2>Frequently asked <em>questions</em></h2>
+    </div>
+
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <button class="faq-q">
+          How long does it take to set up all my business profiles?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a">We complete the full setup and optimization of your Google Business Profile, Yelp, Facebook, Apple Maps, and all 40+ directories within 7-14 business days. Some platforms have their own verification timelines, but we handle the entire process for you from start to finish.</div>
+      </div>
+      <div class="faq-item reveal d1">
+        <button class="faq-q">
+          Do I keep ownership of my business profiles?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a">Absolutely. You are the verified owner of every profile we create or claim on your behalf. We set up the profiles using your business email and credentials. If you ever decide to manage them yourself or work with another provider, you retain full access and control.</div>
+      </div>
+      <div class="faq-item reveal d2">
+        <button class="faq-q">
+          What if I already have some profiles set up?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a">No problem. We start with a full audit of your existing profiles. We'll optimize what's already there, fix any inconsistencies in your business information, remove duplicate listings, and fill in the gaps on platforms where you're not yet listed.</div>
+      </div>
+      <div class="faq-item reveal d3">
+        <button class="faq-q">
+          How do you help me get more reviews?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a">We implement a proven review generation strategy that includes automated email and SMS review request sequences, printable QR code cards for in-person requests, and professional response templates for both positive and negative reviews. We also monitor review sites so you're always aware of new feedback.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<span class="fade-d2l"></span>
+
+<!-- ─── CTA BANNER ───────────────────────────────────────────── -->
+<section class="cta-banner">
+  <div class="w cta-banner-inner">
+    <span class="eyebrow gold reveal">Ready to Get Found?</span>
+    <h2 class="reveal d1">Start showing up where<br>your customers are <em>searching</em></h2>
+    <p class="reveal d2">Join 500+ businesses that trust Nexora Digital to build their local online presence and drive real foot traffic.</p>
+    <div class="cta-banner-btns reveal d3">
+      <a href="tel:+13109551077" class="btn btn-white btn-lg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/></svg> Call (310) 955-1077</a>
+      <a href="index.html#contact" class="btn btn-gold btn-lg">Book a Free Call &#x2192;</a>
+    </div>
+    <p class="reveal d4" style="color:rgba(255,255,255,.35);font-size:.82rem;margin-top:1.5rem">
+      Response within 2 hours &middot; No credit card required &middot; No long-term commitment
+    </p>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────────────────── -->
+<footer>
+  <div class="w">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="index.html" class="nav-logo">Nexora<span>Digital</span></a>
+        <p>The growth platform for new businesses across the USA. Websites, SEO, social media, and paid ads — all in one place.</p>
+        <div class="foot-newsletter">
+          <input type="email" placeholder="Enter your email" />
+          <button>Subscribe</button>
+        </div>
+        <div class="foot-social">
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="LinkedIn">in</a>
+          <a href="#" aria-label="Instagram">ig</a>
+          <a href="#" aria-label="X/Twitter">x</a>
+        </div>
+      </div>
+      <div>
+        <h6>Services</h6>
+        <ul>
+          <li><a href="website-design.html">Website Design</a></li>
+          <li><a href="business-profiles.html">Business Profiles</a></li>
+          <li><a href="seo.html">SEO</a></li>
+          <li><a href="social-media.html">Social Media</a></li>
+          <li><a href="ecommerce.html">E-Commerce</a></li>
+          <li><a href="paid-ads.html">Paid Ads</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Company</h6>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="how-it-works.html">Our Process</a></li>
+          <li><a href="index.html#testimonials">Case Studies</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Contact</h6>
+        <ul>
+          <li><a href="tel:+13109551077">(310) 955-1077</a></li>
+          <li><a href="mailto:hello@nexoradigital.com">hello@nexoradigital.com</a></li>
+          <li><a href="index.html#contact">Free Strategy Call</a></li>
+          <li><a href="#">Support Center</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p>&copy; 2026 Nexora Digital LLC. All rights reserved. USA.</p>
+      <div class="foot-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">DMCA</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Scroll-to-top button -->
+<button id="back-to-top" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script>
+/* ── Page Loader ──────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('page-loader').classList.add('done'), 1400);
+});
+
+/* ── Scroll Progress Bar ──────────────────────────────────── */
+const progressBar = document.getElementById('scroll-progress');
+window.addEventListener('scroll', () => {
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const scrolled = (window.scrollY / docHeight) * 100;
+  progressBar.style.width = scrolled + '%';
+}, { passive: true });
+
+/* ── Nav scroll effect ────────────────────────────────────── */
+const nav = document.getElementById('main-nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+}, { passive: true });
+
+/* ── Mobile menu ──────────────────────────────────────────── */
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+  document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+});
+document.querySelectorAll('.mobile-link').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+});
+
+/* ── Cursor glow (desktop only) ──────────────────────────── */
+if (window.matchMedia('(pointer: fine)').matches) {
+  const glow = document.getElementById('cursor-glow');
+  let glowVisible = false;
+  document.addEventListener('mousemove', (e) => {
+    if (!glowVisible) { glow.classList.add('visible'); glowVisible = true; }
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  });
+}
+
+/* ── Card mouse tracking ─────────────────────────────────── */
+document.querySelectorAll('.included-card').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', ((e.clientX - rect.left) / rect.width * 100) + '%');
+    card.style.setProperty('--my', ((e.clientY - rect.top) / rect.height * 100) + '%');
+  });
+});
+
+/* ── Button mouse tracking ────────────────────────────────── */
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    btn.style.setProperty('--x', ((e.clientX - rect.left) / rect.width * 100) + '%');
+    btn.style.setProperty('--y', ((e.clientY - rect.top) / rect.height * 100) + '%');
+  });
+});
+
+/* ── Scroll Reveal ─────────────────────────────────────────── */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ── Animated counters ─────────────────────────────────────── */
+function animateCounter(el, target, duration, suffix, prefix, isDecimal) {
+  const start = 0;
+  const startTime = performance.now();
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    let current;
+    if (isDecimal) {
+      current = (start + (target - start) * eased).toFixed(1);
+    } else {
+      current = Math.floor(start + (target - start) * eased);
+    }
+    el.textContent = (prefix || '') + current + (suffix || '');
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const el = e.target;
+      const target = parseFloat(el.dataset.target || el.dataset.count);
+      const suffix = el.dataset.suffix || '';
+      const prefix = el.dataset.prefix || '';
+      const isDecimal = el.dataset.decimal === 'true';
+      animateCounter(el, target, 2000, suffix, prefix, isDecimal);
+      counterObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('[data-target], [data-count]').forEach(el => counterObserver.observe(el));
+
+/* ── FAQ accordion ─────────────────────────────────────────── */
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  });
+});
+
+/* ── Smooth scroll for anchor links ───────────────────────── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href').slice(1);
+    const el = id ? document.getElementById(id) : null;
+    if (el) {
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+/* ── Back to top ───────────────────────────────────────────── */
+const btt = document.getElementById('back-to-top');
+window.addEventListener('scroll', () => {
+  btt.classList.toggle('visible', window.scrollY > 400);
+}, { passive: true });
+btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>

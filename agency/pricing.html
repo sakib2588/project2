@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pricing — Nexora Digital | Transparent Plans for Every Business</title>
+<meta name="description" content="Simple, transparent pricing for new businesses. No hidden fees, no long-term contracts. Website design, SEO, social media, and paid ads packages starting at $497/mo."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--primary:#eeb75d;--primary-dk:#d4993c;--primary-lt:rgba(238,183,93,.1);--gold:#eeb75d;--gold-dk:#d4993c;--bg:#F1EFEB;--ink:#141516;--charcoal:#262626;--ash:#3d3a3a;--flint:#8F8F8F;--dove:#dedede;--white:#ffffff;--card-bg:#ffffff;--sp-1:0.44rem;--sp-2:0.67rem;--sp-3:1rem;--sp-4:1.5rem;--sp-5:2.25rem;--sp-6:3.38rem;--sp-7:5.06rem;--radius-sm:6px;--radius-md:12px;--radius-lg:20px;--radius-xl:28px;--nav-h:74px;--content-w:800px;--wide-w:1400px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',sans-serif;background:#141516;color:#fff;line-height:1.6;padding-top:var(--nav-h);overflow-x:hidden}
+h1,h2,h3,h4,h5{font-family:'Playfair Display',serif;font-weight:500;line-height:1.1;color:#fff}
+h1{font-size:clamp(2.6rem,5.5vw,4.8rem);letter-spacing:-.02em}
+h2{font-size:clamp(2rem,4vw,3.2rem);letter-spacing:-.015em;margin-bottom:var(--sp-3)}
+h3{font-size:clamp(1.25rem,2vw,1.6rem);margin-bottom:.5rem}
+h1 em,h2 em{font-style:italic;color:var(--primary)}
+p{color:rgba(255,255,255,.7);font-size:1rem}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+.w{max-width:var(--wide-w);margin:0 auto;padding:0 var(--sp-5)}
+.center{text-align:center}
+.eyebrow{display:inline-block;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--primary);margin-bottom:var(--sp-2)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 1.9rem;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;letter-spacing:.01em;border-radius:var(--radius-sm);cursor:pointer;border:none;transition:all .3s cubic-bezier(0.16,1,0.3,1);position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-2px)}
+.btn-gold{background:var(--gold);color:var(--ink);box-shadow:0 4px 18px rgba(238,183,93,.35)}
+.btn-gold:hover{background:var(--gold-dk);color:#fff;box-shadow:0 8px 28px rgba(238,183,93,.45)}
+.btn-ghost{background:transparent;color:var(--ink);border:1.5px solid rgba(20,21,22,.22)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold-dk)}
+.btn-white{background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.btn-white:hover{background:var(--bg)}
+.btn-lg{padding:1.05rem 2.4rem;font-size:.95rem}
+
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(20,21,22,.85);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);border-bottom:1px solid rgba(238,183,93,.15);z-index:100;transition:background .4s,box-shadow .4s,border-color .4s}
+.nav.scrolled{background:rgba(20,21,22,.95);box-shadow:0 4px 30px rgba(0,0,0,.5);border-color:rgba(238,183,93,.3)}
+.nav-inner{max-width:var(--wide-w);margin:0 auto;padding:0 var(--sp-5);height:100%;display:flex;align-items:center;gap:2rem}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:#fff;letter-spacing:-.02em;flex-shrink:0;display:flex;align-items:baseline;gap:.2rem}
+.nav-logo span{color:var(--primary);font-style:italic;font-weight:400}
+.nav-links{display:flex;align-items:center;gap:2rem;flex:1;justify-content:center;list-style:none}
+.nav-links a{font-size:.88rem;font-weight:500;color:rgba(255,255,255,.7);transition:color .2s;position:relative}
+.nav-links a::after{content:'';position:absolute;left:0;bottom:-3px;width:0;height:1.5px;background:var(--primary);transition:width .25s}
+.nav-links a:hover{color:var(--primary)}
+.nav-links a:hover::after{width:100%}
+/* Services mega dropdown */
+.nav-dropdown {
+  position: static;
+}
+.nav-dropdown > a {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.nav-dropdown > a .dd-arrow {
+  display: inline-block;
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid currentColor;
+  transition: transform .25s;
+}
+.nav-dropdown:hover > a .dd-arrow { transform: rotate(180deg); }
+.nav-dropdown-menu {
+  position: absolute;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  background: rgba(14,15,16,.98);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(238,183,93,.15);
+  border-bottom: 1px solid rgba(238,183,93,.1);
+  padding: 3rem 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 200;
+  box-shadow: 0 30px 80px rgba(0,0,0,.6);
+}
+.nav-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0; right: 0;
+  height: 20px;
+}
+.nav-dropdown:hover .nav-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.nav-dropdown-grid {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: 0 var(--sp-5);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem 4rem;
+}
+.nav-dropdown-menu a {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  padding: 1.1rem 1.5rem;
+  border-radius: var(--radius-sm);
+  transition: all .2s;
+}
+.nav-dropdown-menu a::after { display: none; }
+.nav-dropdown-menu a:hover {
+  background: rgba(238,183,93,.06);
+}
+.dd-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.9);
+  transition: color .2s;
+}
+.nav-dropdown-menu a:hover .dd-title { color: var(--primary); }
+.dd-sub {
+  font-size: .85rem;
+  color: rgba(255,255,255,.4);
+  font-weight: 400;
+  line-height: 1.5;
+}
+.nav-dropdown-footer {
+  max-width: var(--wide-w);
+  margin: 0 auto;
+  padding: 1.5rem var(--sp-5) 0;
+  border-top: 1px solid rgba(255,255,255,.06);
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.nav-dropdown-footer a {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--primary);
+  transition: color .2s;
+  padding: 0;
+}
+.nav-dropdown-footer a::after { display: none; }
+.nav-dropdown-footer a:hover { color: var(--gold-dk); }
+.nav-right{display:flex;align-items:center;gap:1.5rem;flex-shrink:0}
+.nav-phone{font-size:.85rem;color:rgba(255,255,255,.7);font-weight:500;transition:color .2s}
+.nav-phone:hover{color:var(--primary)}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;z-index:200}
+.nav-hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:transform .3s,opacity .3s}
+.nav-hamburger.open span:first-child{transform:translateY(7px) rotate(45deg)}
+.nav-hamburger.open span:nth-child(2){opacity:0}
+.nav-hamburger.open span:last-child{transform:translateY(-7px) rotate(-45deg)}
+.mobile-menu{display:none;position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;background:rgba(20,21,22,.97);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);z-index:90;flex-direction:column;align-items:center;justify-content:center;gap:2rem;opacity:0;transition:opacity .4s ease}
+.mobile-menu.open{display:flex;opacity:1}
+.mobile-menu a{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:500;color:rgba(255,255,255,.8);transition:color .2s}
+.mobile-menu a:hover{color:var(--primary)}
+.mobile-menu .btn{margin-top:1rem}
+@media(max-width:980px){.nav-links,.nav-phone{display:none}.nav-hamburger{display:flex}}
+
+/* Page Hero */
+.page-hero{padding:var(--sp-7) 0;text-align:center;position:relative;overflow:hidden;background:#141516}
+.page-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(238,183,93,.04) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+.page-hero>*{position:relative;z-index:1}
+.page-hero h1{margin-bottom:1rem}
+.page-hero>p,.page-hero .w>p{color:rgba(255,255,255,.82);font-size:1.1rem;max-width:60ch;margin:0 auto 2rem;line-height:1.7}
+
+/* Pricing */
+.pricing-section{padding:var(--sp-6) 0 var(--sp-7);position:relative}
+.pricing-section::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(238,183,93,.04) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+.pricing-section>*{position:relative;z-index:1}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;align-items:stretch}
+.pricing-card{display:flex;flex-direction:column;background:rgba(255,255,255,.03);color:#fff;border-radius:var(--radius-lg);padding:2.5rem 2rem;border:1px solid rgba(255,255,255,.08);position:relative;transition:all .4s cubic-bezier(0.16,1,0.3,1)}
+.pricing-card h1,.pricing-card h2,.pricing-card h3,.pricing-card h4{color:#fff}
+.pricing-card p{color:rgba(255,255,255,.55)}
+.pricing-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.15);box-shadow:0 16px 50px rgba(0,0,0,.3)}
+.pricing-card.popular{border-color:var(--gold);border-width:2px;background:rgba(238,183,93,.05);box-shadow:0 20px 60px rgba(238,183,93,.15)}
+.pricing-card.popular:hover{transform:translateY(-6px);box-shadow:0 24px 70px rgba(238,183,93,.2)}
+.pricing-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--primary);color:var(--ink);font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.35rem 1.2rem;border-radius:99px;white-space:nowrap}
+.pricing-name{font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:.75rem}
+.pricing-price{font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;color:#fff;line-height:1;margin-bottom:.4rem}
+.pricing-price sup{font-size:1.5rem;vertical-align:super}
+.pricing-price sub{font-family:'DM Sans',sans-serif;font-size:.85rem;color:rgba(255,255,255,.45);vertical-align:baseline;font-weight:400}
+.pricing-desc{font-size:.88rem;color:rgba(255,255,255,.5);margin-bottom:1.75rem;padding-bottom:1.75rem;border-bottom:1px solid rgba(255,255,255,.1)}
+.pricing-features{list-style:none;display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem;flex:1}
+.pricing-features li{display:flex;align-items:flex-start;gap:.6rem;font-size:.88rem;color:rgba(255,255,255,.7)}
+.pricing-features li::before{content:'\2713';color:var(--primary);font-weight:700;flex-shrink:0;margin-top:.1rem}
+@media(max-width:860px){.pricing-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.pricing-grid{grid-template-columns:1fr}}
+
+/* Comparison table */
+.compare-section{padding:var(--sp-6) 0 var(--sp-7)}
+.compare-table{width:100%;border-collapse:collapse;margin-top:2rem}
+.compare-table th,.compare-table td{padding:1rem 1.25rem;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);font-size:.9rem}
+.compare-table thead th{font-family:'DM Sans',sans-serif;font-weight:700;color:var(--primary);font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;background:rgba(238,183,93,.05);border-bottom:2px solid rgba(238,183,93,.2)}
+.compare-table thead th:first-child{border-radius:var(--radius-sm) 0 0 0}
+.compare-table thead th:last-child{border-radius:0 var(--radius-sm) 0 0}
+.compare-table tbody td{color:rgba(255,255,255,.7)}
+.compare-table tbody td:first-child{color:#fff;font-weight:500}
+.compare-table tbody tr:hover{background:rgba(255,255,255,.02)}
+.compare-table .check-mark{color:var(--primary);font-weight:700}
+.compare-table .dash{color:rgba(255,255,255,.2)}
+@media(max-width:700px){.compare-table{font-size:.8rem}.compare-table th,.compare-table td{padding:.75rem .5rem}}
+
+/* FAQ */
+.faq{background:#141516;padding:var(--sp-7) 0}
+.faq .section-head h2,.faq .section-head .eyebrow{color:#fff}
+.section-head{margin-bottom:var(--sp-6)}
+.section-head p{font-size:1.05rem;color:var(--flint);max-width:52ch;margin-top:.75rem;line-height:1.7}
+.section-head.center p{margin:.75rem auto 0}
+.faq-list{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:.75rem}
+.faq-item{border:1px solid rgba(255,255,255,.08);border-radius:var(--radius-md);overflow:hidden;transition:border-color .3s}
+.faq-item:hover{border-color:rgba(238,183,93,.15)}
+.faq-item.open{border-color:rgba(238,183,93,.3)}
+.faq-q{width:100%;text-align:left;padding:1.25rem 1.5rem;background:rgba(255,255,255,.03);border:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;color:#fff;transition:background .2s}
+.faq-q:hover{background:rgba(255,255,255,.06)}
+.faq-q svg{flex-shrink:0;transition:transform .3s;color:var(--primary)}
+.faq-item.open .faq-q svg{transform:rotate(180deg)}
+.faq-item.open .faq-q{background:rgba(238,183,93,.05)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease;padding:0 1.5rem;font-size:.92rem;color:rgba(255,255,255,.55);line-height:1.7}
+.faq-item.open .faq-a{max-height:300px;padding:0 1.5rem 1.25rem}
+
+/* CTA Banner */
+.cta-banner{background:var(--ink);padding:var(--sp-7) 0;position:relative;overflow:hidden}
+.cta-banner::before{content:'';position:absolute;top:-100px;left:-100px;width:400px;height:400px;border-radius:50%;background:var(--primary);opacity:.1;filter:blur(60px)}
+.cta-banner::after{content:'';position:absolute;bottom:-80px;right:-80px;width:320px;height:320px;border-radius:50%;background:var(--gold);opacity:.07;filter:blur(50px)}
+.cta-banner-inner{position:relative;z-index:1;text-align:center}
+.cta-banner h2{color:#fff;margin-bottom:.75rem}
+.cta-banner p{color:rgba(255,255,255,.6);font-size:1.05rem;max-width:50ch;margin:0 auto 2.5rem}
+.cta-banner-btns{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+
+/* Footer */
+footer{background:#0a0b0c;color:#fff;padding:var(--sp-7) 0 var(--sp-5);border-top:1px solid rgba(255,255,255,.05)}
+.foot-grid{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:3rem;padding-bottom:3rem;border-bottom:1px solid rgba(255,255,255,.06)}
+@media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr}}
+.foot-brand .nav-logo{color:#fff;font-size:1.5rem;margin-bottom:1rem}
+.foot-brand .nav-logo span{color:var(--gold)}
+.foot-brand p{color:rgba(255,255,255,.4);font-size:.88rem;line-height:1.7;max-width:30ch;margin-bottom:1.5rem}
+.foot-newsletter{display:flex;gap:.5rem;margin-bottom:1.5rem}
+.foot-newsletter input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:.65rem 1rem;font-family:'DM Sans',sans-serif;font-size:.85rem;color:#fff;outline:none;transition:border-color .3s}
+.foot-newsletter input::placeholder{color:rgba(255,255,255,.25)}
+.foot-newsletter input:focus{border-color:var(--primary)}
+.foot-newsletter button{background:var(--gold);color:var(--ink);border:none;border-radius:var(--radius-sm);padding:.65rem 1.25rem;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .2s;white-space:nowrap}
+.foot-newsletter button:hover{background:var(--gold-dk)}
+.foot-social{display:flex;gap:.75rem}
+.foot-social a{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.06);display:grid;place-items:center;font-size:.85rem;color:rgba(255,255,255,.5);transition:all .3s}
+.foot-social a:hover{background:var(--primary);color:#fff;transform:translateY(-2px)}
+footer h6{font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:1.25rem}
+footer ul{list-style:none;display:flex;flex-direction:column;gap:.65rem}
+footer ul a{font-size:.88rem;color:rgba(255,255,255,.45);transition:color .2s,transform .2s;display:inline-block}
+footer ul a:hover{color:var(--primary);transform:translateX(4px)}
+.foot-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding-top:2rem}
+.foot-bottom p{font-size:.8rem;color:rgba(255,255,255,.25)}
+.foot-legal{display:flex;gap:1.5rem}
+.foot-legal a{font-size:.8rem;color:rgba(255,255,255,.25);transition:color .2s}
+.foot-legal a:hover{color:rgba(255,255,255,.6)}
+
+/* Guarantee */
+.guarantee{padding:var(--sp-6) 0;text-align:center}
+.guarantee-card{background:rgba(238,183,93,.05);border:1px solid rgba(238,183,93,.2);border-radius:var(--radius-xl);padding:3rem;max-width:700px;margin:0 auto}
+.guarantee-card h3{font-size:1.5rem;color:#fff;margin-bottom:1rem}
+.guarantee-card p{color:rgba(255,255,255,.6);line-height:1.7;max-width:50ch;margin:0 auto}
+.guarantee-icon{font-size:3rem;margin-bottom:1rem}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(28px);filter:blur(4px);transition:opacity .8s cubic-bezier(0.16,1,0.3,1),transform .8s cubic-bezier(0.16,1,0.3,1),filter .8s cubic-bezier(0.16,1,0.3,1)}
+.reveal.d1{transition-delay:.12s}
+.reveal.d2{transition-delay:.24s}
+.reveal.d3{transition-delay:.36s}
+.reveal.in{opacity:1;transform:none;filter:blur(0)}
+
+/* Scroll to top */
+#back-to-top{position:fixed;bottom:2rem;right:2rem;z-index:200;width:48px;height:48px;border-radius:50%;background:rgba(20,21,22,.9);backdrop-filter:blur(10px);color:var(--gold);border:1.5px solid rgba(238,183,93,.3);display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.4);opacity:0;transform:translateY(16px);transition:all .3s ease;pointer-events:none}
+#back-to-top.visible{opacity:1;transform:translateY(0);pointer-events:auto}
+#back-to-top:hover{background:var(--gold);color:var(--ink);border-color:var(--gold);transform:translateY(-2px)}
+#back-to-top svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* Scroll progress */
+.scroll-progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--gold-dk));z-index:999;width:0%;transition:width .1s linear}
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scroll-progress"></div>
+
+<!-- NAV -->
+<header class="nav" id="main-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Nexora<span>Digital</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="index.html#services">Services <span class="dd-arrow"></span></a>
+        <div class="nav-dropdown-menu">
+          <div class="nav-dropdown-grid">
+            <a href="website-design.html">
+              <span class="dd-title">Website Design</span>
+              <span class="dd-sub">Launch a stunning, conversion-focused website</span>
+            </a>
+            <a href="business-profiles.html">
+              <span class="dd-title">Business Profiles</span>
+              <span class="dd-sub">Get found on Google, Yelp &amp; 40+ directories</span>
+            </a>
+            <a href="seo.html">
+              <span class="dd-title">SEO</span>
+              <span class="dd-sub">Rank on page 1 for the keywords that matter</span>
+            </a>
+            <a href="social-media.html">
+              <span class="dd-title">Social Media Marketing</span>
+              <span class="dd-sub">Turn followers into real paying customers</span>
+            </a>
+            <a href="ecommerce.html">
+              <span class="dd-title">E-Commerce Solutions</span>
+              <span class="dd-sub">Launch an online store built to sell</span>
+            </a>
+            <a href="paid-ads.html">
+              <span class="dd-title">Paid Ads Management</span>
+              <span class="dd-sub">Every ad dollar tracked and optimized</span>
+            </a>
+          </div>
+          <div class="nav-dropdown-footer">
+            <a href="pricing.html">View Pricing &rarr;</a>
+            <a href="index.html#contact">Book a Free Call &rarr;</a>
+          </div>
+        </div>
+      </li>
+      <li><a href="why-us.html">Why Us</a></li>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="tel:+13109551077" class="nav-phone">(310) 955-1077</a>
+      <a href="index.html#contact" class="btn btn-gold">Get Started Free</a>
+    </div>
+    <div class="nav-hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html" class="mobile-link">Home</a>
+  <a href="index.html#services" class="mobile-link">Services</a>
+  <a href="why-us.html" class="mobile-link">Why Us</a>
+  <a href="how-it-works.html" class="mobile-link">How It Works</a>
+  <a href="pricing.html" class="mobile-link">Pricing</a>
+  <a href="index.html#contact" class="btn btn-gold btn-lg">Get Started Free</a>
+</div>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="w">
+    <span class="eyebrow reveal">Transparent Pricing</span>
+    <h1 class="reveal d1">Simple plans for <em>every stage</em> of growth</h1>
+    <p class="reveal d2">No hidden fees. No long-term lock-in. Cancel any time. All plans include a free strategy call so we can recommend the perfect fit for your business.</p>
+  </div>
+</section>
+
+<!-- PRICING CARDS -->
+<section class="pricing-section">
+  <div class="w">
+    <div class="pricing-grid">
+
+      <!-- Starter -->
+      <div class="pricing-card reveal">
+        <div class="pricing-name">Starter</div>
+        <div class="pricing-price"><sup>$</sup>497<sub>/mo</sub></div>
+        <p class="pricing-desc">Perfect for brand-new businesses that need a professional online presence fast.</p>
+        <ul class="pricing-features">
+          <li>5-page professional website</li>
+          <li>Google Business Profile setup</li>
+          <li>Basic on-page SEO</li>
+          <li>3 social media posts/week</li>
+          <li>Monthly analytics report</li>
+          <li>Email &amp; chat support</li>
+        </ul>
+        <a href="index.html#contact" class="btn btn-ghost" style="width:100%;justify-content:center;color:#fff;border-color:rgba(255,255,255,.2)">Get Started</a>
+      </div>
+
+      <!-- Growth -->
+      <div class="pricing-card popular reveal d1">
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-name">Growth</div>
+        <div class="pricing-price"><sup>$</sup>997<sub>/mo</sub></div>
+        <p class="pricing-desc">For businesses serious about ranking on Google and generating consistent leads.</p>
+        <ul class="pricing-features">
+          <li>10-page custom website</li>
+          <li>Full business profile optimization (40+ directories)</li>
+          <li>Full local &amp; national SEO</li>
+          <li>Daily social media + content creation</li>
+          <li>Google &amp; Meta Ads management</li>
+          <li>Bi-weekly strategy calls</li>
+          <li>Priority dedicated account manager</li>
+        </ul>
+        <a href="index.html#contact" class="btn btn-gold" style="width:100%;justify-content:center">Get Started</a>
+      </div>
+
+      <!-- Scale -->
+      <div class="pricing-card reveal d2">
+        <div class="pricing-name">Scale</div>
+        <div class="pricing-price"><sup>$</sup>1,997<sub>/mo</sub></div>
+        <p class="pricing-desc">Full-service digital marketing for businesses ready to dominate their market.</p>
+        <ul class="pricing-features">
+          <li>Unlimited pages + e-commerce</li>
+          <li>Full business profile management</li>
+          <li>Aggressive SEO + link building</li>
+          <li>Full social media management</li>
+          <li>Google, Meta &amp; TikTok Ads</li>
+          <li>Email marketing automation</li>
+          <li>Weekly reporting + weekly calls</li>
+          <li>Dedicated team of 3 specialists</li>
+        </ul>
+        <a href="index.html#contact" class="btn btn-ghost" style="width:100%;justify-content:center;color:#fff;border-color:rgba(255,255,255,.2)">Get Started</a>
+      </div>
+
+    </div>
+    <p class="center reveal" style="margin-top:2rem;font-size:.88rem;color:rgba(255,255,255,.4)">
+      Need something custom? <a href="index.html#contact" style="color:var(--primary);font-weight:600">Contact us for a custom quote &rarr;</a>
+    </p>
+  </div>
+</section>
+
+<!-- PLAN COMPARISON -->
+<section class="compare-section">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Compare Plans</span>
+      <h2>Everything included <em>at a glance</em></h2>
+    </div>
+    <table class="compare-table reveal">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Starter</th>
+          <th>Growth</th>
+          <th>Scale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Website Pages</td><td>5 pages</td><td>10 pages</td><td>Unlimited</td></tr>
+        <tr><td>Custom Design</td><td class="check-mark">&#10003;</td><td class="check-mark">&#10003;</td><td class="check-mark">&#10003;</td></tr>
+        <tr><td>Mobile Responsive</td><td class="check-mark">&#10003;</td><td class="check-mark">&#10003;</td><td class="check-mark">&#10003;</td></tr>
+        <tr><td>Google Business Profile</td><td class="check-mark">&#10003;</td><td class="check-mark">&#10003;</td><td class="check-mark">&#10003;</td></tr>
+        <tr><td>40+ Directory Listings</td><td class="dash">&mdash;</td><td class="check-mark">&#10003;</td><td class="check-mark">&#10003;</td></tr>
+        <tr><td>On-Page SEO</td><td>Basic</td><td>Full</td><td>Aggressive</td></tr>
+        <tr><td>Link Building</td><td class="dash">&mdash;</td><td class="check-mark">&#10003;</td><td class="check-mark">&#10003;</td></tr>
+        <tr><td>Social Media Posts</td><td>3/week</td><td>Daily</td><td>Daily + Stories</td></tr>
+        <tr><td>Content Creation</td><td class="dash">&mdash;</td><td class="check-mark">&#10003;</td><td class="check-mark">&#10003;</td></tr>
+        <tr><td>Google &amp; Meta Ads</td><td class="dash">&mdash;</td><td class="check-mark">&#10003;</td><td class="check-mark">&#10003;</td></tr>
+        <tr><td>TikTok Ads</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="check-mark">&#10003;</td></tr>
+        <tr><td>Email Marketing</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="check-mark">&#10003;</td></tr>
+        <tr><td>E-Commerce</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="check-mark">&#10003;</td></tr>
+        <tr><td>Strategy Calls</td><td>Monthly</td><td>Bi-weekly</td><td>Weekly</td></tr>
+        <tr><td>Dedicated Team</td><td>1 manager</td><td>1 manager</td><td>3 specialists</td></tr>
+        <tr><td>Reporting</td><td>Monthly</td><td>Bi-weekly</td><td>Weekly</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- GUARANTEE -->
+<section class="guarantee">
+  <div class="w">
+    <div class="guarantee-card reveal">
+      <div class="guarantee-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <h3>Our 30-Day Risk-Free Guarantee</h3>
+      <p>If you're not completely satisfied with our work in the first 30 days, we'll refund your first month's payment in full. No questions asked. We're that confident in what we deliver.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="w">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Pricing FAQ</span>
+      <h2>Common questions about <em>our plans</em></h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <button class="faq-q">Do I need to sign a long-term contract?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="faq-a">No. All our plans are month-to-month. We earn your business every single month by delivering results. That said, SEO and social media take 3-6 months to show their full potential, so we recommend committing to at least 3 months.</div>
+      </div>
+      <div class="faq-item reveal d1">
+        <button class="faq-q">Are there any setup fees or hidden costs?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="faq-a">No hidden fees whatsoever. The price you see is the price you pay. Website design, hosting, SSL, and all platform setup costs are included in your monthly plan.</div>
+      </div>
+      <div class="faq-item reveal d2">
+        <button class="faq-q">Can I switch plans later?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="faq-a">Absolutely. You can upgrade or downgrade your plan at any time. Most clients start with Starter or Growth and upgrade as their business scales. We'll always recommend the plan that makes the most sense for where you are right now.</div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">What if I need a custom package?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="faq-a">We build custom packages all the time. Book a free strategy call and tell us exactly what you need. We'll put together a tailored plan with transparent pricing that fits your budget and goals.</div>
+      </div>
+      <div class="faq-item reveal d1">
+        <button class="faq-q">Is the ad spend included in the monthly price?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="faq-a">No. The monthly price covers our management and optimization fees. Your ad spend budget goes directly to Google/Meta and is separate. We recommend a minimum of $500/mo in ad spend for Growth and Scale plans, but we'll tailor this based on your market and goals.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <div class="w cta-banner-inner">
+    <span class="eyebrow reveal" style="color:var(--gold-dk)">Ready to Grow?</span>
+    <h2 class="reveal d1">Not sure which plan is right?<br><em>Let's talk.</em></h2>
+    <p class="reveal d2">Book a free 30-minute strategy call and we'll recommend the perfect plan based on your business, budget, and goals.</p>
+    <div class="cta-banner-btns reveal d3">
+      <a href="tel:+13109551077" class="btn btn-white btn-lg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/></svg> Call (310) 955-1077</a>
+      <a href="index.html#contact" class="btn btn-gold btn-lg">Book a Free Call &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="w">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="index.html" class="nav-logo">Nexora<span>Digital</span></a>
+        <p>The growth platform for new businesses across the USA. Websites, SEO, social media, and paid ads — all in one place.</p>
+        <div class="foot-newsletter">
+          <input type="email" placeholder="Enter your email"/>
+          <button>Subscribe</button>
+        </div>
+        <div class="foot-social">
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="LinkedIn">in</a>
+          <a href="#" aria-label="Instagram">ig</a>
+          <a href="#" aria-label="X/Twitter">x</a>
+        </div>
+      </div>
+      <div>
+        <h6>Services</h6>
+        <ul>
+          <li><a href="website-design.html">Website Design</a></li>
+          <li><a href="business-profiles.html">Business Profiles</a></li>
+          <li><a href="seo.html">SEO</a></li>
+          <li><a href="social-media.html">Social Media</a></li>
+          <li><a href="ecommerce.html">E-Commerce</a></li>
+          <li><a href="paid-ads.html">Paid Ads</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Company</h6>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="how-it-works.html">Our Process</a></li>
+          <li><a href="index.html#testimonials">Case Studies</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Contact</h6>
+        <ul>
+          <li><a href="tel:+13109551077">(310) 955-1077</a></li>
+          <li><a href="mailto:hello@nexoradigital.com">hello@nexoradigital.com</a></li>
+          <li><a href="index.html#contact">Free Strategy Call</a></li>
+          <li><a href="#">Support Center</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p>&copy; 2026 Nexora Digital LLC. All rights reserved. USA.</p>
+      <div class="foot-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">DMCA</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<button id="back-to-top" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script>
+const nav=document.getElementById('main-nav');
+window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>50)},{passive:true});
+const progressBar=document.getElementById('scroll-progress');
+window.addEventListener('scroll',()=>{const d=document.documentElement.scrollHeight-window.innerHeight;progressBar.style.width=(window.scrollY/d)*100+'%'},{passive:true});
+const hamburger=document.getElementById('hamburger');const mobileMenu=document.getElementById('mobile-menu');
+hamburger.addEventListener('click',()=>{hamburger.classList.toggle('open');mobileMenu.classList.toggle('open');document.body.style.overflow=mobileMenu.classList.contains('open')?'hidden':''});
+document.querySelectorAll('.mobile-link').forEach(l=>l.addEventListener('click',()=>{hamburger.classList.remove('open');mobileMenu.classList.remove('open');document.body.style.overflow=''}));
+const io=new IntersectionObserver(e=>{e.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+document.querySelectorAll('.faq-q').forEach(btn=>{btn.addEventListener('click',()=>{const item=btn.closest('.faq-item');const isOpen=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));if(!isOpen)item.classList.add('open')})});
+const btt=document.getElementById('back-to-top');
+window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400)},{passive:true});
+btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+</body>
+</html>
