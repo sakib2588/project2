@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nexora Digital — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --gold:    #eeb75d;
+    --gold-dk: #d4993c;
+    --bg:      #141516;
+    --surface: #1e1f21;
+    --border:  #2a2b2d;
+    --text:    #F1EFEB;
+    --muted:   rgba(241,239,235,.5);
+    --green:   #4dbe8e;
+    --red:     #e05c5c;
+    --radius:  10px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── Login ─────────────────────────────────────────── */
+  #login-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 24px;
+  }
+  .login-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 48px 40px; width: min(400px, 100%);
+    text-align: center;
+  }
+  .login-card h1 {
+    font-family: 'Playfair Display', serif; font-size: 1.8rem;
+    color: var(--gold); margin-bottom: 6px;
+  }
+  .login-card h1 span { font-style: italic; font-weight: 600; }
+  .login-card p { color: var(--muted); margin-bottom: 32px; font-size: 0.9rem; }
+  .login-card input {
+    width: 100%; padding: 12px 16px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text); font-size: 1rem; margin-bottom: 16px;
+    font-family: inherit;
+  }
+  .login-card input:focus { outline: none; border-color: var(--gold); }
+  .btn-gold {
+    width: 100%; padding: 13px; background: var(--gold); color: var(--bg);
+    border: none; border-radius: var(--radius); font-size: 1rem;
+    font-weight: 600; cursor: pointer; transition: background .2s; font-family: inherit;
+  }
+  .btn-gold:hover { background: var(--gold-dk); }
+  .login-error { color: var(--red); margin-top: 14px; font-size: 0.875rem; display: none; }
+
+  /* ── Dashboard ─────────────────────────────────────── */
+  #dashboard { display: none; }
+
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--gold); }
+  .logo span { font-style: italic; }
+  #logout-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    padding: 8px 18px; border-radius: var(--radius); cursor: pointer;
+    font-family: inherit; font-size: 0.9rem; transition: border-color .2s, color .2s;
+  }
+  #logout-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  main { max-width: 1280px; margin: 0 auto; padding: 40px 24px; }
+
+  /* ── Tabs ──────────────────────────────────────────── */
+  .tabs { display: flex; gap: 8px; margin-bottom: 32px; }
+  .tab-btn {
+    padding: 10px 28px; border-radius: var(--radius); border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer;
+    font-family: inherit; font-size: 0.95rem; transition: all .2s;
+  }
+  .tab-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: 600; }
+  .tab-btn:not(.active):hover { border-color: var(--gold); color: var(--gold); }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── Section header ────────────────────────────────── */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+  }
+  .section-title { display: flex; align-items: center; gap: 12px; }
+  .section-title h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; }
+  .count-badge {
+    background: var(--gold); color: var(--bg); font-size: 0.72rem;
+    font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: .03em;
+  }
+  .refresh-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    padding: 7px 18px; border-radius: var(--radius); cursor: pointer;
+    font-family: inherit; font-size: 0.85rem; transition: all .2s;
+  }
+  .refresh-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── Table ─────────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: var(--surface); }
+  th {
+    text-align: left; padding: 14px 16px; font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+    font-weight: 600; border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(238,183,93,.04); }
+
+  .status-select {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    padding: 6px 10px; border-radius: 6px; font-size: 0.82rem; cursor: pointer;
+    font-family: inherit; transition: border-color .2s;
+  }
+  .status-select:focus { outline: none; border-color: var(--gold); }
+
+  .msg-cell {
+    max-width: 220px; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; color: var(--muted); font-size: 0.85rem;
+  }
+
+  .empty-state { text-align: center; padding: 64px 24px; color: var(--muted); font-size: 0.95rem; }
+  .loading     { text-align: center; padding: 48px; color: var(--muted); }
+
+  /* ── Error banner ──────────────────────────────────── */
+  .error-banner {
+    color: var(--red); background: rgba(224,92,92,.1);
+    border: 1px solid rgba(224,92,92,.3); border-radius: var(--radius);
+    padding: 12px 18px; margin-bottom: 20px; display: none; font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>Nexora<span>Digital</span></h1>
+    <p>Admin Dashboard &mdash; restricted access</p>
+    <input type="password" id="secret-input" placeholder="Enter admin password" autocomplete="current-password"/>
+    <button class="btn-gold" id="login-btn">Sign In &rarr;</button>
+    <p class="login-error" id="login-error">Incorrect password. Please try again.</p>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <header>
+    <span class="logo">Nexora<span>Digital</span> &nbsp;Admin</span>
+    <button id="logout-btn">Sign Out</button>
+  </header>
+
+  <main>
+    <div class="error-banner" id="api-error"></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="leads">Leads</button>
+      <button class="tab-btn" data-tab="subscribers">Subscribers</button>
+    </div>
+
+    <!-- Leads -->
+    <div class="section active" id="tab-leads">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Contact Leads</h2>
+          <span class="count-badge" id="leads-count">0</span>
+        </div>
+        <button class="refresh-btn" onclick="loadLeads()">&#8635; Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Service</th>
+              <th>Message</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="leads-tbody">
+            <tr><td colspan="7" class="loading">Loading&hellip;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Subscribers -->
+    <div class="section" id="tab-subscribers">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Newsletter Subscribers</h2>
+          <span class="count-badge" id="subs-count">0</span>
+        </div>
+        <button class="refresh-btn" onclick="loadSubscribers()">&#8635; Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date Subscribed</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody id="subs-tbody">
+            <tr><td colspan="2" class="loading">Loading&hellip;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── Auth ─────────────────────────────────────────────────────
+let adminSecret = sessionStorage.getItem('nexora_admin_secret') || '';
+
+function showDashboard() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadLeads();
+  loadSubscribers();
+}
+
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const input = document.getElementById('secret-input').value.trim();
+  if (!input) return;
+
+  const btn = document.getElementById('login-btn');
+  btn.textContent = 'Verifying...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/admin/leads', {
+      headers: { 'x-admin-secret': input }
+    });
+    if (res.ok) {
+      adminSecret = input;
+      sessionStorage.setItem('nexora_admin_secret', adminSecret);
+      document.getElementById('login-error').style.display = 'none';
+      showDashboard();
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  } catch {
+    document.getElementById('login-error').textContent = 'Network error. Please try again.';
+    document.getElementById('login-error').style.display = 'block';
+  } finally {
+    btn.textContent = 'Sign In \u2192';
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('secret-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  sessionStorage.removeItem('nexora_admin_secret');
+  adminSecret = '';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('secret-input').value = '';
+  document.getElementById('login-error').style.display = 'none';
+});
+
+if (adminSecret) showDashboard();
+
+// ── Tabs ──────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Leads ─────────────────────────────────────────────────────
+const SERVICE_LABELS = {
+  website: 'Website Design', profiles: 'Business Profile', seo: 'SEO',
+  social: 'Social Media', ecom: 'E-Commerce', ads: 'Paid Ads', bundle: 'Full Bundle'
+};
+const STATUSES = ['new', 'contacted', 'qualified', 'closed', 'lost'];
+
+function formatDate(iso) {
+  if (!iso) return '\u2014';
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
+function escHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+async function loadLeads() {
+  const tbody = document.getElementById('leads-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" class="loading">Loading\u2026</td></tr>';
+
+  try {
+    const res = await fetch('/api/admin/leads', { headers: { 'x-admin-secret': adminSecret } });
+    if (!res.ok) { showApiError('Failed to load leads'); return; }
+
+    const leads = await res.json();
+    document.getElementById('leads-count').textContent = leads.length;
+
+    if (!leads.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No leads yet &mdash; submissions will appear here.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = leads.map(l => `
+      <tr>
+        <td style="white-space:nowrap;color:var(--muted);font-size:.82rem">${escHtml(formatDate(l.created_at))}</td>
+        <td><strong>${escHtml(l.name)}</strong></td>
+        <td><a href="mailto:${escHtml(l.email)}" style="color:var(--gold);text-decoration:none">${escHtml(l.email)}</a></td>
+        <td>${l.phone ? escHtml(l.phone) : '<span style="color:var(--muted)">\u2014</span>'}</td>
+        <td>${l.service ? escHtml(SERVICE_LABELS[l.service] || l.service) : '<span style="color:var(--muted)">\u2014</span>'}</td>
+        <td class="msg-cell" title="${escHtml(l.message || '')}">${l.message ? escHtml(l.message) : '<span style="color:var(--muted)">\u2014</span>'}</td>
+        <td>
+          <select class="status-select" onchange="updateLeadStatus('${escHtml(l.id)}', this.value)">
+            ${STATUSES.map(s => `<option value="${s}"${l.status === s ? ' selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`).join('')}
+          </select>
+        </td>
+      </tr>
+    `).join('');
+  } catch {
+    showApiError('Network error loading leads');
+  }
+}
+
+async function updateLeadStatus(id, status) {
+  try {
+    const res = await fetch('/api/admin/leads', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'x-admin-secret': adminSecret },
+      body: JSON.stringify({ id, status })
+    });
+    if (!res.ok) showApiError('Failed to update status');
+  } catch {
+    showApiError('Network error updating status');
+  }
+}
+
+// ── Subscribers ───────────────────────────────────────────────
+async function loadSubscribers() {
+  const tbody = document.getElementById('subs-tbody');
+  tbody.innerHTML = '<tr><td colspan="2" class="loading">Loading\u2026</td></tr>';
+
+  try {
+    const res = await fetch('/api/admin/subscribers', { headers: { 'x-admin-secret': adminSecret } });
+    if (!res.ok) { showApiError('Failed to load subscribers'); return; }
+
+    const subs = await res.json();
+    document.getElementById('subs-count').textContent = subs.length;
+
+    if (!subs.length) {
+      tbody.innerHTML = '<tr><td colspan="2" class="empty-state">No subscribers yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = subs.map(s => `
+      <tr>
+        <td style="white-space:nowrap;color:var(--muted);font-size:.82rem">${escHtml(formatDate(s.created_at))}</td>
+        <td><a href="mailto:${escHtml(s.email)}" style="color:var(--gold);text-decoration:none">${escHtml(s.email)}</a></td>
+      </tr>
+    `).join('');
+  } catch {
+    showApiError('Network error loading subscribers');
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function showApiError(msg) {
+  const el = document.getElementById('api-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+</script>
+</body>
+</html>

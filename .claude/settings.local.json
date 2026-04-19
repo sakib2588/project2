@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:www.luxurypresence.com)",
-      "Bash(rtk ls:*)"
+      "Bash(rtk ls:*)",
+      "Bash(ls -la \"e:/Farhan/moneyproject2/\"*.json)",
+      "Bash(python)",
+      "Bash(gh repo:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(rtk grep:*)"
     ]
   }
 }

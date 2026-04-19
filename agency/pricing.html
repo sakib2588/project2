@@ -282,7 +282,46 @@ footer ul a:hover{color:var(--primary);transform:translateX(4px)}
 
 /* Scroll progress */
 .scroll-progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--gold-dk));z-index:999;width:0%;transition:width .1s linear}
+
+/* ── Mobile optimizations ────────────────────────────────── */
+@media (max-width: 600px) {
+  .w, .w-content { padding: 0 1.25rem; }
+  .nav-inner { padding: 0 1.25rem; }
+  .section { padding: 3.5rem 0; }
+  .section-head { margin-bottom: 2.5rem; }
+  .hero-inner { padding: 3rem 1.25rem; }
+  .hero-sub { font-size: 1rem; }
+  .hero-cta { flex-direction: column; align-items: stretch; }
+  .hero-cta .btn { width: 100%; justify-content: center; }
+  .btn-lg { padding: .9rem 1.5rem; font-size: .88rem; }
+  .cta-banner-btns { flex-direction: column; align-items: stretch; }
+  .cta-banner-btns .btn { width: 100%; justify-content: center; }
+  .testimonial-featured { padding: 2rem 1.25rem; }
+  .test-quote { font-size: 1rem; }
+  .faq-q { font-size: .92rem; padding: 1rem 1.1rem; }
+  .faq-a { padding: 0 1.1rem; }
+  .faq-item.open .faq-a { padding: 0 1.1rem 1rem; }
+  .foot-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .foot-newsletter { flex-direction: column; }
+  .foot-newsletter button { width: 100%; padding: .75rem; }
+  .foot-bottom { flex-direction: column; align-items: flex-start; gap: .75rem; }
+  #back-to-top { bottom: 1.25rem; right: 1.25rem; width: 42px; height: 42px; }
+  .mobile-menu a { font-size: 1.5rem; }
+}
+@media (max-width: 400px) {
+  h1 { font-size: 2.1rem; }
+  h2 { font-size: 1.75rem; }
+  .hero-badge { font-size: .68rem; padding: .35rem .8rem; }
+}
 </style>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
 </head>
 <body>
 
@@ -571,8 +610,8 @@ footer ul a:hover{color:var(--primary);transform:translateX(4px)}
     <div class="foot-bottom">
       <p>&copy; 2026 Nexora Digital LLC. All rights reserved. USA.</p>
       <div class="foot-legal">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="terms-of-service.html">Terms of Service</a>
         <a href="#">DMCA</a>
       </div>
     </div>

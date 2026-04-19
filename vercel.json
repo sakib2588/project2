@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "npm install",
+  "outputDirectory": "agency",
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/admin", "dest": "/agency/admin/index.html" },
+    { "src": "/admin/", "dest": "/agency/admin/index.html" },
+    { "src": "/(.*)", "dest": "/agency/$1" }
+  ]
+}
