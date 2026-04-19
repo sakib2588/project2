@@ -1871,6 +1871,16 @@ footer ul a:hover { color: var(--primary); transform: translateX(4px); }
     gtag('js', new Date());
     gtag('config', 'G-XXXXXXXXXX');
   </script>
+  <!-- SEO & Social -->
+  <link rel="canonical" href="https://nexoradigital.com/"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://nexoradigital.com/"/>
+  <meta property="og:title" content="Nexora Digital — Websites, SEO &amp; Marketing for New Businesses"/>
+  <meta property="og:description" content="We build professional websites, set up business profiles, and run SEO &amp; social media marketing for new businesses across the USA."/>
+  <meta property="og:image" content="https://nexoradigital.com/og-image.jpg"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Nexora Digital — Websites, SEO &amp; Marketing for New Businesses"/>
+  <meta name="twitter:description" content="We build professional websites, set up business profiles, and run SEO &amp; social media marketing for new businesses across the USA."/>
 </head>
 <body>
 
@@ -1891,7 +1901,7 @@ footer ul a:hover { color: var(--primary); transform: translateX(4px); }
 <!-- ─── NAV ──────────────────────────────────────────────────── -->
 <header class="nav" id="main-nav">
   <div class="nav-inner">
-    <a href="#" class="nav-logo">Nexora<span>Digital</span></a>
+    <a href="index.html" class="nav-logo">Nexora<span>Digital</span></a>
 
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
@@ -2615,6 +2625,7 @@ footer ul a:hover { color: var(--primary); transform: translateX(4px); }
             <label for="cf-message">Tell us about your business</label>
             <textarea id="cf-message" name="message" placeholder="What does your business do? What are your goals?" rows="4"></textarea>
           </div>
+          <input type="text" name="website" id="cf-website" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none!important;position:absolute;left:-9999px"/>
           <button type="submit" class="form-submit">Book My Free Strategy Call →</button>
           <p class="form-note">No credit card required · No obligation · Response within 2 hours</p>
         </form>
@@ -2644,7 +2655,7 @@ footer ul a:hover { color: var(--primary); transform: translateX(4px); }
   <div class="w">
     <div class="foot-grid">
       <div class="foot-brand">
-        <a href="#" class="nav-logo">Nexora<span>Digital</span></a>
+        <a href="index.html" class="nav-logo">Nexora<span>Digital</span></a>
         <p>The growth platform for new businesses across the USA. Websites, SEO, social media, and paid ads — all in one place.</p>
         <div class="foot-newsletter">
           <input type="email" id="newsletter-email" placeholder="Enter your email" />
@@ -2843,11 +2854,21 @@ window.addEventListener('scroll', () => {
 btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
 /* ── Contact form handling ─────────────────────────────────── */
+const CONTACT_RATE_KEY = 'ndLastSubmit';
+const RATE_LIMIT_MS    = 60000;
+
 document.getElementById('contact-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const form = e.target;
   const btn  = form.querySelector('.form-submit');
   const originalText = btn.textContent;
+
+  const lastSubmit = parseInt(localStorage.getItem(CONTACT_RATE_KEY) || '0', 10);
+  if (Date.now() - lastSubmit < RATE_LIMIT_MS) {
+    btn.textContent = 'Please wait 60 seconds before submitting again';
+    setTimeout(() => { btn.textContent = originalText; }, 4000);
+    return;
+  }
 
   btn.textContent = 'Sending...';
   btn.disabled = true;
@@ -2857,7 +2878,8 @@ document.getElementById('contact-form').addEventListener('submit', async (e) => 
     email:   form.querySelector('#cf-email').value.trim(),
     phone:   form.querySelector('#cf-phone').value.trim(),
     service: form.querySelector('#cf-service').value,
-    message: form.querySelector('#cf-message').value.trim()
+    message: form.querySelector('#cf-message').value.trim(),
+    website: form.querySelector('#cf-website').value
   };
 
   try {
@@ -2869,6 +2891,7 @@ document.getElementById('contact-form').addEventListener('submit', async (e) => 
     const data = await res.json();
 
     if (res.ok) {
+      localStorage.setItem(CONTACT_RATE_KEY, Date.now().toString());
       btn.textContent      = '✓ Message Sent!';
       btn.style.background = '#4dbe8e';
       btn.style.color      = '#fff';
